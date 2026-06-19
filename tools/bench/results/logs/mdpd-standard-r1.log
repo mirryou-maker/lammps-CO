@@ -1,0 +1,111 @@
+LAMMPS (30 Mar 2026 - Development - 91d4111-modified)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
+  using 1 OpenMP thread(s) per MPI task
+# mdpd correctness test (Step 4: pair_mdpd_omp verification)
+# atom_style mdpd provides the per-atom rho array required by pair_style
+# mdpd; rho is set to a uniform nonzero value via "set ... sph/rho" (the
+# underlying atom->rho array is shared with atom_style sph), since no
+# density-summation fix is needed to exercise the ported force formula.
+# cut_r (1.5) < cut (2.0) so both the B_rep*wc_r branch (1st neighbor
+# shell, r~1.19) and the wc_r=0 clamp (2nd shell, r~1.68) are exercised.
+# comm_modify vel yes is required (pair mdpd needs ghost atom velocities).
+
+units           lj
+atom_style      mdpd
+comm_modify     vel yes
+
+lattice         fcc 0.8442
+Lattice spacing in x,y,z = 1.6795962 1.6795962 1.6795962
+region          box block 0 6 0 6 0 6
+create_box      1 box
+Created orthogonal box = (0 0 0) to (10.077577 10.077577 10.077577)
+  1 by 1 by 1 MPI processor grid
+create_atoms    1 box
+Created 864 atoms
+  using lattice units in orthogonal box = (0 0 0) to (10.077577 10.077577 10.077577)
+  create_atoms CPU = 0.000 seconds
+mass            1 1.0
+
+set             group all sph/rho 1.0
+Setting atom values ...
+  864 settings made for sph/rho
+
+velocity        all create 1.0 12345 loop geom
+
+pair_style      mdpd 1.0 2.0 98765
+pair_coeff      * * -40.0 25.0 18.0 2.0 1.5
+
+neighbor        0.3 bin
+neigh_modify    every 20 delay 0 check no
+
+fix             1 all nve
+
+thermo          10
+run             50
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- pair mdpd command: https://doi.org/10.1063/1.4812366
+
+@Article{ZLi2013_POF,
+ author = {Li, Z. and Hu, G. H. and Wang, Z. L. and Ma Y. B. and Zhou, Z. W.},
+ title = {Three Dimensional Flow Structures in a Moving Droplet on Substrate: a Dissipative Particle Dynamics Study},
+ journal = {Physics of Fluids},
+ year = {2013},
+ volume = {25},
+ number = {7},
+ pages = {072103}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Neighbor list info ...
+  update: every = 20 steps, delay = 0 steps, check = no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 2.3
+  ghost atom cutoff = 2.3
+  binsize = 1.15, bins = 9 9 9
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair mdpd, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 3.489 | 3.489 | 3.489 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   1             -32.918122      0             -31.419858     -19.679397    
+        10   0.93788384    -32.768266      0             -31.363069     -19.52646     
+        20   0.91989266    -32.62669       0             -31.248448     -21.801113    
+        30   0.93887269    -32.56368       0             -31.157001     -23.549757    
+        40   1.0280031     -32.572122      0             -31.031903     -23.259299    
+        50   1.1019328     -32.684406      0             -31.03342      -26.91151     
+Loop time of 0.0178204 on 1 procs for 50 steps with 864 atoms
+
+Performance: 1212094.005 tau/day, 2805.773 timesteps/s, 2.424 Matom-step/s
+87.7% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.015649   | 0.015649   | 0.015649   |   0.0 | 87.81
+Neigh   | 0.0010113  | 0.0010113  | 0.0010113  |   0.0 |  5.67
+Comm    | 0.000896   | 0.000896   | 0.000896   |   0.0 |  5.03
+Output  | 4.56e-05   | 4.56e-05   | 4.56e-05   |   0.0 |  0.26
+Modify  | 0.0001541  | 0.0001541  | 0.0001541  |   0.0 |  0.86
+Other   |            | 6.47e-05   |            |       |  0.36
+
+Nlocal:            864 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           1628 ave        1628 max        1628 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:          18819 ave       18819 max       18819 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 18819
+Ave neighs/atom = 21.78125
+Neighbor list builds = 2
+Dangerous builds not checked
+Total wall time: 0:00:00

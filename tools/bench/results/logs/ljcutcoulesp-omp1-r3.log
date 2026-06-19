@@ -1,0 +1,116 @@
+LAMMPS (30 Mar 2026 - Development - 91d4111-modified)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
+  using 1 OpenMP thread(s) per MPI task
+package omp 1
+using multi-threaded neighbor list subroutines
+# lj/cut/coul/esp correctness test (Step 4: pair_lj_cut_coul_esp_omp verification)
+# PairLJCutCoulEsp : public Pair (KSPACE package). Standard lj/cut LJ term
+# (cutsq/cut_ljsq/lj1-4/offset, per itype/jtype) combined with the same
+# coul/esp Coulomb term ported in pair_coul_esp_omp.cpp: direct branch is an
+# 11-term Horner polynomial (force_poly_coeff/energy_poly_coeff from the ESP
+# kspace object) for rsq <= tabinnersq, table-lookup branch (ncoultablebits
+# default = 12, tabinner = sqrt(2) -> tabinnersq = 2.0) otherwise. No `scale`
+# array in this style (unlike coul/esp), so ecoul table branch has no scale
+# multiplier. cut_lj = cut_coul = 4.0 (+0.3 skin = 4.3 < L/2 = 5.04 with this
+# box) keeps neighbor distances spanning both sides of tabinnersq=2.0.
+
+units           lj
+atom_style      charge
+
+lattice         fcc 0.8442
+Lattice spacing in x,y,z = 1.6795962 1.6795962 1.6795962
+region          box block 0 6 0 6 0 6
+create_box      2 box
+Created orthogonal box = (0 0 0) to (10.077577 10.077577 10.077577)
+  1 by 1 by 1 MPI processor grid
+create_atoms    1 box basis 1 1 basis 2 2 basis 3 1 basis 4 2
+Created 864 atoms
+  using lattice units in orthogonal box = (0 0 0) to (10.077577 10.077577 10.077577)
+  create_atoms CPU = 0.000 seconds
+mass            1 1.0
+mass            2 1.0
+set             type 1 charge 1.0
+Setting atom values ...
+  432 settings made for charge
+set             type 2 charge -1.0
+Setting atom values ...
+  432 settings made for charge
+
+velocity        all create 3.0 87287 loop geom
+
+kspace_style    esp 1.0e-4
+
+pair_style      lj/cut/coul/esp 4.0
+pair_coeff      * * 1.0 1.0
+
+neighbor        0.3 bin
+neigh_modify    every 20 delay 0 check no
+
+fix             1 all nve
+
+thermo          10
+run             50
+ESP initialization ...
+  Force poly size: 11
+  Energy poly size: 11
+  Fourier poly size: 11
+  Spread real poly size: 8
+  Fourier spreading poly size: 12
+  Spreading parameter c = 13.496
+  Splitting parameter c = 12.024
+  grid = 10 10 10
+  stencil order = 6
+  estimated relative splitting force accuracy = 0.0001
+  estimated relative spreading accuracy = 2.5e-05
+  using double precision KISS FFT
+  3d grid and FFT values/proc = 4913 1000
+Generated 0 of 1 mixed pair_coeff terms from geometric mixing rule
+Last active /omp style is pair_style lj/cut/coul/esp/omp
+Neighbor list info ...
+  update: every = 20 steps, delay = 0 steps, check = no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 4.3
+  ghost atom cutoff = 4.3
+  binsize = 2.15, bins = 5 5 5
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut/coul/esp/omp, perpetual
+      attributes: half, newton on, omp
+      pair build: half/bin/atomonly/newton/omp
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 3.918 | 3.918 | 3.918 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   3             -7.7804369      0             -3.2856452     -4.4606672    
+        10   2.1276775     -6.4730815      0             -3.2852591      1.5860179    
+        20   1.6544783     -5.7652386      0             -3.2863935      5.0708235    
+        30   1.625713      -5.7220888      0             -3.2863417      5.1802196    
+        40   1.5892485     -5.6675496      0             -3.286436       5.2839598    
+        50   1.7348154     -5.88621        0             -3.2869988      4.3554517    
+Loop time of 0.0812788 on 1 procs for 50 steps with 864 atoms
+
+Performance: 265751.955 tau/day, 615.167 timesteps/s, 531.504 katom-step/s
+96.1% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.050772   | 0.050772   | 0.050772   |   0.0 | 62.47
+Kspace  | 0.025334   | 0.025334   | 0.025334   |   0.0 | 31.17
+Neigh   | 0.0041615  | 0.0041615  | 0.0041615  |   0.0 |  5.12
+Comm    | 0.0007314  | 0.0007314  | 0.0007314  |   0.0 |  0.90
+Output  | 1.87e-05   | 1.87e-05   | 1.87e-05   |   0.0 |  0.02
+Modify  | 0.0002444  | 0.0002444  | 0.0002444  |   0.0 |  0.30
+Other   |            | 1.66e-05   |            |       |  0.02
+
+Nlocal:            864 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           4802 ave        4802 max        4802 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:         121640 ave      121640 max      121640 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 121640
+Ave neighs/atom = 140.78704
+Neighbor list builds = 2
+Dangerous builds not checked
+Total wall time: 0:00:00

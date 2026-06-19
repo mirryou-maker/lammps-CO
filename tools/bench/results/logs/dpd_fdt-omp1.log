@@ -1,0 +1,87 @@
+LAMMPS (30 Mar 2026 - Development - 91d4111-modified)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
+  using 1 OpenMP thread(s) per MPI task
+package omp 1
+using multi-threaded neighbor list subroutines
+# dpd/fdt correctness test (Step 4: pair_dpd_fdt_omp verification)
+# splitFDT_flag stays false (no fix shardlow), so this exercises the
+# full conservative + dissipative + random force branch (needs
+# comm_modify vel yes for ghost velocities and a per-thread RNG pool).
+
+units           lj
+atom_style      atomic
+comm_modify     vel yes
+
+lattice         fcc 0.8442
+Lattice spacing in x,y,z = 1.6795962 1.6795962 1.6795962
+region          box block 0 6 0 6 0 6
+create_box      1 box
+Created orthogonal box = (0 0 0) to (10.077577 10.077577 10.077577)
+  1 by 1 by 1 MPI processor grid
+create_atoms    1 box
+Created 864 atoms
+  using lattice units in orthogonal box = (0 0 0) to (10.077577 10.077577 10.077577)
+  create_atoms CPU = 0.000 seconds
+mass            1 1.0
+
+velocity        all create 1.0 12345 loop geom
+
+pair_style      dpd/fdt 1.0 1.5 98765
+pair_coeff      * * 25.0 3.0
+
+neighbor        0.3 bin
+neigh_modify    every 20 delay 0 check no
+
+fix             1 all nve
+
+thermo          10
+run             50
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Last active /omp style is pair_style dpd/fdt/omp
+Neighbor list info ...
+  update: every = 20 steps, delay = 0 steps, check = no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 1.8
+  ghost atom cutoff = 1.8
+  binsize = 0.9, bins = 12 12 12
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair dpd/fdt/omp, perpetual
+      attributes: half, newton on, omp
+      pair build: half/bin/atomonly/newton/omp
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 2.669 | 2.669 | 2.669 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   1              4.8780057      0              6.3762696      11.319118    
+        10   0.93795922     4.9823805      0              6.387691       11.246564    
+        20   0.78858019     5.2245768      0              6.406078       10.883919    
+        30   0.65690265     5.4602752      0              6.4444887      9.8793334    
+        40   0.62182802     5.5779325      0              6.5095949      9.4284655    
+        50   0.65748985     5.5954192      0              6.5805125      9.3600532    
+Loop time of 0.0124391 on 1 procs for 50 steps with 864 atoms
+
+Performance: 1736460.033 tau/day, 4019.583 timesteps/s, 3.473 Matom-step/s
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.010342   | 0.010342   | 0.010342   |   0.0 | 83.14
+Neigh   | 0.0009552  | 0.0009552  | 0.0009552  |   0.0 |  7.68
+Comm    | 0.0007589  | 0.0007589  | 0.0007589  |   0.0 |  6.10
+Output  | 6.88e-05   | 6.88e-05   | 6.88e-05   |   0.0 |  0.55
+Modify  | 0.0002851  | 0.0002851  | 0.0002851  |   0.0 |  2.29
+Other   |            | 2.96e-05   |            |       |  0.24
+
+Nlocal:            864 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           1354 ave        1354 max        1354 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:           8046 ave        8046 max        8046 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 8046
+Ave neighs/atom = 9.3125
+Neighbor list builds = 2
+Dangerous builds not checked
+Total wall time: 0:00:00

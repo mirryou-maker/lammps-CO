@@ -1,0 +1,42 @@
+﻿LAMMPS (30 Mar 2026 - Development - 91d4111)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
+  using 1 OpenMP thread(s) per MPI task
+Lattice spacing in x,y,z = 1.6795962 1.6795962 1.6795962
+Created orthogonal box = (0 0 0) to (20.155154 20.155154 20.155154)
+  1 by 1 by 1 MPI processor grid
+Created 6912 atoms
+  using lattice units in orthogonal box = (0 0 0) to (20.155154 20.155154 20.155154)
+  create_atoms CPU = 0.000 seconds
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+- Pair style momb: https://doi.org/10.1021/jp412098n
+The log file lists these citations in BibTeX format.
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 3.3
+  ghost atom cutoff = 3.3
+  binsize = 1.65, bins = 13 13 13
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair momb, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d
+      bin: standard
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 0.005
+Per MPI rank memory allocation (min/avg/max) = 4.979 | 4.979 | 4.979 Mbytes
+   Step          Temp          E_pair         TotEng         Press     
+         0   1             -17.916847     -16.417064     -11.711349    
+        50   0.68961539    -17.839088     -16.804815     -10.748259    
+       100   1.1522924     -18.539818     -16.811629     -10.010104    
+ERROR: Lost atoms: original 6912 current 6908
+For more information see https://docs.lammps.org/err0008 (D:\Claude-Code-R\LAMMPS-CO\lammps-src\src\thermo.cpp:527)

@@ -1,0 +1,43 @@
+# Build artifacts
+build/
+*.exe
+*.obj
+*.lib
+*.dll
+*.pdb
+*.ilk
+*.exp
+
+# LAMMPS source (large sparse-checkout clone — not part of this repo)
+lammps-src/
+
+# Paper documents (submitted separately)
+PAPER_draft.md
+PAPER_draft.md.bak
+Supplementary_Materials.md
+Cover_Letter.md
+Future_LLM_Optimizations.md
+CLAUDE.md
+
+# LAMMPS run artifacts
+log.lammps
+tools/bench/log.lammps
+tools/fep/logs_opls/
+tools/fep/logs_opls_long/
+
+# Generated figures (reproducible from scripts)
+tools/plots/*.png
+tools/plots/*.pdf
+
+# Claude memory
+memory/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Temp
+*.bak
+*.tmp
+tools/fix_refs_dryrun.txt

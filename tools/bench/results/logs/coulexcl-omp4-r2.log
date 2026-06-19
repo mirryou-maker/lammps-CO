@@ -1,0 +1,121 @@
+LAMMPS (30 Mar 2026 - Development - 91d4111-modified)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
+  using 1 OpenMP thread(s) per MPI task
+package omp 4
+set 4 OpenMP thread(s) per MPI task
+using multi-threaded neighbor list subroutines
+# coul/exclude correctness test (Step 4: pair_coul_exclude_omp verification)
+# atom_style full provides per-atom charge + bond topology. The data file
+# (data.coul_exclude_test) defines 216 four-atom linear chains (bond length
+# 1.0, charges alternating +1/-1/+1/-1) connected via
+# bond_style zero (no force/energy), purely to establish 1-2/1-3/1-4
+# special-bond topology.
+# special_bonds lj/coul values are all strictly between 0 and 1 so that
+# 1-2, 1-3 and 1-4 pairs remain in the neighbor list with sbmask set and
+# factor_coul = special_coul[sbmask]-1.0 != 0 for all three cases.
+# cut_global=3.5 covers the 1-4 distance (3.0) within each chain.
+# pair_style coul/exclude has no cutsq/itype/jtype dependence and is fully
+# deterministic (no RNG), so standard/omp1/omp4 are expected bit-identical.
+
+units           lj
+atom_style      full
+boundary        p p p
+
+read_data       data.coul_exclude_test
+Reading data file ...
+  orthogonal box = (0 0 0) to (24 12 12)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  864 atoms
+  scanning bonds ...
+  1 = max bonds/atom
+  orthogonal box = (0 0 0) to (24 12 12)
+  1 by 1 by 1 MPI processor grid
+  reading bonds ...
+  648 bonds
+Finding 1-2 1-3 1-4 neighbors ...
+  special bond factors lj:    0        0        0       
+  special bond factors coul:  0        0        0       
+     2 = max # of 1-2 neighbors
+     1 = max # of 1-3 neighbors
+     2 = max # of 1-4 neighbors
+     3 = max # of special neighbors
+  special bonds CPU = 0.000 seconds
+  read_data CPU = 0.008 seconds
+
+bond_style      zero
+bond_coeff      1 1.0
+
+special_bonds   lj/coul 0.5 0.6 0.7
+Finding 1-2 1-3 1-4 neighbors ...
+  special bond factors lj:    0.5      0.6      0.7     
+  special bond factors coul:  0.5      0.6      0.7     
+     2 = max # of 1-2 neighbors
+     1 = max # of 1-3 neighbors
+     2 = max # of 1-4 neighbors
+     3 = max # of special neighbors
+  special bonds CPU = 0.000 seconds
+
+pair_style      coul/exclude 3.5
+pair_coeff      * *
+
+velocity        all create 1.0 12345 loop geom
+
+neighbor        0.3 bin
+neigh_modify    every 20 delay 0 check no
+
+fix             1 all nve
+
+thermo          10
+run             50
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Last active /omp style is pair_style coul/exclude/omp
+Neighbor list info ...
+  update: every = 20 steps, delay = 0 steps, check = no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 3.8
+  ghost atom cutoff = 3.8
+  binsize = 1.9, bins = 13 7 7
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair coul/exclude/omp, perpetual
+      attributes: half, newton on, omp
+      pair build: half/bin/newton/omp
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 8.515 | 8.515 | 8.515 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   1              0.3            0              1.7982639      0.27471065   
+        10   1.0001488      0.29977725     0              1.798264       0.27472924   
+        20   1.0007028      0.2989476      0              1.7982644      0.27479844   
+        30   1.001976       0.29704038     0              1.7982648      0.27495743   
+        40   1.0042945      0.29356677     0              1.7982649      0.27524692   
+        50   1.0079274      0.28812434     0              1.7982655      0.27570056   
+Loop time of 0.0029535 on 4 procs for 50 steps with 864 atoms
+
+Performance: 7313357.034 tau/day, 16929.067 timesteps/s, 14.627 Matom-step/s
+0.0% CPU use with 1 MPI tasks x 4 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.0008831  | 0.0008831  | 0.0008831  |   0.0 | 29.90
+Bond    | 3.3e-06    | 3.3e-06    | 3.3e-06    |   0.0 |  0.11
+Neigh   | 0.000665   | 0.000665   | 0.000665   |   0.0 | 22.52
+Comm    | 0.0005706  | 0.0005706  | 0.0005706  |   0.0 | 19.32
+Output  | 2.17e-05   | 2.17e-05   | 2.17e-05   |   0.0 |  0.73
+Modify  | 0.0007921  | 0.0007921  | 0.0007921  |   0.0 | 26.82
+Other   |            | 1.77e-05   |            |       |  0.60
+
+Nlocal:            864 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           1909 ave        1909 max        1909 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:          23376 ave       23376 max       23376 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 23376
+Ave neighs/atom = 27.055556
+Ave special neighs/atom = 3
+Neighbor list builds = 2
+Dangerous builds not checked
+Total wall time: 0:00:00

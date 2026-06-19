@@ -1,0 +1,104 @@
+LAMMPS (30 Mar 2026 - Development - 91d4111-modified)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
+  using 1 OpenMP thread(s) per MPI task
+package omp 4
+set 4 OpenMP thread(s) per MPI task
+using multi-threaded neighbor list subroutines
+# lj/class2/coul/long/cs correctness test (Step 4: pair_lj_class2_coul_long_cs_omp verification)
+# PairLJClass2CoulLongCS : public PairLJClass2CoulLong (CORESHELL package, CLASS2 base).
+# class2 9-6 LJ (cutsq/cut_ljsq, forcelj = r6inv*(lj1*r3inv - lj2)) + CS-pattern
+# Ewald-table Coulomb (rsq+=EPSILON, B0-B5 erfc polynomial, EPS_EWALD/EPS_EWALD_SQR).
+# cut_lj=cut_coul=4.0 (+0.3 skin = 4.3 < L/2 = 5.04 with this box).
+
+units           lj
+atom_style      charge
+kspace_style    ewald 1.0e-4
+
+lattice         fcc 0.8442
+Lattice spacing in x,y,z = 1.6795962 1.6795962 1.6795962
+region          box block 0 6 0 6 0 6
+create_box      2 box
+Created orthogonal box = (0 0 0) to (10.077577 10.077577 10.077577)
+  1 by 1 by 1 MPI processor grid
+create_atoms    1 box basis 1 1 basis 2 2 basis 3 1 basis 4 2
+Created 864 atoms
+  using lattice units in orthogonal box = (0 0 0) to (10.077577 10.077577 10.077577)
+  create_atoms CPU = 0.000 seconds
+mass            1 1.0
+mass            2 1.0
+set             type 1 charge 1.0
+Setting atom values ...
+  432 settings made for charge
+set             type 2 charge -1.0
+Setting atom values ...
+  432 settings made for charge
+
+velocity        all create 3.0 87287 loop geom
+
+pair_style      lj/class2/coul/long/cs 4.0
+pair_coeff      * * 1.0 1.0
+
+neighbor        0.3 bin
+neigh_modify    every 20 delay 0 check no
+
+fix             1 all nve
+
+thermo          10
+run             50
+Ewald initialization ...
+  using 12-bit tables for long-range coulomb
+  G vector (1/distance) = 0.75521758
+  estimated absolute RMS force accuracy = 0.00010129749
+  estimated relative force accuracy = 0.00010129749
+  KSpace vectors: actual max1d max3d = 1054 8 2456
+                  kxmax kymax kzmax  = 8 8 8
+Generated 0 of 1 mixed pair_coeff terms from sixthpower/geometric mixing rule
+Last active /omp style is kspace_style ewald/omp
+Neighbor list info ...
+  update: every = 20 steps, delay = 0 steps, check = no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 4.3
+  ghost atom cutoff = 4.3
+  binsize = 2.15, bins = 5 5 5
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/class2/coul/long/cs/omp, perpetual
+      attributes: half, newton on, omp
+      pair build: half/bin/atomonly/newton/omp
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 19.04 | 19.04 | 19.04 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   3             -5.656993       0             -1.1622013     -3.834287     
+        10   2.9554173     -5.591198       0             -1.163203      -2.6540966    
+        20   2.2096124     -4.4732095      0             -1.1626269      2.271678     
+        30   2.3230027     -4.6444321      0             -1.163961       2.4157449    
+        40   2.3357406     -4.6636412      0             -1.1640855      2.4104925    
+        50   2.2947451     -4.6022616      0             -1.164128       2.5382974    
+Loop time of 0.0811845 on 4 procs for 50 steps with 864 atoms
+
+Performance: 266060.640 tau/day, 615.881 timesteps/s, 532.121 katom-step/s
+250.2% CPU use with 1 MPI tasks x 4 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.013942   | 0.013942   | 0.013942   |   0.0 | 17.17
+Kspace  | 0.064114   | 0.064114   | 0.064114   |   0.0 | 78.97
+Neigh   | 0.001043   | 0.001043   | 0.001043   |   0.0 |  1.28
+Comm    | 0.0009059  | 0.0009059  | 0.0009059  |   0.0 |  1.12
+Output  | 5.41e-05   | 5.41e-05   | 5.41e-05   |   0.0 |  0.07
+Modify  | 0.0011014  | 0.0011014  | 0.0011014  |   0.0 |  1.36
+Other   |            | 2.4e-05    |            |       |  0.03
+
+Nlocal:            864 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           4695 ave        4695 max        4695 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:         121143 ave      121143 max      121143 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 121143
+Ave neighs/atom = 140.21181
+Neighbor list builds = 2
+Dangerous builds not checked
+Total wall time: 0:00:00

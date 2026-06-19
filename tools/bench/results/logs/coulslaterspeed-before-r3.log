@@ -1,0 +1,90 @@
+LAMMPS (30 Mar 2026 - Development - 91d4111-modified)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
+  using 1 OpenMP thread(s) per MPI task
+# coul/slater/cut speed test (Step 5: restrict/caching backport timing)
+# Larger system + longer run than in.coul_slater_cut_test to make Pair time
+# dominate over OS/timer noise for a reliable speedup measurement.
+
+units           lj
+atom_style      charge
+
+lattice         fcc 0.8442
+Lattice spacing in x,y,z = 1.6795962 1.6795962 1.6795962
+region          box block 0 12 0 12 0 12
+create_box      2 box
+Created orthogonal box = (0 0 0) to (20.155154 20.155154 20.155154)
+  1 by 1 by 1 MPI processor grid
+create_atoms    1 box basis 1 1 basis 2 2 basis 3 1 basis 4 2
+Created 6912 atoms
+  using lattice units in orthogonal box = (0 0 0) to (20.155154 20.155154 20.155154)
+  create_atoms CPU = 0.001 seconds
+mass            1 1.0
+mass            2 1.0
+set             type 1 charge 1.0
+Setting atom values ...
+  3456 settings made for charge
+set             type 2 charge -1.0
+Setting atom values ...
+  3456 settings made for charge
+
+velocity        all create 3.0 87287 loop geom
+
+pair_style      coul/slater/cut 1.0 2.5
+pair_coeff      * *
+
+neighbor        0.3 bin
+neigh_modify    every 20 delay 0 check no
+
+fix             1 all nve
+
+thermo          50
+run             300
+Generated 0 of 1 mixed pair_coeff terms from geometric mixing rule
+Neighbor list info ...
+  update: every = 20 steps, delay = 0 steps, check = no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 2.8
+  ghost atom cutoff = 2.8
+  binsize = 1.4, bins = 15 15 15
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair coul/slater/cut, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 3.893 | 3.893 | 3.893 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   3              0.88322286     0              5.3825718      2.8395897    
+        50   2.9304414     -0.35633458     0              4.0386916      2.4379237    
+       100   2.8903752     -0.2985048      0              4.0364307      2.3967742    
+       150   2.8884568     -0.26887643     0              4.0631819      2.401027     
+       200   2.8926913     -0.30696184     0              4.0314474      2.39872      
+       250   2.8936081     -0.28613633     0              4.0536479      2.4043126    
+       300   2.8932071     -0.3195312      0              4.0196516      2.3945773    
+Loop time of 0.920305 on 1 procs for 300 steps with 6912 atoms
+
+Performance: 140822.879 tau/day, 325.979 timesteps/s, 2.253 Matom-step/s
+98.5% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.80469    | 0.80469    | 0.80469    |   0.0 | 87.44
+Neigh   | 0.093475   | 0.093475   | 0.093475   |   0.0 | 10.16
+Comm    | 0.0097606  | 0.0097606  | 0.0097606  |   0.0 |  1.06
+Output  | 0.000146   | 0.000146   | 0.000146   |   0.0 |  0.02
+Modify  | 0.010004   | 0.010004   | 0.010004   |   0.0 |  1.09
+Other   |            | 0.002231   |            |       |  0.24
+
+Nlocal:           6912 ave        6912 max        6912 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           7427 ave        7427 max        7427 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:         267362 ave      267362 max      267362 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 267362
+Ave neighs/atom = 38.680845
+Neighbor list builds = 15
+Dangerous builds not checked
+Total wall time: 0:00:00

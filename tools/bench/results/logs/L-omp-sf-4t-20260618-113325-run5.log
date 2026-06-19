@@ -1,0 +1,62 @@
+﻿LAMMPS (30 Mar 2026 - Development - 91d4111)
+  using 4 OpenMP thread(s) per MPI task
+using multi-threaded neighbor list subroutines
+Lattice spacing in x,y,z = 1.6795962 1.6795962 1.6795962
+Created orthogonal box = (0 0 0) to (33.591924 33.591924 33.591924)
+  1 by 1 by 1 MPI processor grid
+Created 32000 atoms
+  using lattice units in orthogonal box = (0 0 0) to (33.591924 33.591924 33.591924)
+  create_atoms CPU = 0.003 seconds
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Last active /omp style is pair_style lj/cut/omp
+Neighbor list info ...
+  update: every = 20 steps, delay = 0 steps, check = no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 2.8
+  ghost atom cutoff = 2.8
+  binsize = 1.4, bins = 24 24 24
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut/omp, perpetual
+      attributes: half, newton on, omp
+      pair build: half/bin/atomonly/newton/omp
+      stencil: half/bin/3d
+      bin: standard
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 0.005
+Per MPI rank memory allocation (min/avg/max) = 20.97 | 20.97 | 20.97 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   3             -6.7733681      0             -2.2735087     -3.7027964    
+       100   1.6492558     -4.7541379      0             -2.2803315      5.8212694    
+       200   1.6457604     -4.7487045      0             -2.280141       5.8596275    
+       300   1.6412687     -4.7424525      0             -2.2806265      5.8803458    
+       400   1.6382993     -4.7386135      0             -2.2812414      5.8957894    
+       500   1.6480575     -4.7542394      0             -2.2822304      5.8365715    
+Loop time of 1.0427 on 4 procs for 500 steps with 32000 atoms
+
+Performance: 207153.946 tau/day, 479.523 timesteps/s, 15.345 Matom-step/s
+358.1% CPU use with 1 MPI tasks x 4 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.75561    | 0.75561    | 0.75561    |   0.0 | 72.47
+Neigh   | 0.17753    | 0.17753    | 0.17753    |   0.0 | 17.03
+Comm    | 0.053661   | 0.053661   | 0.053661   |   0.0 |  5.15
+Output  | 0.0003169  | 0.0003169  | 0.0003169  |   0.0 |  0.03
+Modify  | 0.054568   | 0.054568   | 0.054568   |   0.0 |  5.23
+Other   |            | 0.001019   |            |       |  0.10
+
+Nlocal:          32000 ave       32000 max       32000 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:          18857 ave       18857 max       18857 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1.21197e+06 ave 1.21197e+06 max 1.21197e+06 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1211972
+Ave neighs/atom = 37.874125
+Neighbor list builds = 25
+Dangerous builds not checked
+Total wall time: 0:00:01
