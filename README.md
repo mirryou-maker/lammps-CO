@@ -8,6 +8,32 @@
 
 ## Contents
 
+### `src/OPENMP/` — New OpenMP pair_style variants (A-1, this work)
+36 new `pair_*_omp.{h,cpp}` file pairs created by LLM-assisted code generation.
+Copy into `lammps/src/OPENMP/` and rebuild with `-DPKG_OPENMP=on` to enable.
+
+| Style group | Files |
+|---|---|
+| born/coul (dsf, dsf_cs, long_cs, wolf_cs) | 4 pairs |
+| bpm_spring, buck_coul_long_cs | 2 pairs |
+| coul (ctip, cut_dielectric, cut_soft_gapsys, esp, exclude, long_cs, long_dielectric, slater_cut, slater_long, tt, wolf_cs) | 11 pairs |
+| dpd_fdt, kolmogorov_crespi_z, lebedeva_z | 3 pairs |
+| lj_charmmfsw (coul_charmmfsh, coul_long) | 2 pairs |
+| lj_class2 (coul_cut_soft, coul_long_cs, coul_long_soft, soft) | 4 pairs |
+| lj_cut (coul_esp, coul_long_cs, coul_msm_dielectric, dipole_long) | 4 pairs |
+| lj_expand_coul_long, mdpd, morse_soft, nm_cut_split, rheo_solid, thole | 6 pairs |
+
+### `src/` — A-3 optimized standard pair files (15 files)
+Standard `pair_*.cpp` files backported with `__restrict__`/`_noalias` hints and
+`fxtmp`/`fytmp`/`fztmp` register-accumulator pattern to enable compiler auto-vectorization.
+Copy into `lammps/src/` (replaces originals — bit-identical results verified).
+
+Files: `pair_born`, `pair_buck`, `pair_buck_coul_cut`, `pair_coul_cut`, `pair_coul_debye`,
+`pair_coul_dsf`, `pair_coul_wolf`, `pair_lj_cut`, `pair_lj_cut_coul_cut`,
+`pair_lj_expand`, `pair_morse`, `pair_soft`, `pair_table`, `pair_yukawa`, `pair_zbl`
+
+---
+
 ### `tools/bench/` — Performance benchmark harness (PowerShell)
 - `Run-Benchmark.ps1` — Runs LAMMPS N times, parses Loop/Pair/Neigh/Comm times, saves JSON + CSV
 - `LammpsLog.psm1` — LAMMPS stdout parser module
