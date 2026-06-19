@@ -6,6 +6,32 @@
 
 ---
 
+## Quick start
+
+> **[→ Full installation guide: INSTALL.md](INSTALL.md)**
+
+```bash
+# 1. Clone LAMMPS
+git clone --depth=1 --branch=develop https://github.com/lammps/lammps.git
+
+# 2. Download this repo and apply the patch
+git clone https://github.com/mirryou-maker/lammps-llm-omp-optimization.git
+cd lammps-llm-omp-optimization
+bash scripts/apply_patch.sh /path/to/lammps   # Linux/macOS
+# .\scripts\apply_patch.ps1 -LammpsRoot C:\path\to\lammps  # Windows
+
+# 3. Build with OpenMP
+cd /path/to/lammps && mkdir build && cd build
+cmake ../cmake -D CMAKE_BUILD_TYPE=Release -D PKG_OPENMP=yes -D PKG_KSPACE=yes \
+               -D CMAKE_CXX_FLAGS="-O3 -march=native"
+make -j$(nproc)
+
+# 4. Run with OMP (example: 4 threads, automatic style selection)
+OMP_NUM_THREADS=4 ./lmp -sf omp -pk omp 4 -in in.your_simulation
+```
+
+---
+
 ## Contents
 
 ### `src/OPENMP/` — New OpenMP pair_style variants (A-1, this work)
