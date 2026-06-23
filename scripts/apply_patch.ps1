@@ -80,7 +80,8 @@ $EpDst = "$LammpsRoot\src\EXTRA-PAIR"
 
 $a4files = @(
   'pair_nm_cut.cpp','pair_nm_cut_coul_cut.cpp',
-  'pair_nm_cut_coul_long.cpp','pair_nm_cut_split.cpp'
+  'pair_nm_cut_coul_long.cpp','pair_nm_cut_split.cpp',
+  'pair_lj_pirani.cpp','pair_mie_cut.cpp'
 )
 
 if (-not (Test-Path $EpDst)) {
@@ -97,7 +98,26 @@ if (-not (Test-Path $EpDst)) {
     Write-Host "  [COPY] EXTRA-PAIR\$f  (A-4 pow reduction)" -ForegroundColor Green
     $count++
   }
-  Write-Host "  -> $count nm/cut files replaced."
+  Write-Host "  -> $count EXTRA-PAIR pow-reduction files replaced."
+}
+
+Write-Host ""
+
+# A-4 OMP: lj/pirani OMP pow()-reduction (replaces existing OMP file)
+$a4ompfiles = @('pair_lj_pirani_omp.cpp')
+if (Test-Path $OmpDst) {
+  $count = 0
+  foreach ($f in $a4ompfiles) {
+    $src = "$OmpSrc\$f"
+    if (-not (Test-Path $src)) {
+      Write-Warning "  $f not found in repo src\OPENMP\ — skipping"
+      continue
+    }
+    Copy-Item $src "$OmpDst\$f" -Force
+    Write-Host "  [COPY] OPENMP\$f  (A-4 pow reduction)" -ForegroundColor Green
+    $count++
+  }
+  Write-Host "  -> $count OMP pow-reduction files replaced."
 }
 
 Write-Host ""

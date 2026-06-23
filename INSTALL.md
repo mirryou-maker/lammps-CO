@@ -12,7 +12,9 @@ on Linux/macOS and Windows.
 |---|---|---|
 | **A-1 — 36 new OMP variants** | `src/OPENMP/pair_*_omp.{h,cpp}` (80 files) | Adds `pair_style xxx/omp` for 36 previously unparallelized styles → 4–5× speedup on multi-core nodes |
 | **A-3 — restrict backport** | `src/pair_*.cpp` (15 files) | Enables compiler auto-vectorization of standard (serial) hotloops → +4–6% serial speed |
-| **A-4 — nm/cut pow() reduction** | `src/EXTRA-PAIR/pair_nm_cut*.cpp` (4 files) | Replaces 4 `pow()` calls per pair with 2 → **−39.8% loop time** for nm/cut family |
+| **A-4 — pow() reduction (nm/cut)** | `src/EXTRA-PAIR/pair_nm_cut*.cpp` (4 files) + `src/OPENMP/pair_nm_cut*_omp.cpp` (4 files) | Replaces 4 `pow()` calls per pair with 2 in force block → **−39.8% loop time** for nm/cut family |
+| **A-4 — pow() reduction (lj/pirani)** | `src/EXTRA-PAIR/pair_lj_pirani.cpp`, `src/OPENMP/pair_lj_pirani_omp.cpp` | Eliminates 2 redundant `pow()` in energy block → **−23.4% loop time** when energy computed every step |
+| **A-4 — pow() reduction (mie/cut)** | `src/EXTRA-PAIR/pair_mie_cut.cpp` | Eliminates redundant `pow()` in compute_outer (RESPA multi-timestep) |
 
 **No CMakeLists.txt changes required.** LAMMPS auto-discovers `_omp.cpp` files via `RegisterStylesExt`.
 
@@ -277,10 +279,12 @@ results are **bit-identical** to the unoptimized originals.
 
 ---
 
-## A-4 nm/cut pow() reduction (EXTRA-PAIR)
+## A-4 pow() reduction (nm/cut, lj/pirani, mie/cut — EXTRA-PAIR)
 
-The following 4 files replace the original EXTRA-PAIR implementations with a
-2-`pow()` hotloop (down from 4), plus A-3 `__restrict__`/`fxtmp` patterns:
+The following files replace original EXTRA-PAIR/OPENMP implementations to eliminate
+redundant transcendental `pow()` calls per neighbor pair:
+
+### nm/cut family (4→2 pow per pair, force block — every step)
 
 | File | Optimization |
 |---|---|
@@ -289,11 +293,28 @@ The following 4 files replace the original EXTRA-PAIR implementations with a
 | `src/EXTRA-PAIR/pair_nm_cut_coul_long.cpp` | A-3 + A-4 |
 | `src/EXTRA-PAIR/pair_nm_cut_split.cpp` | A-3 + A-4 + eflag dedup |
 
-**Requires**: `PKG_EXTRA-PAIR=yes` in the cmake build.
+**Performance**: **−39.8–40.9% loop time** (1.65–1.69×), 864–6,912 atoms, serial 1T.
 
-**Performance**: **−39.8% loop time** (1.65×) over original LAMMPS, measured at
-864 and 6,912 atoms (serial 1T, MSVC Release). Thermo output is **bit-identical**
-to the OMP 4T variant — correctness fully verified.
+### lj/pirani (2 pow eliminated per pair, energy block — when eflag active)
+
+| File | Optimization |
+|---|---|
+| `src/EXTRA-PAIR/pair_lj_pirani.cpp` | A-4 eflag block pow reuse |
+| `src/OPENMP/pair_lj_pirani_omp.cpp` | A-4 EFLAG template block pow reuse |
+
+**Performance**: **−23.4% loop time** (1.31×) when energy is computed every step
+(`thermo 1` or energy minimization). Benefit scales with thermo frequency.
+
+### mie/cut (compute_outer RESPA fix)
+
+| File | Optimization |
+|---|---|
+| `src/EXTRA-PAIR/pair_mie_cut.cpp` | A-4 compute_outer: lift r2inv/rgamA/rgamR before conditional blocks |
+
+Eliminates up to 4 redundant `pow()` calls per pair in the RESPA `compute_outer()`
+path (multi-timestep integration). Standard `compute()` was already optimal.
+
+**Requires**: `PKG_EXTRA-PAIR=yes` in the cmake build for all EXTRA-PAIR files.
 
 ---
 

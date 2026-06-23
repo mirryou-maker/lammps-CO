@@ -79,13 +79,14 @@ echo "  → $count standard pair files replaced."
 
 echo ""
 
-# ── A-4: Copy nm/cut optimized EXTRA-PAIR files ──────────────────────────────
+# ── A-4: Copy pow()-reduced EXTRA-PAIR files ─────────────────────────────────
 EP_SRC="$REPO_ROOT/src/EXTRA-PAIR"
 EP_DST="$LAMMPS_ROOT/src/EXTRA-PAIR"
 
 a4_files=(
   pair_nm_cut.cpp pair_nm_cut_coul_cut.cpp
   pair_nm_cut_coul_long.cpp pair_nm_cut_split.cpp
+  pair_lj_pirani.cpp pair_mie_cut.cpp
 )
 
 if [[ ! -d "$EP_DST" ]]; then
@@ -102,7 +103,28 @@ else
     echo "  [COPY] EXTRA-PAIR/$f (A-4 pow reduction)"
     ((count++))
   done
-  echo "  → $count nm/cut files replaced."
+  echo "  → $count EXTRA-PAIR pow-reduction files replaced."
+fi
+
+echo ""
+
+# ── A-4 OMP: lj/pirani OMP pow()-reduction (replaces existing OMP file) ──────
+a4_omp_files=(
+  pair_lj_pirani_omp.cpp
+)
+
+if [[ -d "$OMP_DST" ]]; then
+  count=0
+  for f in "${a4_omp_files[@]}"; do
+    if [[ ! -e "$OMP_SRC/$f" ]]; then
+      echo "  [WARN] $f not found in repo src/OPENMP/ — skipping"
+      continue
+    fi
+    cp "$OMP_SRC/$f" "$OMP_DST/$f"
+    echo "  [COPY] OPENMP/$f (A-4 pow reduction)"
+    ((count++))
+  done
+  echo "  → $count OMP pow-reduction files replaced."
 fi
 
 echo ""

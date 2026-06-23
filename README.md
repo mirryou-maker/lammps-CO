@@ -49,12 +49,13 @@ Copy into `lammps/src/OPENMP/` and rebuild with `-DPKG_OPENMP=on` to enable.
 | lj_cut (coul_esp, coul_long_cs, coul_msm_dielectric, dipole_long) | 4 pairs |
 | lj_expand_coul_long, mdpd, morse_soft, nm_cut_split, rheo_solid, thole | 6 pairs |
 
-### `src/EXTRA-PAIR/` — A-4 nm/cut pow() reduction (4 files)
-Standard `pair_nm_cut*.cpp` files with transcendental `pow()` call count reduced
-from 4 to 2 per neighbor pair, plus A-3 `__restrict__`/`fxtmp` patterns.
-Build with `-D PKG_EXTRA-PAIR=yes`. Requires LAMMPS develop ≥ commit `91d4111`.
+### `src/EXTRA-PAIR/` — A-4 pow() reduction (6 files)
+EXTRA-PAIR files with redundant `pow()` calls eliminated:
+- `pair_nm_cut*.cpp` (4 files): force-block pow 4→2; **−39.8% loop time** (1.65×) always
+- `pair_lj_pirani.cpp`: eflag-block pow reuse; **−23.4%** when energy computed every step
+- `pair_mie_cut.cpp`: compute_outer RESPA path pow reuse (up to 4 pow eliminated)
 
-**Performance**: −39.8% loop time (1.65×) over original LAMMPS, bit-identical results.
+Build with `-D PKG_EXTRA-PAIR=yes`. Requires LAMMPS develop ≥ commit `91d4111`.
 
 ### `src/` — A-3 optimized standard pair files (15 files)
 Standard `pair_*.cpp` files backported with `__restrict__`/`_noalias` hints and
