@@ -1,7 +1,8 @@
 # Installation Guide — LLM-Optimized LAMMPS
 
 This guide explains how to download, patch, and build the LLM-optimized LAMMPS
-(OpenMP A-1 variants + A-3 restrict/fxtmp backport) on Linux/macOS and Windows.
+(OpenMP A-1 variants + A-3 restrict/fxtmp backport + A-4 nm/cut pow() reduction)
+on Linux/macOS and Windows.
 
 ---
 
@@ -9,8 +10,9 @@ This guide explains how to download, patch, and build the LLM-optimized LAMMPS
 
 | Category | Files | Effect |
 |---|---|---|
-| **A-1 — 36 new OMP variants** | `src/OPENMP/pair_*_omp.{h,cpp}` (72 files) | Adds `pair_style xxx/omp` for 36 previously unparallelized styles → 4–5× speedup on multi-core nodes |
+| **A-1 — 36 new OMP variants** | `src/OPENMP/pair_*_omp.{h,cpp}` (80 files) | Adds `pair_style xxx/omp` for 36 previously unparallelized styles → 4–5× speedup on multi-core nodes |
 | **A-3 — restrict backport** | `src/pair_*.cpp` (15 files) | Enables compiler auto-vectorization of standard (serial) hotloops → +4–6% serial speed |
+| **A-4 — nm/cut pow() reduction** | `src/EXTRA-PAIR/pair_nm_cut*.cpp` (4 files) | Replaces 4 `pow()` calls per pair with 2 → **−39.8% loop time** for nm/cut family |
 
 **No CMakeLists.txt changes required.** LAMMPS auto-discovers `_omp.cpp` files via `RegisterStylesExt`.
 
@@ -57,8 +59,9 @@ cd lammps-llm-omp-optimization
 ```
 
 The script:
-- Copies 72 new OMP files into `lammps/src/OPENMP/`
+- Copies 80 new/updated OMP files into `lammps/src/OPENMP/`
 - Replaces 15 standard pair files in `lammps/src/` with A-3 optimized versions
+- Copies 4 A-4 nm/cut files into `lammps/src/EXTRA-PAIR/`
 - Skips files that already exist (safe to re-run)
 
 ### Manual copy (if scripts are unavailable)
@@ -70,6 +73,9 @@ cp src/OPENMP/*.h    /path/to/lammps/src/OPENMP/
 
 # Copy A-3 optimized standard files
 cp src/pair_*.cpp    /path/to/lammps/src/
+
+# Copy A-4 nm/cut optimized files (requires PKG_EXTRA-PAIR)
+cp src/EXTRA-PAIR/*.cpp  /path/to/lammps/src/EXTRA-PAIR/
 ```
 
 ---
@@ -271,6 +277,26 @@ results are **bit-identical** to the unoptimized originals.
 
 ---
 
+## A-4 nm/cut pow() reduction (EXTRA-PAIR)
+
+The following 4 files replace the original EXTRA-PAIR implementations with a
+2-`pow()` hotloop (down from 4), plus A-3 `__restrict__`/`fxtmp` patterns:
+
+| File | Optimization |
+|---|---|
+| `src/EXTRA-PAIR/pair_nm_cut.cpp` | A-3 + A-4 |
+| `src/EXTRA-PAIR/pair_nm_cut_coul_cut.cpp` | A-3 + A-4 |
+| `src/EXTRA-PAIR/pair_nm_cut_coul_long.cpp` | A-3 + A-4 |
+| `src/EXTRA-PAIR/pair_nm_cut_split.cpp` | A-3 + A-4 + eflag dedup |
+
+**Requires**: `PKG_EXTRA-PAIR=yes` in the cmake build.
+
+**Performance**: **−39.8% loop time** (1.65×) over original LAMMPS, measured at
+864 and 6,912 atoms (serial 1T, MSVC Release). Thermo output is **bit-identical**
+to the OMP 4T variant — correctness fully verified.
+
+---
+
 ## Performance expectations
 
 | Configuration | Expected speedup vs. serial |
@@ -278,11 +304,12 @@ results are **bit-identical** to the unoptimized originals.
 | OMP 4 threads (`-sf omp -pk omp 4`) | ~4× (Pair time; Amdahl-limited) |
 | OMP 8 threads (`-sf omp -pk omp 8`) | ~5× |
 | A-3 only (no OMP) | ~4–6% |
+| A-4 nm/cut (pow reduction) | **−39.8% loop time** (1.65×, any thread count) |
 | OMP 8t + AVX2 + A-3 | ~5–6× |
 
-> Tested on: AMD Ryzen 9 / 32,000-atom LJ melt benchmark, LAMMPS develop branch
-> commit `91d4111`, MSVC 2022 / GCC 13. Actual performance varies by hardware and
-> system size.
+> Tested on: AMD Ryzen 9 / 32,000-atom LJ melt benchmark (OMP/A-3) and 864–6,912
+> atom nm/cut benchmark (A-4), LAMMPS develop branch commit `91d4111`, MSVC 2022.
+> Actual performance varies by hardware and system size.
 
 ---
 

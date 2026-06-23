@@ -4,8 +4,9 @@
 # Example: .\apply_patch.ps1 -LammpsRoot C:\software\lammps
 #
 # What it does:
-#   1. Copies 36 new pair_*_omp.{h,cpp} into lammps\src\OPENMP\
+#   1. Copies 40 new/updated pair_*_omp.{h,cpp} into lammps\src\OPENMP\
 #   2. Copies 15 A-3 optimized pair_*.cpp into lammps\src\
+#   3. Copies 4 A-4 nm/cut pair_*.cpp into lammps\src\EXTRA-PAIR\
 #   No CMakeLists.txt changes needed — LAMMPS auto-discovers _omp.cpp files.
 
 param(
@@ -70,6 +71,34 @@ foreach ($f in $a3files) {
   $count++
 }
 Write-Host "  -> $count standard pair files replaced."
+
+Write-Host ""
+
+# A-4: nm/cut optimized EXTRA-PAIR files
+$EpSrc = "$RepoRoot\src\EXTRA-PAIR"
+$EpDst = "$LammpsRoot\src\EXTRA-PAIR"
+
+$a4files = @(
+  'pair_nm_cut.cpp','pair_nm_cut_coul_cut.cpp',
+  'pair_nm_cut_coul_long.cpp','pair_nm_cut_split.cpp'
+)
+
+if (-not (Test-Path $EpDst)) {
+  Write-Warning "  $EpDst not found — build with PKG_EXTRA-PAIR=yes. Skipping A-4 files."
+} else {
+  $count = 0
+  foreach ($f in $a4files) {
+    $src = "$EpSrc\$f"
+    if (-not (Test-Path $src)) {
+      Write-Warning "  $f not found in repo src\EXTRA-PAIR\ — skipping"
+      continue
+    }
+    Copy-Item $src "$EpDst\$f" -Force
+    Write-Host "  [COPY] EXTRA-PAIR\$f  (A-4 pow reduction)" -ForegroundColor Green
+    $count++
+  }
+  Write-Host "  -> $count nm/cut files replaced."
+}
 
 Write-Host ""
 Write-Host "=== Patch applied successfully ===" -ForegroundColor Cyan

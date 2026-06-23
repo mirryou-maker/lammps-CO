@@ -49,6 +49,13 @@ Copy into `lammps/src/OPENMP/` and rebuild with `-DPKG_OPENMP=on` to enable.
 | lj_cut (coul_esp, coul_long_cs, coul_msm_dielectric, dipole_long) | 4 pairs |
 | lj_expand_coul_long, mdpd, morse_soft, nm_cut_split, rheo_solid, thole | 6 pairs |
 
+### `src/EXTRA-PAIR/` — A-4 nm/cut pow() reduction (4 files)
+Standard `pair_nm_cut*.cpp` files with transcendental `pow()` call count reduced
+from 4 to 2 per neighbor pair, plus A-3 `__restrict__`/`fxtmp` patterns.
+Build with `-D PKG_EXTRA-PAIR=yes`. Requires LAMMPS develop ≥ commit `91d4111`.
+
+**Performance**: −39.8% loop time (1.65×) over original LAMMPS, bit-identical results.
+
 ### `src/` — A-3 optimized standard pair files (15 files)
 Standard `pair_*.cpp` files backported with `__restrict__`/`_noalias` hints and
 `fxtmp`/`fytmp`/`fztmp` register-accumulator pattern to enable compiler auto-vectorization.
@@ -98,6 +105,7 @@ Files: `pair_born`, `pair_buck`, `pair_buck_coul_cut`, `pair_coul_cut`, `pair_co
 | OMP 8 threads (32k atoms) | 4.93× |
 | AVX2 + /fp:fast build flag | +6.3% |
 | A-3 restrict backport (lj/cut) | +4.2% |
+| **A-4 nm/cut pow() reduction** | **−39.8% loop time (1.65×)** |
 | FEP OMP 4 threads (lj/cut/soft) | 4.04× |
 | FEP OMP 8 threads (lj/cut/soft) | 5.28× |
 
