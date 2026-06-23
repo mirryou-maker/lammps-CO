@@ -13,12 +13,11 @@
    Contributing author: Axel Kohlmeyer (Temple U)
 ------------------------------------------------------------------------- */
 
-#include "pair_nm_cut_split_omp.h"
+#include "pair_nm_cut_omp.h"
 
 #include "atom.h"
 #include "comm.h"
 #include "force.h"
-#include "math_special.h"
 #include "neigh_list.h"
 #include "suffix.h"
 
@@ -26,12 +25,11 @@
 
 #include "omp_compat.h"
 using namespace LAMMPS_NS;
-using MathSpecial::powint;
 
 /* ---------------------------------------------------------------------- */
 
-PairNMCutSplitOMP::PairNMCutSplitOMP(LAMMPS *lmp) :
-  PairNMCutSplit(lmp), ThrOMP(lmp, THR_PAIR)
+PairNMCutOMP::PairNMCutOMP(LAMMPS *lmp) :
+  PairNMCut(lmp), ThrOMP(lmp, THR_PAIR)
 {
   suffix_flag |= Suffix::OMP;
   respa_enable = 0;
@@ -39,7 +37,7 @@ PairNMCutSplitOMP::PairNMCutSplitOMP(LAMMPS *lmp) :
 
 /* ---------------------------------------------------------------------- */
 
-void PairNMCutSplitOMP::compute(int eflag, int vflag)
+void PairNMCutOMP::compute(int eflag, int vflag)
 {
   ev_init(eflag,vflag);
 
@@ -76,7 +74,7 @@ void PairNMCutSplitOMP::compute(int eflag, int vflag)
 }
 
 template <int EVFLAG, int EFLAG, int NEWTON_PAIR>
-void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
+void PairNMCutOMP::eval(int iifrom, int iito, ThrData * const thr)
 {
   const auto * _noalias const x = (dbl3_t *) atom->x[0];
   auto * _noalias const f = (dbl3_t *) thr->get_f()[0];
@@ -101,15 +99,13 @@ void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
     const int itype = type[i];
     const int    * _noalias const jlist = firstneigh[i];
     const double * _noalias const cutsqi = cutsq[itype];
-    const double * _noalias const r0i = r0[itype];
-    const double * _noalias const e0i = e0[itype];
-    const double * _noalias const e0nmi = e0nm[itype];
-    const double * _noalias const nmi = nm[itype];
-    const double * _noalias const r0ni = r0n[itype];
-    const double * _noalias const r0mi = r0m[itype];
-    const double * _noalias const nni = nn[itype];
-    const double * _noalias const mmi = mm[itype];
     const double * _noalias const offseti = offset[itype];
+    const double * _noalias const mmi = mm[itype];
+    const double * _noalias const nni = nn[itype];
+    const double * _noalias const nmi = nm[itype];
+    const double * _noalias const e0nmi = e0nm[itype];
+    const double * _noalias const r0mi = r0m[itype];
+    const double * _noalias const r0ni = r0n[itype];
 
     xtmp = x[i].x;
     ytmp = x[i].y;
@@ -132,17 +128,12 @@ void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
         r2inv = 1.0/rsq;
         r = sqrt(rsq);
 
-        // r < r0 --> use generalized LJ
-        if (rsq < r0i[jtype]*r0i[jtype]) {
-          rminv = pow(r2inv,mmi[jtype]/2.0);
-          rninv = pow(r2inv,nni[jtype]/2.0);
-          // r^n = 1/rninv, r^m = 1/rminv (eliminates 2 pow calls)
-          forcenm = e0nmi[jtype]*nmi[jtype]*
-            (r0ni[jtype]*rninv - r0mi[jtype]*rminv);
-        }
-        // r > r0 --> use standard LJ (m = 6 n = 12)
-        else forcenm = (e0i[jtype]/6.0)*72.0*(4.0/powint(r,12)-2.0/powint(r,6));
+        rminv = pow(r2inv,mmi[jtype]*0.5);
+        rninv = pow(r2inv,nni[jtype]*0.5);
 
+        // r^n = 1/rninv, r^m = 1/rminv (eliminates 2 pow calls)
+        forcenm = e0nmi[jtype]*nmi[jtype] *
+          (r0ni[jtype]*rninv - r0mi[jtype]*rminv);
         fpair = factor_lj*forcenm*r2inv;
 
         fxtmp += delx*fpair;
@@ -155,15 +146,9 @@ void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
         }
 
         if (EFLAG) {
-          // r < r0 --> use generalized LJ
-          if (rsq < r0i[jtype]*r0i[jtype]) {
-            // rminv/rninv already computed in force block above
-            evdwl = e0nmi[jtype]*(mmi[jtype]*r0ni[jtype]*rninv -
-                                  nni[jtype]*r0mi[jtype]*rminv) -
-              offseti[jtype];
-          }
-          // r > r0 --> use standard LJ (m = 6 n = 12)
-          else evdwl = (e0i[jtype]/6.0)*(24.0*powint(r2inv,6) - 24.0*pow(r2inv,3));
+          evdwl = e0nmi[jtype] *
+            (mmi[jtype]*r0ni[jtype]*rninv -
+             nni[jtype]*r0mi[jtype]*rminv) - offseti[jtype];
           evdwl *= factor_lj;
         }
 
@@ -179,10 +164,10 @@ void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
 
 /* ---------------------------------------------------------------------- */
 
-double PairNMCutSplitOMP::memory_usage()
+double PairNMCutOMP::memory_usage()
 {
   double bytes = memory_usage_thr();
-  bytes += PairNMCutSplit::memory_usage();
+  bytes += PairNMCut::memory_usage();
 
   return bytes;
 }

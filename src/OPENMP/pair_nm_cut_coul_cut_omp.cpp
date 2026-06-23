@@ -13,12 +13,11 @@
    Contributing author: Axel Kohlmeyer (Temple U)
 ------------------------------------------------------------------------- */
 
-#include "pair_nm_cut_split_omp.h"
+#include "pair_nm_cut_coul_cut_omp.h"
 
 #include "atom.h"
 #include "comm.h"
 #include "force.h"
-#include "math_special.h"
 #include "neigh_list.h"
 #include "suffix.h"
 
@@ -26,12 +25,11 @@
 
 #include "omp_compat.h"
 using namespace LAMMPS_NS;
-using MathSpecial::powint;
 
 /* ---------------------------------------------------------------------- */
 
-PairNMCutSplitOMP::PairNMCutSplitOMP(LAMMPS *lmp) :
-  PairNMCutSplit(lmp), ThrOMP(lmp, THR_PAIR)
+PairNMCutCoulCutOMP::PairNMCutCoulCutOMP(LAMMPS *lmp) :
+  PairNMCutCoulCut(lmp), ThrOMP(lmp, THR_PAIR)
 {
   suffix_flag |= Suffix::OMP;
   respa_enable = 0;
@@ -39,7 +37,7 @@ PairNMCutSplitOMP::PairNMCutSplitOMP(LAMMPS *lmp) :
 
 /* ---------------------------------------------------------------------- */
 
-void PairNMCutSplitOMP::compute(int eflag, int vflag)
+void PairNMCutCoulCutOMP::compute(int eflag, int vflag)
 {
   ev_init(eflag,vflag);
 
@@ -70,47 +68,57 @@ void PairNMCutSplitOMP::compute(int eflag, int vflag)
       if (force->newton_pair) eval<0,0,1>(ifrom, ito, thr);
       else eval<0,0,0>(ifrom, ito, thr);
     }
+
     thr->timer(Timer::PAIR);
     reduce_thr(this, eflag, vflag, thr);
   } // end of omp parallel region
 }
 
+/* ---------------------------------------------------------------------- */
+
 template <int EVFLAG, int EFLAG, int NEWTON_PAIR>
-void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
+void PairNMCutCoulCutOMP::eval(int iifrom, int iito, ThrData * const thr)
 {
+  int j,ii,jj,jnum,jtype;
+  double qtmp,xtmp,ytmp,ztmp,delx,dely,delz,evdwl,ecoul,fpair;
+  double r,rsq,r2inv,rminv,rninv,forcecoul,forcenm,factor_coul,factor_lj;
+  int *ilist,*numneigh,**firstneigh;
+
+  evdwl = ecoul = 0.0;
+
   const auto * _noalias const x = (dbl3_t *) atom->x[0];
   auto * _noalias const f = (dbl3_t *) thr->get_f()[0];
+  const double * _noalias const q = atom->q;
   const int * _noalias const type = atom->type;
-  const double * _noalias const special_lj = force->special_lj;
-  const int * _noalias const ilist = list->ilist;
-  const int * _noalias const numneigh = list->numneigh;
-  const int * const * const firstneigh = list->firstneigh;
-
-  double xtmp,ytmp,ztmp,delx,dely,delz,fxtmp,fytmp,fztmp;
-  double r,rsq,r2inv,rminv,rninv,forcenm,factor_lj,evdwl,fpair;
-
   const int nlocal = atom->nlocal;
-  int j,jj,jnum,jtype;
+  const double * _noalias const special_coul = force->special_coul;
+  const double * _noalias const special_lj = force->special_lj;
+  const double qqrd2e = force->qqrd2e;
+  double fxtmp,fytmp,fztmp;
 
-  evdwl = 0.0;
+  ilist = list->ilist;
+  numneigh = list->numneigh;
+  firstneigh = list->firstneigh;
 
   // loop over neighbors of my atoms
 
-  for (int ii = iifrom; ii < iito; ++ii) {
+  for (ii = iifrom; ii < iito; ++ii) {
+
     const int i = ilist[ii];
     const int itype = type[i];
     const int    * _noalias const jlist = firstneigh[i];
     const double * _noalias const cutsqi = cutsq[itype];
-    const double * _noalias const r0i = r0[itype];
-    const double * _noalias const e0i = e0[itype];
-    const double * _noalias const e0nmi = e0nm[itype];
-    const double * _noalias const nmi = nm[itype];
-    const double * _noalias const r0ni = r0n[itype];
-    const double * _noalias const r0mi = r0m[itype];
-    const double * _noalias const nni = nn[itype];
-    const double * _noalias const mmi = mm[itype];
+    const double * _noalias const cut_coulsqi = cut_coulsq[itype];
+    const double * _noalias const cut_ljsqi = cut_ljsq[itype];
     const double * _noalias const offseti = offset[itype];
+    const double * _noalias const mmi = mm[itype];
+    const double * _noalias const nni = nn[itype];
+    const double * _noalias const nmi = nm[itype];
+    const double * _noalias const e0nmi = e0nm[itype];
+    const double * _noalias const r0mi = r0m[itype];
+    const double * _noalias const r0ni = r0n[itype];
 
+    qtmp = q[i];
     xtmp = x[i].x;
     ytmp = x[i].y;
     ztmp = x[i].z;
@@ -120,6 +128,7 @@ void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
     for (jj = 0; jj < jnum; jj++) {
       j = jlist[jj];
       factor_lj = special_lj[sbmask(j)];
+      factor_coul = special_coul[sbmask(j)];
       j &= NEIGHMASK;
 
       delx = xtmp - x[j].x;
@@ -130,20 +139,37 @@ void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
 
       if (rsq < cutsqi[jtype]) {
         r2inv = 1.0/rsq;
-        r = sqrt(rsq);
 
-        // r < r0 --> use generalized LJ
-        if (rsq < r0i[jtype]*r0i[jtype]) {
+        if (rsq < cut_coulsqi[jtype]) {
+          const double rinv = sqrt(r2inv);
+          forcecoul = qqrd2e * qtmp*q[j]*rinv;
+          forcecoul *= factor_coul;
+          if (EFLAG) ecoul = factor_coul * qqrd2e * qtmp*q[j]*rinv;
+        } else {
+          forcecoul = 0.0;
+          if (EFLAG) ecoul = 0.0;
+        }
+
+        if (rsq < cut_ljsqi[jtype]) {
+          r = sqrt(rsq);
           rminv = pow(r2inv,mmi[jtype]/2.0);
           rninv = pow(r2inv,nni[jtype]/2.0);
           // r^n = 1/rninv, r^m = 1/rminv (eliminates 2 pow calls)
-          forcenm = e0nmi[jtype]*nmi[jtype]*
+          forcenm = e0nmi[jtype]*nmi[jtype] *
             (r0ni[jtype]*rninv - r0mi[jtype]*rminv);
+          forcenm *= factor_lj;
+          if (EFLAG)
+            evdwl = (e0nmi[jtype]*(mmi[jtype] *
+                                   r0ni[jtype]*rninv -
+                                   nni[jtype] *
+                                   r0mi[jtype]*rminv) -
+                     offseti[jtype]) * factor_lj;
+        } else {
+          forcenm = 0.0;
+          if (EFLAG) evdwl = 0.0;
         }
-        // r > r0 --> use standard LJ (m = 6 n = 12)
-        else forcenm = (e0i[jtype]/6.0)*72.0*(4.0/powint(r,12)-2.0/powint(r,6));
 
-        fpair = factor_lj*forcenm*r2inv;
+        fpair = (forcecoul + forcenm) * r2inv;
 
         fxtmp += delx*fpair;
         fytmp += dely*fpair;
@@ -154,21 +180,8 @@ void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
           f[j].z -= delz*fpair;
         }
 
-        if (EFLAG) {
-          // r < r0 --> use generalized LJ
-          if (rsq < r0i[jtype]*r0i[jtype]) {
-            // rminv/rninv already computed in force block above
-            evdwl = e0nmi[jtype]*(mmi[jtype]*r0ni[jtype]*rninv -
-                                  nni[jtype]*r0mi[jtype]*rminv) -
-              offseti[jtype];
-          }
-          // r > r0 --> use standard LJ (m = 6 n = 12)
-          else evdwl = (e0i[jtype]/6.0)*(24.0*powint(r2inv,6) - 24.0*pow(r2inv,3));
-          evdwl *= factor_lj;
-        }
-
-        if (EVFLAG) ev_tally_thr(this,i,j,nlocal,NEWTON_PAIR,
-                                 evdwl,0.0,fpair,delx,dely,delz,thr);
+        if (EVFLAG) ev_tally_thr(this, i,j,nlocal,NEWTON_PAIR,
+                                 evdwl,ecoul,fpair,delx,dely,delz,thr);
       }
     }
     f[i].x += fxtmp;
@@ -179,10 +192,10 @@ void PairNMCutSplitOMP::eval(int iifrom, int iito, ThrData * const thr)
 
 /* ---------------------------------------------------------------------- */
 
-double PairNMCutSplitOMP::memory_usage()
+double PairNMCutCoulCutOMP::memory_usage()
 {
   double bytes = memory_usage_thr();
-  bytes += PairNMCutSplit::memory_usage();
+  bytes += PairNMCutCoulCut::memory_usage();
 
   return bytes;
 }
