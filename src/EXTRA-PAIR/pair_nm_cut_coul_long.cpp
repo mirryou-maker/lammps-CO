@@ -547,11 +547,13 @@ double PairNMCutCoulLong::single(int i, int j, int itype, int jtype,
     }
   } else forcecoul = 0.0;
 
+  double rn_inv = 0.0, rm_inv = 0.0;
   if (rsq < cut_ljsq[itype][jtype]) {
     r = sqrt(rsq);
+    rn_inv = 1.0/pow(r,nn[itype][jtype]);
+    rm_inv = 1.0/pow(r,mm[itype][jtype]);
     forcenm = e0nm[itype][jtype]*nm[itype][jtype] *
-      (r0n[itype][jtype]/pow(r,nn[itype][jtype]) -
-       r0m[itype][jtype]/pow(r,mm[itype][jtype]));
+      (r0n[itype][jtype]*rn_inv - r0m[itype][jtype]*rm_inv);
   } else forcenm = 0.0;
 
   fforce = (forcecoul + factor_lj*forcenm) * r2inv;
@@ -570,8 +572,8 @@ double PairNMCutCoulLong::single(int i, int j, int itype, int jtype,
 
   if (rsq < cut_ljsq[itype][jtype]) {
     phinm = e0nm[itype][jtype] *
-      (mm[itype][jtype]*r0n[itype][jtype]/pow(r,nn[itype][jtype]) -
-       nn[itype][jtype]*r0m[itype][jtype]/pow(r,mm[itype][jtype])) -
+      (mm[itype][jtype]*r0n[itype][jtype]*rn_inv -
+       nn[itype][jtype]*r0m[itype][jtype]*rm_inv) -
       offset[itype][jtype];
     eng += factor_lj*phinm;
   }

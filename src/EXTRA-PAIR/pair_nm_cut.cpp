@@ -424,14 +424,16 @@ double PairNMCut::single(int /*i*/, int /*j*/, int itype, int jtype,
   r2inv = 1.0/rsq;
   r = sqrt(rsq);
 
+  const double rn_inv = 1.0/pow(r,nn[itype][jtype]);
+  const double rm_inv = 1.0/pow(r,mm[itype][jtype]);
+
   forcenm = e0nm[itype][jtype]*nm[itype][jtype] *
-    (r0n[itype][jtype]/pow(r,nn[itype][jtype]) -
-     r0m[itype][jtype]/pow(r,mm[itype][jtype]));
+    (r0n[itype][jtype]*rn_inv - r0m[itype][jtype]*rm_inv);
   fforce = factor_lj*forcenm*r2inv;
 
   phinm = e0nm[itype][jtype] *
-    (mm[itype][jtype] * r0n[itype][jtype]/pow(r,nn[itype][jtype]) -
-     nn[itype][jtype]*r0m[itype][jtype] /pow(r,mm[itype][jtype])) -
+    (mm[itype][jtype] * r0n[itype][jtype]*rn_inv -
+     nn[itype][jtype]*r0m[itype][jtype]*rm_inv) -
     offset[itype][jtype];
   return factor_lj*phinm;
 }
@@ -445,11 +447,13 @@ void PairNMCut::born_matrix(int /*i*/, int /*j*/, int itype, int jtype, double r
   double r = sqrt(rsq);
   double prefactor = e0nm[itype][jtype]*nm[itype][jtype];
 
+  const double rn_inv = 1.0/pow(r,nn[itype][jtype]);
+  const double rm_inv = 1.0/pow(r,mm[itype][jtype]);
   double du = prefactor *
-          (r0m[itype][jtype]/pow(r,mm[itype][jtype]) - r0n[itype][jtype]/pow(r,nn[itype][jtype])) / r;
+          (r0m[itype][jtype]*rm_inv - r0n[itype][jtype]*rn_inv) / r;
   double du2 = prefactor *
-          (r0n[itype][jtype]*(nn[itype][jtype] + 1.0) / pow(r,nn[itype][jtype]) -
-           r0m[itype][jtype]*(mm[itype][jtype] + 1.0) / pow(r,mm[itype][jtype])) / rsq;
+          (r0n[itype][jtype]*(nn[itype][jtype] + 1.0) * rn_inv -
+           r0m[itype][jtype]*(mm[itype][jtype] + 1.0) * rm_inv) / rsq;
 
   dupair = factor_lj * du;
   du2pair = factor_lj * du2;

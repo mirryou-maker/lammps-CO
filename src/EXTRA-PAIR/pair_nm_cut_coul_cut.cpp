@@ -480,11 +480,13 @@ double PairNMCutCoulCut::single(int i, int j, int itype, int jtype,
   if (rsq < cut_coulsq[itype][jtype])
     forcecoul = force->qqrd2e * atom->q[i]*atom->q[j]*sqrt(r2inv);
   else forcecoul = 0.0;
+  double rn_inv = 0.0, rm_inv = 0.0;
   if (rsq < cut_ljsq[itype][jtype]) {
     r = sqrt(rsq);
+    rn_inv = 1.0/pow(r,nn[itype][jtype]);
+    rm_inv = 1.0/pow(r,mm[itype][jtype]);
     forcenm = e0nm[itype][jtype]*nm[itype][jtype] *
-      (r0n[itype][jtype]/pow(r,nn[itype][jtype]) -
-       r0m[itype][jtype]/pow(r,mm[itype][jtype]));
+      (r0n[itype][jtype]*rn_inv - r0m[itype][jtype]*rm_inv);
   } else forcenm = 0.0;
   fforce = (factor_coul*forcecoul + factor_lj*forcenm) * r2inv;
 
@@ -495,8 +497,8 @@ double PairNMCutCoulCut::single(int i, int j, int itype, int jtype,
   }
   if (rsq < cut_ljsq[itype][jtype]) {
     phinm = e0nm[itype][jtype] *
-      (mm[itype][jtype]*r0n[itype][jtype]/pow(r,nn[itype][jtype]) -
-       nn[itype][jtype]*r0m[itype][jtype]/pow(r,mm[itype][jtype])) -
+      (mm[itype][jtype]*r0n[itype][jtype]*rn_inv -
+       nn[itype][jtype]*r0m[itype][jtype]*rm_inv) -
       offset[itype][jtype];
     eng += factor_lj*phinm;
   }
@@ -523,11 +525,13 @@ void PairNMCutCoulCut::born_matrix(int i, int j, int itype, int jtype, double rs
 
   double prefactor = e0nm[itype][jtype]*nm[itype][jtype];
 
+  const double rn_inv = 1.0/pow(r,nn[itype][jtype]);
+  const double rm_inv = 1.0/pow(r,mm[itype][jtype]);
   du_lj = prefactor *
-          (r0m[itype][jtype]/pow(r,mm[itype][jtype]) - r0n[itype][jtype]/pow(r,nn[itype][jtype])) / r;
+          (r0m[itype][jtype]*rm_inv - r0n[itype][jtype]*rn_inv) / r;
   du2_lj = prefactor *
-          (r0n[itype][jtype]*(nn[itype][jtype] + 1.0) / pow(r,nn[itype][jtype]) -
-           r0m[itype][jtype]*(mm[itype][jtype] + 1.0) / pow(r,mm[itype][jtype])) / rsq;
+          (r0n[itype][jtype]*(nn[itype][jtype] + 1.0) * rn_inv -
+           r0m[itype][jtype]*(mm[itype][jtype] + 1.0) * rm_inv) / rsq;
 
   du_coul = -qqrd2e * q[i] * q[j] * r2inv;
   du2_coul = 2.0 * qqrd2e * q[i] * q[j] * r3inv;

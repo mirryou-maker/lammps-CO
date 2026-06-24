@@ -77,9 +77,11 @@ ax.grid(axis="y", alpha=0.30, zorder=0)
 # ── (b) tornado chart ──────────────────────────────────────────────────────
 ax = axes[0, 1]
 tornado_items = [
-    ("A-3 serial patch\n(lj/cut, 4k atoms)",   4.2,  "#26C6DA"),
-    ("/arch:AVX2\n(32k atoms)",                  2.9,  "#1E88E5"),
-    ("AVX2 + /fp:fast\n(32k atoms)",             6.3,  "#0D47A1"),
+    ("/arch:AVX2\n(32k atoms)",                        2.9,  "#1E88E5"),
+    ("A-3 serial patch\n(lj/cut, 4k atoms)",           4.2,  "#26C6DA"),
+    ("AVX2 + /fp:fast\n(32k atoms)",                   6.3,  "#0D47A1"),
+    ("A-4 lj/pirani eflag\n(864 atoms, thermo 1)",    23.4,  "#FF8A65"),
+    ("A-4 nm/cut pow\n(864–6,912 atoms)",             40.8,  "#E64A19"),
     ("OMP 4 threads\n(-sf omp, 32k atoms)", (BASELINE - 1.004) / BASELINE * 100, "#43A047"),
     ("OMP 8 threads\n(-sf omp, 32k atoms)", (BASELINE - 0.878) / BASELINE * 100, "#1B5E20"),
 ]
@@ -88,12 +90,12 @@ tvals   = [t[1] for t in tornado_items]
 tcolors = [t[2] for t in tornado_items]
 
 y = np.arange(len(tornado_items))
-hbars = ax.barh(y, tvals, color=tcolors, edgecolor="white", height=0.6, zorder=3)
+hbars = ax.barh(y, tvals, color=tcolors, edgecolor="white", height=0.55, zorder=3)
 for bar, val in zip(hbars, tvals):
     ax.text(val + 0.8, bar.get_y() + bar.get_height() / 2,
-            f"+{val:.1f}%", va="center", fontsize=12, fontweight="bold")
+            f"+{val:.1f}%", va="center", fontsize=11, fontweight="bold")
 ax.set_yticks(y)
-ax.set_yticklabels(tlabels, fontsize=11.5)
+ax.set_yticklabels(tlabels, fontsize=10.5)
 ax.set_xlabel("Loop-time reduction vs. serial baseline (%)", fontsize=12.5)
 ax.set_xlim(0, 90)
 ax.axvline(0, lw=1.0, color="#444")

@@ -159,7 +159,7 @@ double PairNMCutSplit::single(int /*i*/, int /*j*/, int itype, int jtype, double
   // r < r_0, use generalized LJ
   if (rsq < r0[itype][jtype]*r0[itype][jtype]) {  // note the addition of the r0 factor
      forcenm = e0nm[itype][jtype]*nm[itype][jtype]*
-      (r0n[itype][jtype]/pow(r,nn[itype][jtype])-r0m[itype][jtype]/pow(r,mm[itype][jtype]));
+      (r0n[itype][jtype]*rninv - r0m[itype][jtype]*rminv);
       phinm = e0nm[itype][jtype]*(mm[itype][jtype]*r0n[itype][jtype]*rninv
       -nn[itype][jtype]*r0m[itype][jtype]*rminv)-offset[itype][jtype];
 
