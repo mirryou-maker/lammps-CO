@@ -35,10 +35,10 @@ git clone --depth=1 --branch=develop https://github.com/lammps/lammps.git
 
 ```bash
 # Option A: git clone (requires GitHub account with repo access)
-git clone https://github.com/mirryou-maker/lammps-llm-omp-optimization.git
+git clone https://github.com/mirryou-maker/lammps-CO.git
 
 # Option B: Download ZIP from GitHub Release page
-#   https://github.com/mirryou-maker/lammps-llm-omp-optimization/releases/latest
+#   https://github.com/mirryou-maker/lammps-CO/releases/latest
 #   → "Source code (zip)" → unzip
 ```
 
@@ -49,14 +49,14 @@ git clone https://github.com/mirryou-maker/lammps-llm-omp-optimization.git
 ### Linux / macOS
 
 ```bash
-cd lammps-llm-omp-optimization
+cd lammps-CO
 bash scripts/apply_patch.sh /path/to/lammps
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-cd lammps-llm-omp-optimization
+cd lammps-CO
 .\scripts\apply_patch.ps1 -LammpsRoot C:\path\to\lammps
 ```
 
@@ -362,8 +362,8 @@ Then add `-D OpenMP_CXX_FLAGS="/openmp"` to the cmake command.
 If you use this optimized LAMMPS in your research, please cite:
 
 > You, C.-Y. "AI-Assisted Systematic Optimization of the LAMMPS Molecular Dynamics
-> Simulator via Large Language Model Coding Agents."
-> *npj Computational Materials* (2026). https://github.com/mirryou-maker/lammps-llm-omp-optimization
+> Simulator via Large Language Model Coding Agents." (2026).
+> https://github.com/mirryou-maker/lammps-CO
 
 Also cite the original LAMMPS paper:
 

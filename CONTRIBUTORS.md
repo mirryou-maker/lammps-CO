@@ -6,7 +6,7 @@
 - Affiliation: Department of Physics and Chemistry, DGIST (Daegu Gyeongbuk Institute of Science and Technology), Daegu, Republic of Korea
 - Email: cyyou@dgist.ac.kr
 - GitHub: [@mirryou-maker](https://github.com/mirryou-maker)
-- Role: Project design, implementation, benchmarking, and manuscript preparation
+- Role: Project design, implementation, and benchmarking
 
 ---
 
