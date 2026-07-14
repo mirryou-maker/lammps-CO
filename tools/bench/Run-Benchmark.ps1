@@ -65,9 +65,14 @@ foreach ($v in $Vars) {
 $argList += $ExtraArgs
 
 $commit = $null
-$lammpsSrc = Join-Path $ScriptDir "..\..\lammps-src"
-if (Test-Path (Join-Path $lammpsSrc ".git")) {
-    $commit = (& git -C $lammpsSrc rev-parse --short HEAD 2>$null)
+# Try common LAMMPS clone locations (lammps-src/ or lammps/ beside repo root)
+$RepoRoot  = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
+foreach ($candidate in @("lammps-src", "lammps")) {
+    $lammpsSrc = Join-Path $RepoRoot $candidate
+    if (Test-Path (Join-Path $lammpsSrc ".git")) {
+        $commit = (& git -C $lammpsSrc rev-parse --short HEAD 2>$null)
+        break
+    }
 }
 
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"

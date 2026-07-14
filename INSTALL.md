@@ -23,7 +23,7 @@ on Linux/macOS and Windows.
 ## Step 1 — Clone LAMMPS (develop branch)
 
 ```bash
-git clone --depth=1 --branch=develop https://github.com/lammps/lammps.git
+git clone --depth=1 --branch=develop https://github.com/lammps/lammps.git lammps-src
 ```
 
 > **Minimum version**: commit `91d4111` or later (2025-06). The patches were

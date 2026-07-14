@@ -7,6 +7,10 @@
 
 Set-Location (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent)
 $lmp = "build\omp-fep\Release\lmp.exe"
+if (-not (Test-Path $lmp)) {
+    Write-Error "LAMMPS binary not found: '$lmp'. Build first with: .\tools\bench\Build-Lammps.ps1 -BuildDir omp-fep -Packages OPENMP,KSPACE,MOLECULE,FEP"
+    exit 1
+}
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 $lambdas = @(0.00,0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.45,

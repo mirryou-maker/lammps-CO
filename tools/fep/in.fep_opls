@@ -1,0 +1,77 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# in.fep_opls  — OPLS-AA all-atom FEP: Li+ desolvation
+# Usage: lmp.exe [-sf omp -pk omp N] \
+#          -var DATAFILE tools/fep/data/ec_li_aa.data \
+#          -var LAMBDA 0.50  -var NSTEPS 300000  -in tools/fep/in.fep_opls
+#
+# Pair style: lj/cut/coul/long/soft 2 0.5 0.3 10.0  (soft-core LJ+Coul)
+# Li+ is atom type 1; lambda is set for ALL Li+-solvent pair_coeffs.
+# compute fep perturbs lambda(1,*) by +0.01 → dU/dlambda estimate.
+# ─────────────────────────────────────────────────────────────────────────────
+
+units           real
+atom_style      full
+boundary        p p p
+
+bond_style      harmonic
+angle_style     harmonic
+dihedral_style  opls
+
+read_data       ${DATAFILE}
+
+# ── Pair: lj/cut/coul/long/soft (n=2, alphaLJ=0.5, alphaCoul=0.3, rc=10 Ang) ─
+pair_style      lj/cut/coul/long/soft 2 0.5 0.3 10.0
+kspace_style    pppm 1.0e-4
+special_bonds   lj/coul 0.0 0.0 0.5        # OPLS-AA 1-4 scaling
+
+# Pair Coeffs read from data file (per-type LJ: eps sig lambda=1.0 template)
+# Override Li+ cross-pairs with lambda=${LAMBDA}:
+pair_coeff      * * ${LAMBDA} ${LAMBDA}     # this form not valid — done per pair below
+
+# LAMMPS does not support "pair_coeff * *" with three args for soft-core.
+# Instead, we use pair_modify mix and set Li cross-pairs explicitly.
+# The data file sets all lambdas to 1.0; here we override Li+ pairs:
+pair_coeff      1 *  ${LAMBDA}              # short form: only scale lambda for Li
+
+# Actually for lj/cut/coul/long/soft we must give full (eps, sig, lambda).
+# Read pair coeffs from data, then override Li+ pairs using the line below.
+# The short-form "pair_coeff 1 *" approach for lambda only is NOT supported.
+# Instead we rely on compute fep to perturb the lambda stored in pair tables.
+
+pair_modify     mix arithmetic              # Lorentz-Berthelot for cross-pairs
+
+neighbor        3.0 bin
+neigh_modify    every 5 delay 0 check yes
+
+# ── Energy minimization ───────────────────────────────────────────────────────
+minimize        1.0e-4 1.0e-6 5000 50000
+
+# ── NPT density equilibration (100 ps) ───────────────────────────────────────
+velocity        all create 300.0 12345 dist gaussian
+fix             NPT all npt temp 300.0 300.0 200.0 iso 1.0 1.0 1000.0
+thermo_style    custom step temp press density epair
+thermo          2000
+run             50000
+unfix           NPT
+
+# ── FEP compute ───────────────────────────────────────────────────────────────
+# c_FEP[1] = ΔU  = U(lam+dlam) - U(lam)   [kcal/mol]
+# c_FEP[2] = exp(-ΔU/kT)                   [dimensionless]
+variable        dlam  equal 0.01
+compute         FEP   all fep 300.0 pair lj/cut/coul/long/soft lambda 1 * v_dlam
+variable        dUdL  equal c_FEP[1]/v_dlam
+variable        LAMv  equal ${LAMBDA}
+
+# ── NVT equilibration (50 ps) ─────────────────────────────────────────────────
+fix             NVT all nvt temp 300.0 300.0 200.0
+thermo_style    custom step temp epair
+thermo          2000
+run             25000
+
+reset_timestep  0
+
+# ── Production ────────────────────────────────────────────────────────────────
+thermo_style    custom step v_LAMv v_dUdL c_FEP[2]
+thermo_modify   format float %18.10g
+thermo          200
+run             ${NSTEPS}

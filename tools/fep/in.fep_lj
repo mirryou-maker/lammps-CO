@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# FEP: Li+ desolvation in LJ CG solvent (pipeline validation)
+# Usage: lmp.exe [-sf omp -pk omp N] -var LAMBDA 0.50 -in tools/fep/in.fep_lj
+#
+# Atom types: 1=EC_CG (sigma=5 Ang, eps=0.5 kcal/mol)  2=Li+ (Joung&Cheatham)
+# FEP: annihilate Li+-solvent LJ coupling  (lambda: 1→0)
+# Returns: dU/dlambda = c_FEP[1] / dlam  (for TI integration)
+# ─────────────────────────────────────────────────────────────────────────────
+
+units           real
+atom_style      charge
+boundary        p p p
+timestep        2.0
+
+read_data       tools/fep/data/lj_ec_li.data
+
+pair_style      lj/cut/soft 2 0.5 15.0
+pair_coeff      1 1  0.5000  5.0000  1.0          # EC-EC fully coupled
+pair_coeff      1 2  0.4101  3.2047  ${LAMBDA}    # EC-Li+  lambda window
+pair_coeff      2 2  0.3367  1.4094  1.0          # Li+-Li+ irrelevant
+
+neighbor        4.0 bin
+neigh_modify    every 5 delay 0 check yes
+
+# ── Remove overlaps then create velocities ──────────────────────────────────
+minimize        1.0e-4 1.0e-6 2000 20000
+velocity        all create 300.0 12345 dist gaussian
+
+fix             NVT all nvt temp 300.0 300.0 200.0
+
+# ── compute fep ─────────────────────────────────────────────────────────────
+# Perturb lambda for EC-Li+ pair (1,2) by dlam=0.01
+# c_FEP[1] = ΔU = U(lam+dlam) - U(lam)   [kcal/mol]
+# c_FEP[2] = exp(-ΔU/kT)                  [dimensionless]
+variable        dlam  equal 0.01
+compute         FEP   all fep 300.0 pair lj/cut/soft lambda 1 2 v_dlam
+variable        dUdL  equal c_FEP[1]/v_dlam
+variable        LAMv  equal ${LAMBDA}
+
+# ── Equilibration (50 ps) ───────────────────────────────────────────────────
+thermo_style    custom step temp epair
+thermo          1000
+run             25000
+
+reset_timestep  0
+
+# ── Production: collect dU/dlambda every 100 steps (2 ns = 1000000 steps) ──
+# Output: step | lambda | dU/dlam | exp(-dU/kT)
+thermo_style    custom step v_LAMv v_dUdL c_FEP[2]
+thermo_modify   format float %18.10g
+thermo          100
+run             ${NSTEPS}

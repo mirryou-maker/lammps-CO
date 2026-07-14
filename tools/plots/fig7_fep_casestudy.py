@@ -121,8 +121,8 @@ SHORT_BAR = {'ec': -169.116, 'pc': -167.820, 'dme': -147.434}
 SHORT_ERR = {'ec':  0.276,   'pc':  0.286,   'dme':  0.275  }
 
 # ── figure ─────────────────────────────────────────────────────────────────
-fig = plt.figure(figsize=(19, 11))
-gs  = GridSpec(2, 3, figure=fig, hspace=0.52, wspace=0.44)
+fig = plt.figure(figsize=(22, 13))
+gs  = GridSpec(2, 3, figure=fig, hspace=0.58, wspace=0.48)
 
 # Row 0: TI integrands ──────────────────────────────────────────────────────
 for col, sol in enumerate(['ec', 'pc', 'dme']):
@@ -222,12 +222,12 @@ ax_omp.set_xticks(n_threads)
 ax_omp.set_ylim(0.5, 9)
 
 fig.suptitle(
-    'Figure 7 · FEP Case Study: Li⁺ Desolvation in Battery Electrolyte Solvents\n'
+    'Figure 6 · FEP Case Study: Li⁺ Desolvation in Battery Electrolyte Solvents\n'
     '(OPLS-AA force field; TI with 21 λ-windows; 40 ps and 200 ps/window)',
     fontsize=15, fontweight='bold', y=1.02)
 
-out_pdf = str(OUTDIR / "figure7_fep_casestudy.pdf")
-out_png = str(OUTDIR / "figure7_fep_casestudy.png")
+out_pdf = str(OUTDIR / "figure6_fep_casestudy.pdf")
+out_png = str(OUTDIR / "figure6_fep_casestudy.png")
 plt.savefig(out_pdf, bbox_inches='tight', dpi=300)
 plt.savefig(out_png, bbox_inches='tight', dpi=300)
 print(f"Saved {out_pdf}")

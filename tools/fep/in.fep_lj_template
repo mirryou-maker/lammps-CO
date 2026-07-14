@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# FEP: Li+ desolvation in LJ CG solvent  (pipeline validation run)
+# Usage:  lmp.exe -sf omp -pk omp 4 -var LAMBDA 0.50 -var TEMP 300.0 -in in.fep_lj_template
+#
+# Atom types in lj_ec_li.data:
+#   type 1 = EC CG bead  (sigma=5.0 Ang, eps=0.5 kcal/mol, q=0)
+#   type 2 = Li+          (sigma=1.4094 Ang, eps=0.3367 kcal/mol, q=+1)
+#
+# FEP protocol:
+#   lambda = 1 → Li+ fully coupled to solvent
+#   lambda = 0 → Li+ fully decoupled (ghost)
+#   Run 20 windows: lambda = 0.00, 0.05, ..., 0.95, 1.00
+#   Collect <dU/dlambda> via compute fep (finite-difference TI)
+# ─────────────────────────────────────────────────────────────────────────────
+
+units           real
+atom_style      charge
+boundary        p p p
+
+read_data       ${DATAFILE}
+
+# ── Force field: lj/cut/soft for all pairs ──────────────────────────────────
+# pair_style lj/cut/soft n alpha cutoff
+# n=2 (exponent), alpha=0.5 (LJ soft-core param), cutoff=15 Ang
+pair_style      lj/cut/soft 2 0.5 15.0
+pair_modify     mix arithmetic    # Lorentz-Berthelot: sig_ij=(sig_i+sig_j)/2
+
+# Solvent-solvent: always fully coupled (lambda=1)
+pair_coeff      1 1  0.500  5.0000  1.0   # EC_CG - EC_CG
+
+# Li+-solvent cross: lambda varies with window
+pair_coeff      1 2  0.410  3.2047  ${LAMBDA}  # EC_CG - Li+ (geom/arith mix)
+
+# Li+-Li+: irrelevant (single Li+), keep lambda=1
+pair_coeff      2 2  0.337  1.4094  1.0   # Li+ - Li+
+
+neighbor        3.0 bin
+neigh_modify    every 5 delay 0 check yes
+
+# ── Thermostat ──────────────────────────────────────────────────────────────
+fix             NVT all nvt temp ${TEMP} ${TEMP} 100.0
+
+# ── compute fep: finite-difference dU/dlambda ────────────────────────────────
+# Perturb lambda for Li+-solvent pair by +delta, measure ΔU
+variable        delta_lam equal 0.001
+compute         FEP all fep ${TEMP} pair lj/cut/soft lambda 1 2 v_delta_lam
+
+# Collect the FEP output: step, lambda, <U_fep1>, <U_fep2>
+variable        LAM equal ${LAMBDA}
+fix             FEP_OUT all ave/time 1 1 1 c_FEP[1] c_FEP[2] c_FEP[3] &
+                    file ${OUTFILE} title1 "# step U_ref U_perturbed dU"
+
+# ── Equilibration ────────────────────────────────────────────────────────────
+thermo_style    custom step temp epair etotal press
+thermo          500
+run             50000    # 100 ps equilibration (dt=2 fs assumed → set below)
+
+reset_timestep  0
+
+# ── Production: collect dU/dlambda ──────────────────────────────────────────
+fix             FEP_PROD all ave/time 1 1 10 c_FEP[1] c_FEP[2] c_FEP[3] &
+                    file ${OUTFILE} title1 "# step U_ref U_perturbed dU" &
+                    mode scalar
+
+run             500000   # 1 ns production (500k steps at 2fs)

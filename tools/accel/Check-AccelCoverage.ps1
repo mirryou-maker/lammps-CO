@@ -38,14 +38,25 @@ Optional path to also write the full report as JSON.
 param(
     [Parameter(Mandatory)] [string]$InputFile,
     [string]$BuildDir = "serial",
-    [string]$Json
+    [string]$Json,
+    # Path to the LAMMPS source tree (default: lammps-src/ beside repo root).
+    # Override if cloned under a different name: -LammpsDir C:\path\to\lammps
+    [string]$LammpsDir = ""
 )
 
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = $PSScriptRoot
 $RepoRoot  = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
-$SrcDir    = Join-Path $RepoRoot "lammps-src\src"
+
+if ($LammpsDir -eq "") { $LammpsDir = Join-Path $RepoRoot "lammps-src" }
+if (-not (Test-Path $LammpsDir)) {
+    Write-Error ("LAMMPS source directory not found: '$LammpsDir'`n" +
+        "Clone LAMMPS as 'lammps-src' beside this repo, or pass -LammpsDir <path>.`n" +
+        "  git clone https://github.com/lammps/lammps.git '$LammpsDir'")
+    exit 1
+}
+$SrcDir = Join-Path $LammpsDir "src"
 
 $Categories = @('Pair', 'Bond', 'Angle', 'Dihedral', 'Improper', 'KSpace', 'Fix', 'Compute')
 $AccelDirs  = @{ OPENMP = 'omp'; OPT = 'opt'; INTEL = 'intel'; GPU = 'gpu'; KOKKOS = 'kk' }

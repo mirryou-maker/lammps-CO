@@ -13,7 +13,12 @@ param(
     [string]$LogDir  = "tools\fep\logs"
 )
 
+Set-Location (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent)
 $lmp     = "build\omp-fep\Release\lmp.exe"
+if (-not (Test-Path $lmp)) {
+    Write-Error "LAMMPS binary not found: '$lmp'. Build first with: .\tools\bench\Build-Lammps.ps1 -BuildDir omp-fep -Packages OPENMP,KSPACE,MOLECULE,FEP"
+    exit 1
+}
 $infile  = "tools\fep\in.fep_lj"
 $lambdas = @(0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,
              0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00)

@@ -15,8 +15,8 @@
 git clone --depth=1 --branch=develop https://github.com/lammps/lammps.git
 
 # 2. Download this repo and apply the patch
-git clone https://github.com/mirryou-maker/lammps-llm-omp-optimization.git
-cd lammps-llm-omp-optimization
+git clone https://github.com/mirryou-maker/lammps-CO.git
+cd lammps-CO
 bash scripts/apply_patch.sh /path/to/lammps   # Linux/macOS
 # .\scripts\apply_patch.ps1 -LammpsRoot C:\path\to\lammps  # Windows
 

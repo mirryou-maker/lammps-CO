@@ -5,6 +5,7 @@ Figure 2: OpenMP acceleration coverage in LAMMPS before and after optimization.
 (c) Radar chart comparing OMP / INTEL / OPT / KOKKOS coverage
 """
 
+import pathlib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -38,8 +39,8 @@ after_pct   = [100 * a / t for a, t in zip(after,  total)]
 x = np.arange(len(categories))
 w = 0.35
 
-fig, axes = plt.subplots(1, 3, figsize=(18, 6))
-fig.subplots_adjust(wspace=0.42)
+fig, axes = plt.subplots(1, 3, figsize=(22, 8))
+fig.subplots_adjust(wspace=0.52)
 
 # ── (a) coverage per category ──────────────────────────────────────────────
 ax = axes[0]
@@ -50,7 +51,7 @@ for bar, pct in zip(bars_b, before_pct):
     ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1.5,
             f"{pct:.0f}%", ha="center", va="bottom", fontsize=11, color="#555")
 for bar, pct in zip(bars_a, after_pct):
-    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1.5,
+    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 5.5,
             f"{pct:.0f}%", ha="center", va="bottom", fontsize=11,
             color=C_AFTER, fontweight="bold")
 
@@ -110,14 +111,14 @@ ax.set_xticklabels(radar_cats, fontsize=12)
 ax.set_yticks([25, 50, 75, 100])
 ax.set_yticklabels(["25%", "50%", "75%", "100%"], fontsize=10, color="#777")
 ax.set_ylim(0, 100)
-ax.legend(loc="upper right", bbox_to_anchor=(1.42, 1.15), fontsize=11)
+ax.legend(loc="upper right", bbox_to_anchor=(1.55, 1.18), fontsize=11)
 ax.set_title("(c) Coverage across\nacceleration packages", fontsize=14, pad=18)
 
 plt.suptitle(
     "Figure 2 · OpenMP pair-style coverage before and after AI-assisted optimization",
     fontsize=15, y=1.03, fontweight="bold")
 
-out = "D:/Claude-Code-R/LAMMPS-CO/tools/plots/figure2_omp_coverage.pdf"
+out = str(pathlib.Path(__file__).parent / "figure2_omp_coverage.pdf")
 plt.savefig(out, bbox_inches="tight", dpi=300)
 plt.savefig(out.replace(".pdf", ".png"), bbox_inches="tight", dpi=300)
 print(f"Saved {out}")

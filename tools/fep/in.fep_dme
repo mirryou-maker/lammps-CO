@@ -1,0 +1,66 @@
+# in.fep_dme  — OPLS-AA FEP for DME system
+# Atom types: 1=Li  2=C_sp3  3=O_ete  4=H_c
+
+units           real
+atom_style      full
+boundary        p p p
+bond_style      harmonic
+angle_style     harmonic
+dihedral_style  opls
+
+pair_style      lj/cut/coul/long/soft 2 0.5 0.3 10.0
+kspace_style    pppm 1.0e-4
+special_bonds   lj/coul 0.0 0.0 0.5
+
+read_data       ${DATAFILE}
+
+pair_coeff  1 1  0.33670  1.4094  ${LAMBDA}   # Li-Li
+pair_coeff  1 2  0.14898  2.4547  ${LAMBDA}   # Li-C_sp3
+pair_coeff  1 3  0.23921  2.2047  ${LAMBDA}   # Li-O_ete
+pair_coeff  1 4  0.10049  1.9547  ${LAMBDA}   # Li-H_c
+pair_modify  mix arithmetic
+
+neighbor        3.0 bin
+neigh_modify    every 5 delay 0 check yes
+timestep        2.0
+
+minimize        1.0e-6 1.0e-8 10000 100000
+velocity        all create 100.0 12345 dist gaussian
+
+# Stage 1: gentle NVT with velocity limit (avoid atom explosion)
+fix             LIM all nve/limit 0.1
+fix             RES all temp/rescale 10 100.0 300.0 5.0 1.0
+thermo_style    custom step temp epair
+thermo          1000
+run             5000
+unfix           LIM
+unfix           RES
+
+# Stage 2: full NVT ramp 100→300 K
+fix             NVT2 all nvt temp 100.0 300.0 200.0
+run             10000
+unfix           NVT2
+
+# Stage 3: NVT at 300 K (no NPT to avoid box instability)
+fix             NVT3 all nvt temp 300.0 300.0 200.0
+thermo_style    custom step temp density epair
+thermo          2000
+run             35000
+unfix           NVT3
+
+variable        dlam  equal 0.01
+compute         FEP   all fep 300.0 pair lj/cut/coul/long/soft lambda 1 * v_dlam
+variable        dUdL  equal c_FEP[1]/v_dlam
+variable        LAMv  equal ${LAMBDA}
+
+fix             NVT all nvt temp 300.0 300.0 200.0
+thermo_style    custom step temp epair
+thermo          2000
+run             25000
+
+reset_timestep  0
+
+thermo_style    custom step v_LAMv v_dUdL c_FEP[2]
+thermo_modify   format float %18.10g
+thermo          200
+run             ${NSTEPS}

@@ -5,6 +5,7 @@ Figure 5: A-3 restrict/fxtmp optimization.
 (c) Overall serial speedup from A-3 on lj/cut (4k atoms)
 """
 
+import pathlib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -141,7 +142,7 @@ ax_glob.grid(axis="y", alpha=0.35, zorder=0)
 plt.suptitle("Figure 5 · A-3 restrict/_noalias + fxtmp accumulator optimization",
              fontsize=15, y=1.02, fontweight="bold")
 
-out = "D:/Claude-Code-R/LAMMPS-CO/tools/plots/figure5_a3_backport.pdf"
+out = str(pathlib.Path(__file__).parent / "figure5_a3_backport.pdf")
 plt.savefig(out, bbox_inches="tight", dpi=300)
 plt.savefig(out.replace(".pdf", ".png"), bbox_inches="tight", dpi=300)
 print(f"Saved {out}")

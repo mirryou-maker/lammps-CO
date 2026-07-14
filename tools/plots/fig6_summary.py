@@ -6,6 +6,7 @@ Figure 6: Combined optimization summary.
 (d) OMP coverage donut: before/after with 35-new highlight
 """
 
+import pathlib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -42,8 +43,8 @@ heat_data = np.array([
 ])
 heat_speedup = BASELINE / heat_data
 
-fig, axes = plt.subplots(2, 2, figsize=(16, 13))
-fig.subplots_adjust(hspace=0.50, wspace=0.46)
+fig, axes = plt.subplots(2, 2, figsize=(20, 16))
+fig.subplots_adjust(hspace=0.55, wspace=0.52)
 
 # ── (a) waterfall ──────────────────────────────────────────────────────────
 ax = axes[0, 0]
@@ -77,11 +78,12 @@ ax.grid(axis="y", alpha=0.30, zorder=0)
 # ── (b) tornado chart ──────────────────────────────────────────────────────
 ax = axes[0, 1]
 tornado_items = [
-    ("/arch:AVX2\n(32k atoms)",                        2.9,  "#1E88E5"),
-    ("A-3 serial patch\n(lj/cut, 4k atoms)",           4.2,  "#26C6DA"),
-    ("AVX2 + /fp:fast\n(32k atoms)",                   6.3,  "#0D47A1"),
-    ("A-4 lj/pirani eflag\n(864 atoms, thermo 1)",    23.4,  "#FF8A65"),
-    ("A-4 nm/cut pow\n(864–6,912 atoms)",             40.8,  "#E64A19"),
+    ("/arch:AVX2\n(32k atoms)",                         2.9,  "#1E88E5"),
+    ("A-3 serial patch\n(lj/cut, 4k atoms)",            4.2,  "#26C6DA"),
+    ("AVX2 + /fp:fast\n(32k atoms)",                    6.3,  "#0D47A1"),
+    ("A-4 mie/cut RESPA\n(864 atoms, thermo 1)",       19.9,  "#FF7043"),
+    ("A-4 lj/pirani eflag\n(864 atoms, thermo 1)",     23.4,  "#FF8A65"),
+    ("A-4 nm/cut pow\n(864–6,912 atoms)",              40.8,  "#E64A19"),
     ("OMP 4 threads\n(-sf omp, 32k atoms)", (BASELINE - 1.004) / BASELINE * 100, "#43A047"),
     ("OMP 8 threads\n(-sf omp, 32k atoms)", (BASELINE - 0.878) / BASELINE * 100, "#1B5E20"),
 ]
@@ -90,14 +92,14 @@ tvals   = [t[1] for t in tornado_items]
 tcolors = [t[2] for t in tornado_items]
 
 y = np.arange(len(tornado_items))
-hbars = ax.barh(y, tvals, color=tcolors, edgecolor="white", height=0.55, zorder=3)
+hbars = ax.barh(y, tvals, color=tcolors, edgecolor="white", height=0.62, zorder=3)
 for bar, val in zip(hbars, tvals):
     ax.text(val + 0.8, bar.get_y() + bar.get_height() / 2,
-            f"+{val:.1f}%", va="center", fontsize=11, fontweight="bold")
+            f"+{val:.1f}%", va="center", fontsize=11.5, fontweight="bold")
 ax.set_yticks(y)
-ax.set_yticklabels(tlabels, fontsize=10.5)
-ax.set_xlabel("Loop-time reduction vs. serial baseline (%)", fontsize=12.5)
-ax.set_xlim(0, 90)
+ax.set_yticklabels(tlabels, fontsize=11)
+ax.set_xlabel("Loop-time reduction vs. serial baseline (%)", fontsize=13)
+ax.set_xlim(0, 105)
 ax.axvline(0, lw=1.0, color="#444")
 ax.set_title("(b) Individual optimization contributions\n(% loop-time reduction)",
              fontsize=14, pad=10)
@@ -163,9 +165,9 @@ ax.legend(handles=patches, fontsize=11, loc="lower center",
 ax.set_title("(d) pair_style OMP coverage distribution\n(51.1% → 62.5%, +11.4 pp)",
              fontsize=14, pad=10)
 
-plt.suptitle("Figure 6 · Combined optimization summary", fontsize=15, y=1.02, fontweight="bold")
+plt.suptitle("Figure 5 · Combined optimization summary", fontsize=15, y=1.02, fontweight="bold")
 
-out = "D:/Claude-Code-R/LAMMPS-CO/tools/plots/figure6_summary.pdf"
+out = str(pathlib.Path(__file__).parent / "figure5_summary.pdf")
 plt.savefig(out, bbox_inches="tight", dpi=300)
 plt.savefig(out.replace(".pdf", ".png"), bbox_inches="tight", dpi=300)
 print(f"Saved {out}")

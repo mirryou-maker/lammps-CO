@@ -5,6 +5,7 @@ Figure 3: Compiler flag optimization results.
 (c) Pair time fraction stays constant → flags don't hurt non-pair sections
 """
 
+import pathlib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -30,8 +31,8 @@ pct_impr  = (loop_mean[0] - loop_mean) / loop_mean[0] * 100
 
 colors = ["#90A4AE", "#1565C0", "#1E88E5", "#E53935", "#0D47A1"]
 
-fig, axes = plt.subplots(1, 3, figsize=(17, 5.5))
-fig.subplots_adjust(wspace=0.44)
+fig, axes = plt.subplots(1, 3, figsize=(20, 8))
+fig.subplots_adjust(wspace=0.48)
 
 x = np.arange(len(configs))
 
@@ -97,7 +98,7 @@ plt.suptitle(
     "Figure 3 · Compiler flag optimization on 32,000-atom FCC Lennard-Jones benchmark (N=5 runs)",
     fontsize=15, y=1.02, fontweight="bold")
 
-out = "D:/Claude-Code-R/LAMMPS-CO/tools/plots/figure3_build_flags.pdf"
+out = str(pathlib.Path(__file__).parent / "figure3_build_flags.pdf")
 plt.savefig(out, bbox_inches="tight", dpi=300)
 plt.savefig(out.replace(".pdf", ".png"), bbox_inches="tight", dpi=300)
 print(f"Saved {out}")

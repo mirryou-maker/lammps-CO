@@ -29,13 +29,28 @@ param(
     [int]$Jobs = 0,
     [string]$ExtraFlags = "",
     [switch]$Ipo,
-    [switch]$Reconfigure
+    [switch]$Reconfigure,
+    # Path to the LAMMPS source tree (default: lammps-src/ next to repo root).
+    # Override if you cloned LAMMPS under a different name:
+    #   .\Build-Lammps.ps1 -LammpsDir C:\path\to\lammps
+    [string]$LammpsDir = ""
 )
 
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-$SourceDir = Join-Path $RepoRoot "lammps-src\cmake"
+
+# Resolve LAMMPS source directory
+if ($LammpsDir -eq "") {
+    $LammpsDir = Join-Path $RepoRoot "lammps-src"
+}
+if (-not (Test-Path $LammpsDir)) {
+    Write-Error ("LAMMPS source directory not found: '$LammpsDir'`n" +
+        "Clone LAMMPS as 'lammps-src' beside this repo, or pass -LammpsDir <path>.`n" +
+        "  git clone https://github.com/lammps/lammps.git '$LammpsDir'")
+    exit 1
+}
+$SourceDir = Join-Path $LammpsDir "cmake"
 $BuildPath = Join-Path $RepoRoot "build\$BuildDir"
 
 if ($Jobs -le 0) { $Jobs = [Environment]::ProcessorCount }

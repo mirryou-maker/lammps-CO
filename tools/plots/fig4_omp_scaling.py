@@ -6,6 +6,7 @@ Figure 4: OpenMP threading performance.
 (d) Small-system (864 atoms) speedup for 3 newly parallelized styles
 """
 
+import pathlib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -55,8 +56,8 @@ speedup_new = serial_time / omp4_time
 C_SERIAL = "#B0BEC5"; C_1T = "#90A4AE"; C_4T = "#1565C0"; C_8T = "#0D47A1"
 bar_colors = [C_SERIAL, C_1T, C_4T, C_8T]
 
-fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-fig.subplots_adjust(hspace=0.46, wspace=0.42)
+fig, axes = plt.subplots(2, 2, figsize=(20, 15))
+fig.subplots_adjust(hspace=0.50, wspace=0.46)
 
 # ── (a) loop time ──────────────────────────────────────────────────────────
 ax = axes[0, 0]
@@ -141,7 +142,7 @@ ax.grid(axis="y", alpha=0.35, zorder=0)
 
 plt.suptitle("Figure 4 · OpenMP performance benchmarks", fontsize=15, y=1.02, fontweight="bold")
 
-out = "D:/Claude-Code-R/LAMMPS-CO/tools/plots/figure4_omp_scaling.pdf"
+out = str(pathlib.Path(__file__).parent / "figure4_omp_scaling.pdf")
 plt.savefig(out, bbox_inches="tight", dpi=300)
 plt.savefig(out.replace(".pdf", ".png"), bbox_inches="tight", dpi=300)
 print(f"Saved {out}")
