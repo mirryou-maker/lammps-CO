@@ -1387,8 +1387,10 @@ path reachable. Replacing the exact comparison with a prefix match
 resolves it; the same exact-match idiom appears in \texttt{compute\_fep}
 and \texttt{fix\_adapt\_fep} and may warrant the same treatment. This
 fix is independent of the optimization work reported here and is offered
-upstream separately. 3. \textbf{Bit-identical thermo comparison}: 50 NVE
-steps with \texttt{thermo\_modify\ format\ float\ \%20.15g}; all
+upstream separately; the patch, its reproducer, and the regression run
+that accompanies it are distributed with the software in
+\texttt{upstream-pr/}. 3. \textbf{Bit-identical thermo comparison}: 50
+NVE steps with \texttt{thermo\_modify\ format\ float\ \%20.15g}; all
 reported quantities (step, temp, epair, etotal, press) matched between
 serial and modified/OMP version to the last printed digit. 3.
 \textbf{Energy conservation}: 250 NVE steps measured for two
@@ -2008,14 +2010,33 @@ optimization patterns exist but have not yet been applied
 uniformly---and suggest a productive role for LLM coding agents as
 ``coverage gap closers'' in high-impact community codes.
 
-Future work will target INTEL/OPT package extensions, KOKKOS ports for
-the 36 new styles, and MPI communication buffer optimization, with the
-goal of contributing all changes to the LAMMPS develop branch. The
-computational efficiency gains demonstrated here will also enable
-prospective high-throughput screening of novel electrolyte solvent
-combinations for next-generation Na-ion and Mg-ion batteries, where
-desolvation energetics are even more critical than in Li-ion systems
-{[}35,36{]}.
+The three contributions differ in how readily they can go upstream, and
+it is worth separating them. The \texttt{hybrid/overlay} suffix fix is a
+defect in current LAMMPS with a one-line correction that brings three
+call sites in line with the idiom \texttt{Force::pair\_match()} already
+uses; it is offered upstream on its own. The 36 new OpenMP variants
+belong in the OPENMP package by construction --- extending accelerator
+coverage is what that package is for --- and are prepared for submission
+with the accompanying documentation entries. The kernel rewrite is a
+different proposition. LAMMPS deliberately keeps its baseline pair
+styles plain and confines aliasing-qualified, accumulator-based code to
+the accelerator packages: of the files in current LAMMPS that use
+\texttt{\_noalias}, 203 are in OPENMP, 36 in INTEL, and five in OPT,
+while none are baseline \texttt{src/} styles. Applying that pattern to
+225 baseline files is therefore not a patch but a proposal about where
+optimized code should live, and it trades some of the readability those
+files are maintained for. Whether that trade is worth making across the
+whole set is a question for the maintainers rather than for us; we
+intend to open it with a small pilot rather than a sweep, and report the
+outcome.
+
+Beyond that, future work will target INTEL/OPT package extensions,
+KOKKOS ports for the 36 new styles, and MPI communication buffer
+optimization. The computational efficiency gains demonstrated here will
+also enable prospective high-throughput screening of novel electrolyte
+solvent combinations for next-generation Na-ion and Mg-ion batteries,
+where desolvation energetics are even more critical than in Li-ion
+systems {[}35,36{]}.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
