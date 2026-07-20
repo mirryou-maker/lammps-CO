@@ -11,17 +11,12 @@
    See the README file in the top-level LAMMPS directory.
 ------------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------
-   Contributing author: Eduardo Bringa (LLNL)
-------------------------------------------------------------------------- */
-
-#include "pair_buck_coul_cut.h"
+#include "pair_lj_class2_coul_cut.h"
 
 #include "atom.h"
 #include "comm.h"
 #include "error.h"
 #include "force.h"
-#include "info.h"
 #include "math_const.h"
 #include "memory.h"
 #include "neigh_list.h"
@@ -30,20 +25,25 @@
 #include <cmath>
 #include <cstring>
 
+namespace {
+using dbl3_t = struct { double x, y, z; };
+}    // namespace
+
 using namespace LAMMPS_NS;
 using namespace MathConst;
 
 /* ---------------------------------------------------------------------- */
 
-PairBuckCoulCut::PairBuckCoulCut(LAMMPS *lmp) : Pair(lmp)
+PairLJClass2CoulCut::PairLJClass2CoulCut(LAMMPS *lmp) : Pair(lmp)
 {
   born_matrix_enable = 1;
   writedata = 1;
+  centroidstressflag = CENTROID_SAME;
 }
 
 /* ---------------------------------------------------------------------- */
 
-PairBuckCoulCut::~PairBuckCoulCut()
+PairLJClass2CoulCut::~PairLJClass2CoulCut()
 {
   if (copymode) return;
 
@@ -55,54 +55,65 @@ PairBuckCoulCut::~PairBuckCoulCut()
     memory->destroy(cut_ljsq);
     memory->destroy(cut_coul);
     memory->destroy(cut_coulsq);
-    memory->destroy(a);
-    memory->destroy(rho);
-    memory->destroy(c);
-    memory->destroy(rhoinv);
-    memory->destroy(buck1);
-    memory->destroy(buck2);
+    memory->destroy(epsilon);
+    memory->destroy(sigma);
+    memory->destroy(lj1);
+    memory->destroy(lj2);
+    memory->destroy(lj3);
+    memory->destroy(lj4);
     memory->destroy(offset);
   }
 }
 
 /* ---------------------------------------------------------------------- */
 
-void PairBuckCoulCut::compute(int eflag, int vflag)
+void PairLJClass2CoulCut::compute(int eflag, int vflag)
 {
-  int i, j, ii, jj, inum, jnum, itype, jtype;
+  int i, j, ii, jj, jnum, itype, jtype;
   double qtmp, xtmp, ytmp, ztmp, delx, dely, delz, evdwl, ecoul, fpair;
-  double rsq, r2inv, r6inv, r, rexp, forcecoul, forcebuck, factor_coul, factor_lj;
-  int *ilist, *jlist, *numneigh, **firstneigh;
+  double rsq, rinv, r2inv, r3inv, r6inv, forcecoul, forcelj;
+  double factor_coul, factor_lj;
+  double fxtmp, fytmp, fztmp;
 
   evdwl = ecoul = 0.0;
   ev_init(eflag, vflag);
 
-  double **x = atom->x;
-  double **f = atom->f;
-  double *q = atom->q;
-  int *type = atom->type;
+  auto * _noalias const x = (dbl3_t *) atom->x[0];
+  auto * _noalias const f = (dbl3_t *) atom->f[0];
+  const double * _noalias const q = atom->q;
+  const int * _noalias const type = atom->type;
   int nlocal = atom->nlocal;
   double *special_coul = force->special_coul;
   double *special_lj = force->special_lj;
   int newton_pair = force->newton_pair;
   double qqrd2e = force->qqrd2e;
 
-  inum = list->inum;
-  ilist = list->ilist;
-  numneigh = list->numneigh;
-  firstneigh = list->firstneigh;
+  const int inum = list->inum;
+  const int * _noalias const ilist = list->ilist;
+  const int * _noalias const numneigh = list->numneigh;
+  const int * const * const firstneigh = list->firstneigh;
 
   // loop over neighbors of my atoms
 
   for (ii = 0; ii < inum; ii++) {
     i = ilist[ii];
     qtmp = q[i];
-    xtmp = x[i][0];
-    ytmp = x[i][1];
-    ztmp = x[i][2];
+    xtmp = x[i].x;
+    ytmp = x[i].y;
+    ztmp = x[i].z;
     itype = type[i];
-    jlist = firstneigh[i];
+    const int * _noalias const jlist = firstneigh[i];
     jnum = numneigh[i];
+    fxtmp = fytmp = fztmp = 0.0;
+
+    const double * _noalias const cutsqi      = cutsq[itype];
+    const double * _noalias const cut_coulsqi = cut_coulsq[itype];
+    const double * _noalias const cut_ljsqi   = cut_ljsq[itype];
+    const double * _noalias const lj1i        = lj1[itype];
+    const double * _noalias const lj2i        = lj2[itype];
+    const double * _noalias const lj3i        = lj3[itype];
+    const double * _noalias const lj4i        = lj4[itype];
+    const double * _noalias const offseti     = offset[itype];
 
     for (jj = 0; jj < jnum; jj++) {
       j = jlist[jj];
@@ -110,46 +121,46 @@ void PairBuckCoulCut::compute(int eflag, int vflag)
       factor_coul = special_coul[sbmask(j)];
       j &= NEIGHMASK;
 
-      delx = xtmp - x[j][0];
-      dely = ytmp - x[j][1];
-      delz = ztmp - x[j][2];
+      delx = xtmp - x[j].x;
+      dely = ytmp - x[j].y;
+      delz = ztmp - x[j].z;
       rsq = delx * delx + dely * dely + delz * delz;
       jtype = type[j];
 
-      if (rsq < cutsq[itype][jtype]) {
+      if (rsq < cutsqi[jtype]) {
         r2inv = 1.0 / rsq;
-        r = sqrt(rsq);
 
-        if (rsq < cut_coulsq[itype][jtype])
-          forcecoul = qqrd2e * qtmp * q[j] / r;
+        if (rsq < cut_coulsqi[jtype])
+          forcecoul = qqrd2e * qtmp * q[j] * sqrt(r2inv);
         else
           forcecoul = 0.0;
 
-        if (rsq < cut_ljsq[itype][jtype]) {
-          r6inv = r2inv * r2inv * r2inv;
-          rexp = exp(-r * rhoinv[itype][jtype]);
-          forcebuck = buck1[itype][jtype] * r * rexp - buck2[itype][jtype] * r6inv;
+        if (rsq < cut_ljsqi[jtype]) {
+          rinv = sqrt(r2inv);
+          r3inv = r2inv * rinv;
+          r6inv = r3inv * r3inv;
+          forcelj = r6inv * (lj1i[jtype] * r3inv - lj2i[jtype]);
         } else
-          forcebuck = 0.0;
+          forcelj = 0.0;
 
-        fpair = (factor_coul * forcecoul + factor_lj * forcebuck) * r2inv;
+        fpair = (factor_coul * forcecoul + factor_lj * forcelj) * r2inv;
 
-        f[i][0] += delx * fpair;
-        f[i][1] += dely * fpair;
-        f[i][2] += delz * fpair;
+        fxtmp += delx * fpair;
+        fytmp += dely * fpair;
+        fztmp += delz * fpair;
         if (newton_pair || j < nlocal) {
-          f[j][0] -= delx * fpair;
-          f[j][1] -= dely * fpair;
-          f[j][2] -= delz * fpair;
+          f[j].x -= delx * fpair;
+          f[j].y -= dely * fpair;
+          f[j].z -= delz * fpair;
         }
 
         if (eflag) {
-          if (rsq < cut_coulsq[itype][jtype])
-            ecoul = factor_coul * qqrd2e * qtmp * q[j] / r;
+          if (rsq < cut_coulsqi[jtype])
+            ecoul = factor_coul * qqrd2e * qtmp * q[j] * sqrt(r2inv);
           else
             ecoul = 0.0;
-          if (rsq < cut_ljsq[itype][jtype]) {
-            evdwl = a[itype][jtype] * rexp - c[itype][jtype] * r6inv - offset[itype][jtype];
+          if (rsq < cut_ljsqi[jtype]) {
+            evdwl = r6inv * (lj3i[jtype] * r3inv - lj4i[jtype]) - offseti[jtype];
             evdwl *= factor_lj;
           } else
             evdwl = 0.0;
@@ -158,6 +169,9 @@ void PairBuckCoulCut::compute(int eflag, int vflag)
         if (evflag) ev_tally(i, j, nlocal, newton_pair, evdwl, ecoul, fpair, delx, dely, delz);
       }
     }
+    f[i].x += fxtmp;
+    f[i].y += fytmp;
+    f[i].z += fztmp;
   }
 
   if (vflag_fdotr) virial_fdotr_compute();
@@ -167,13 +181,12 @@ void PairBuckCoulCut::compute(int eflag, int vflag)
    allocate all arrays
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::allocate()
+void PairLJClass2CoulCut::allocate()
 {
   allocated = 1;
-  int np1 = atom->ntypes + 1;
+  const int np1 = atom->ntypes + 1;
 
   memory->create(setflag, np1, np1, "pair:setflag");
-
   for (int i = 1; i < np1; i++)
     for (int j = i; j < np1; j++) setflag[i][j] = 0;
 
@@ -183,12 +196,12 @@ void PairBuckCoulCut::allocate()
   memory->create(cut_ljsq, np1, np1, "pair:cut_ljsq");
   memory->create(cut_coul, np1, np1, "pair:cut_coul");
   memory->create(cut_coulsq, np1, np1, "pair:cut_coulsq");
-  memory->create(a, np1, np1, "pair:a");
-  memory->create(rho, np1, np1, "pair:rho");
-  memory->create(c, np1, np1, "pair:c");
-  memory->create(rhoinv, np1, np1, "pair:rhoinv");
-  memory->create(buck1, np1, np1, "pair:buck1");
-  memory->create(buck2, np1, np1, "pair:buck2");
+  memory->create(epsilon, np1, np1, "pair:epsilon");
+  memory->create(sigma, np1, np1, "pair:sigma");
+  memory->create(lj1, np1, np1, "pair:lj1");
+  memory->create(lj2, np1, np1, "pair:lj2");
+  memory->create(lj3, np1, np1, "pair:lj3");
+  memory->create(lj4, np1, np1, "pair:lj4");
   memory->create(offset, np1, np1, "pair:offset");
 }
 
@@ -196,7 +209,7 @@ void PairBuckCoulCut::allocate()
    global settings
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::settings(int narg, char **arg)
+void PairLJClass2CoulCut::settings(int narg, char **arg)
 {
   if (narg < 1 || narg > 2) error->all(FLERR, "Illegal pair_style command");
 
@@ -223,31 +236,29 @@ void PairBuckCoulCut::settings(int narg, char **arg)
    set coeffs for one or more type pairs
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::coeff(int narg, char **arg)
+void PairLJClass2CoulCut::coeff(int narg, char **arg)
 {
-  if (narg < 5 || narg > 7) error->all(FLERR, "Incorrect args for pair coefficients" + utils::errorurl(21));
+  if (narg < 4 || narg > 6) error->all(FLERR, "Incorrect args for pair coefficients" + utils::errorurl(21));
+
   if (!allocated) allocate();
 
   int ilo, ihi, jlo, jhi;
   utils::bounds(FLERR, arg[0], 1, atom->ntypes, ilo, ihi, error);
   utils::bounds(FLERR, arg[1], 1, atom->ntypes, jlo, jhi, error);
 
-  double a_one = utils::numeric(FLERR, arg[2], false, lmp);
-  double rho_one = utils::numeric(FLERR, arg[3], false, lmp);
-  if (rho_one <= 0) error->all(FLERR, "Incorrect args for pair coefficients" + utils::errorurl(21));
-  double c_one = utils::numeric(FLERR, arg[4], false, lmp);
+  double epsilon_one = utils::numeric(FLERR, arg[2], false, lmp);
+  double sigma_one = utils::numeric(FLERR, arg[3], false, lmp);
 
   double cut_lj_one = cut_lj_global;
   double cut_coul_one = cut_coul_global;
-  if (narg >= 6) cut_coul_one = cut_lj_one = utils::numeric(FLERR, arg[5], false, lmp);
-  if (narg == 7) cut_coul_one = utils::numeric(FLERR, arg[6], false, lmp);
+  if (narg >= 5) cut_coul_one = cut_lj_one = utils::numeric(FLERR, arg[4], false, lmp);
+  if (narg == 6) cut_coul_one = utils::numeric(FLERR, arg[5], false, lmp);
 
   int count = 0;
   for (int i = ilo; i <= ihi; i++) {
     for (int j = MAX(jlo, i); j <= jhi; j++) {
-      a[i][j] = a_one;
-      rho[i][j] = rho_one;
-      c[i][j] = c_one;
+      epsilon[i][j] = epsilon_one;
+      sigma[i][j] = sigma_one;
       cut_lj[i][j] = cut_lj_one;
       cut_coul[i][j] = cut_coul_one;
       setflag[i][j] = 1;
@@ -262,9 +273,9 @@ void PairBuckCoulCut::coeff(int narg, char **arg)
    init specific to this pair style
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::init_style()
+void PairLJClass2CoulCut::init_style()
 {
-  if (!atom->q_flag) error->all(FLERR, "Pair style buck/coul/cut requires atom attribute q");
+  if (!atom->q_flag) error->all(FLERR, "Pair style lj/class2/coul/cut requires atom attribute q");
 
   neighbor->add_request(this);
 }
@@ -273,33 +284,41 @@ void PairBuckCoulCut::init_style()
    init for one type pair i,j and corresponding j,i
 ------------------------------------------------------------------------- */
 
-double PairBuckCoulCut::init_one(int i, int j)
+double PairLJClass2CoulCut::init_one(int i, int j)
 {
-  if (setflag[i][j] == 0)
-    error->all(FLERR, Error::NOLASTLINE,
-               "All pair coeffs are not set. Status:\n" + Info::get_pair_coeff_status(lmp));
+  // always mix epsilon,sigma via sixthpower rules
+  // mix distance via user-defined rule
+
+  if (setflag[i][j] == 0) {
+    epsilon[i][j] = 2.0 * sqrt(epsilon[i][i] * epsilon[j][j]) * pow(sigma[i][i], 3.0) *
+        pow(sigma[j][j], 3.0) / (pow(sigma[i][i], 6.0) + pow(sigma[j][j], 6.0));
+    sigma[i][j] = pow((0.5 * (pow(sigma[i][i], 6.0) + pow(sigma[j][j], 6.0))), 1.0 / 6.0);
+    cut_lj[i][j] = mix_distance(cut_lj[i][i], cut_lj[j][j]);
+    cut_coul[i][j] = mix_distance(cut_coul[i][i], cut_coul[j][j]);
+    did_mix = true;
+  }
 
   double cut = MAX(cut_lj[i][j], cut_coul[i][j]);
   cut_ljsq[i][j] = cut_lj[i][j] * cut_lj[i][j];
   cut_coulsq[i][j] = cut_coul[i][j] * cut_coul[i][j];
 
-  rhoinv[i][j] = 1.0 / rho[i][j];
-  buck1[i][j] = a[i][j] / rho[i][j];
-  buck2[i][j] = 6.0 * c[i][j];
+  lj1[i][j] = 18.0 * epsilon[i][j] * pow(sigma[i][j], 9.0);
+  lj2[i][j] = 18.0 * epsilon[i][j] * pow(sigma[i][j], 6.0);
+  lj3[i][j] = 2.0 * epsilon[i][j] * pow(sigma[i][j], 9.0);
+  lj4[i][j] = 3.0 * epsilon[i][j] * pow(sigma[i][j], 6.0);
 
   if (offset_flag && (cut_lj[i][j] > 0.0)) {
-    double rexp = exp(-cut_lj[i][j] / rho[i][j]);
-    offset[i][j] = a[i][j] * rexp - c[i][j] / pow(cut_lj[i][j], 6.0);
+    double ratio = sigma[i][j] / cut_lj[i][j];
+    offset[i][j] = epsilon[i][j] * (2.0 * pow(ratio, 9.0) - 3.0 * pow(ratio, 6.0));
   } else
     offset[i][j] = 0.0;
 
   cut_ljsq[j][i] = cut_ljsq[i][j];
   cut_coulsq[j][i] = cut_coulsq[i][j];
-  a[j][i] = a[i][j];
-  c[j][i] = c[i][j];
-  rhoinv[j][i] = rhoinv[i][j];
-  buck1[j][i] = buck1[i][j];
-  buck2[j][i] = buck2[i][j];
+  lj1[j][i] = lj1[i][j];
+  lj2[j][i] = lj2[i][j];
+  lj3[j][i] = lj3[i][j];
+  lj4[j][i] = lj4[i][j];
   offset[j][i] = offset[i][j];
 
   // compute I,J contribution to long-range tail correction
@@ -317,28 +336,23 @@ double PairBuckCoulCut::init_one(int i, int j)
     }
     MPI_Allreduce(count, all, 2, MPI_DOUBLE, MPI_SUM, world);
 
-    double rho1 = rho[i][j];
-    double rho2 = rho1 * rho1;
-    double rho3 = rho2 * rho1;
-    double rc = cut_lj[i][j];
-    double rc2 = rc * rc;
-    double rc3 = rc2 * rc;
-    etail_ij = 2.0 * MY_PI * all[0] * all[1] *
-        (a[i][j] * exp(-rc / rho1) * rho1 * (rc2 + 2.0 * rho1 * rc + 2.0 * rho2) -
-         c[i][j] / (3.0 * rc3));
-    ptail_ij = (-1 / 3.0) * 2.0 * MY_PI * all[0] * all[1] *
-        (-a[i][j] * exp(-rc / rho1) * (rc3 + 3.0 * rho1 * rc2 + 6.0 * rho2 * rc + 6.0 * rho3) +
-         2.0 * c[i][j] / rc3);
+    double sig3 = sigma[i][j] * sigma[i][j] * sigma[i][j];
+    double sig6 = sig3 * sig3;
+    double rc3 = cut_lj[i][j] * cut_lj[i][j] * cut_lj[i][j];
+    double rc6 = rc3 * rc3;
+    etail_ij =
+        2.0 * MY_PI * all[0] * all[1] * epsilon[i][j] * sig6 * (sig3 - 3.0 * rc3) / (3.0 * rc6);
+    ptail_ij = 2.0 * MY_PI * all[0] * all[1] * epsilon[i][j] * sig6 * (sig3 - 2.0 * rc3) / rc6;
   }
 
   return cut;
 }
 
 /* ----------------------------------------------------------------------
-  proc 0 writes to restart file
+   proc 0 writes to restart file
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::write_restart(FILE *fp)
+void PairLJClass2CoulCut::write_restart(FILE *fp)
 {
   write_restart_settings(fp);
 
@@ -347,9 +361,8 @@ void PairBuckCoulCut::write_restart(FILE *fp)
     for (j = i; j <= atom->ntypes; j++) {
       fwrite(&setflag[i][j], sizeof(int), 1, fp);
       if (setflag[i][j]) {
-        fwrite(&a[i][j], sizeof(double), 1, fp);
-        fwrite(&rho[i][j], sizeof(double), 1, fp);
-        fwrite(&c[i][j], sizeof(double), 1, fp);
+        fwrite(&epsilon[i][j], sizeof(double), 1, fp);
+        fwrite(&sigma[i][j], sizeof(double), 1, fp);
         fwrite(&cut_lj[i][j], sizeof(double), 1, fp);
         fwrite(&cut_coul[i][j], sizeof(double), 1, fp);
       }
@@ -357,13 +370,12 @@ void PairBuckCoulCut::write_restart(FILE *fp)
 }
 
 /* ----------------------------------------------------------------------
-  proc 0 reads from restart file, bcasts
+   proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::read_restart(FILE *fp)
+void PairLJClass2CoulCut::read_restart(FILE *fp)
 {
   read_restart_settings(fp);
-
   allocate();
 
   int i, j;
@@ -374,15 +386,13 @@ void PairBuckCoulCut::read_restart(FILE *fp)
       MPI_Bcast(&setflag[i][j], 1, MPI_INT, 0, world);
       if (setflag[i][j]) {
         if (me == 0) {
-          utils::sfread(FLERR, &a[i][j], sizeof(double), 1, fp, nullptr, error);
-          utils::sfread(FLERR, &rho[i][j], sizeof(double), 1, fp, nullptr, error);
-          utils::sfread(FLERR, &c[i][j], sizeof(double), 1, fp, nullptr, error);
+          utils::sfread(FLERR, &epsilon[i][j], sizeof(double), 1, fp, nullptr, error);
+          utils::sfread(FLERR, &sigma[i][j], sizeof(double), 1, fp, nullptr, error);
           utils::sfread(FLERR, &cut_lj[i][j], sizeof(double), 1, fp, nullptr, error);
           utils::sfread(FLERR, &cut_coul[i][j], sizeof(double), 1, fp, nullptr, error);
         }
-        MPI_Bcast(&a[i][j], 1, MPI_DOUBLE, 0, world);
-        MPI_Bcast(&rho[i][j], 1, MPI_DOUBLE, 0, world);
-        MPI_Bcast(&c[i][j], 1, MPI_DOUBLE, 0, world);
+        MPI_Bcast(&epsilon[i][j], 1, MPI_DOUBLE, 0, world);
+        MPI_Bcast(&sigma[i][j], 1, MPI_DOUBLE, 0, world);
         MPI_Bcast(&cut_lj[i][j], 1, MPI_DOUBLE, 0, world);
         MPI_Bcast(&cut_coul[i][j], 1, MPI_DOUBLE, 0, world);
       }
@@ -390,10 +400,10 @@ void PairBuckCoulCut::read_restart(FILE *fp)
 }
 
 /* ----------------------------------------------------------------------
-  proc 0 writes to restart file
+   proc 0 writes to restart file
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::write_restart_settings(FILE *fp)
+void PairLJClass2CoulCut::write_restart_settings(FILE *fp)
 {
   fwrite(&cut_lj_global, sizeof(double), 1, fp);
   fwrite(&cut_coul_global, sizeof(double), 1, fp);
@@ -403,10 +413,10 @@ void PairBuckCoulCut::write_restart_settings(FILE *fp)
 }
 
 /* ----------------------------------------------------------------------
-  proc 0 reads from restart file, bcasts
+   proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::read_restart_settings(FILE *fp)
+void PairLJClass2CoulCut::read_restart_settings(FILE *fp)
 {
   if (comm->me == 0) {
     utils::sfread(FLERR, &cut_lj_global, sizeof(double), 1, fp, nullptr, error);
@@ -426,30 +436,28 @@ void PairBuckCoulCut::read_restart_settings(FILE *fp)
    proc 0 writes to data file
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::write_data(FILE *fp)
+void PairLJClass2CoulCut::write_data(FILE *fp)
 {
-  for (int i = 1; i <= atom->ntypes; i++)
-    fprintf(fp, "%d %g %g %g\n", i, a[i][i], rho[i][i], c[i][i]);
+  for (int i = 1; i <= atom->ntypes; i++) fprintf(fp, "%d %g %g\n", i, epsilon[i][i], sigma[i][i]);
 }
 
 /* ----------------------------------------------------------------------
    proc 0 writes all pairs to data file
 ------------------------------------------------------------------------- */
 
-void PairBuckCoulCut::write_data_all(FILE *fp)
+void PairLJClass2CoulCut::write_data_all(FILE *fp)
 {
   for (int i = 1; i <= atom->ntypes; i++)
     for (int j = i; j <= atom->ntypes; j++)
-      fprintf(fp, "%d %d %g %g %g %g %g\n", i, j, a[i][j], rho[i][j], c[i][j], cut_lj[i][j],
-              cut_coul[i][j]);
+      fprintf(fp, "%d %d %g %g %g\n", i, j, epsilon[i][j], sigma[i][j], cut_lj[i][j]);
 }
 
 /* ---------------------------------------------------------------------- */
 
-double PairBuckCoulCut::single(int i, int j, int itype, int jtype, double rsq, double factor_coul,
-                               double factor_lj, double &fforce)
+double PairLJClass2CoulCut::single(int i, int j, int itype, int jtype, double rsq,
+                                   double factor_coul, double factor_lj, double &fforce)
 {
-  double r2inv, r6inv, r, rexp, forcecoul, forcebuck, phicoul, phibuck;
+  double r2inv, rinv, r3inv, r6inv, forcecoul, forcelj, phicoul, philj;
 
   r2inv = 1.0 / rsq;
   if (rsq < cut_coulsq[itype][jtype])
@@ -457,13 +465,13 @@ double PairBuckCoulCut::single(int i, int j, int itype, int jtype, double rsq, d
   else
     forcecoul = 0.0;
   if (rsq < cut_ljsq[itype][jtype]) {
-    r6inv = r2inv * r2inv * r2inv;
-    r = sqrt(rsq);
-    rexp = exp(-r * rhoinv[itype][jtype]);
-    forcebuck = buck1[itype][jtype] * r * rexp - buck2[itype][jtype] * r6inv;
+    rinv = sqrt(r2inv);
+    r3inv = r2inv * rinv;
+    r6inv = r3inv * r3inv;
+    forcelj = r6inv * (lj1[itype][jtype] * r3inv - lj2[itype][jtype]);
   } else
-    forcebuck = 0.0;
-  fforce = (factor_coul * forcecoul + factor_lj * forcebuck) * r2inv;
+    forcelj = 0.0;
+  fforce = (factor_coul * forcecoul + factor_lj * forcelj) * r2inv;
 
   double eng = 0.0;
   if (rsq < cut_coulsq[itype][jtype]) {
@@ -471,42 +479,37 @@ double PairBuckCoulCut::single(int i, int j, int itype, int jtype, double rsq, d
     eng += factor_coul * phicoul;
   }
   if (rsq < cut_ljsq[itype][jtype]) {
-    phibuck = a[itype][jtype] * rexp - c[itype][jtype] * r6inv - offset[itype][jtype];
-    eng += factor_lj * phibuck;
+    philj = r6inv * (lj3[itype][jtype] * r3inv - lj4[itype][jtype]) - offset[itype][jtype];
+    eng += factor_lj * philj;
   }
+
   return eng;
 }
 
 /* ---------------------------------------------------------------------- */
 
-void PairBuckCoulCut::born_matrix(int i, int j, int itype, int jtype, double rsq,
-                                  double factor_coul, double factor_lj, double &dupair,
-                                  double &du2pair)
+void PairLJClass2CoulCut::born_matrix(int i, int j, int itype, int jtype, double rsq,
+                            double factor_coul, double factor_lj, double &dupair,
+                            double &du2pair)
 {
-  double rinv, r2inv, r3inv, r6inv, r7inv, r8inv, r, rexp;
+  double rinv, r2inv, r3inv, r7inv, r8inv;
   double du_lj, du2_lj, du_coul, du2_coul;
 
   double *q = atom->q;
   double qqrd2e = force->qqrd2e;
 
-  r = sqrt(rsq);
-  rexp = exp(-r * rhoinv[itype][jtype]);
-
   r2inv = 1.0 / rsq;
   rinv = sqrt(r2inv);
   r3inv = r2inv * rinv;
-  r6inv = r2inv * r2inv * r2inv;
-  r7inv = r6inv * rinv;
-  r8inv = r6inv * r2inv;
+  r7inv = r3inv * r3inv * rinv;
+  r8inv = r7inv * rinv;
 
-  // Reminder: buck1[itype][jtype] = a[itype][jtype]/rho[itype][jtype];
-  // Reminder: buck2[itype][jtype] = 6.0*c[itype][jtype];
-
-  du_lj = buck2[itype][jtype] * r7inv - buck1[itype][jtype] * rexp;
-  du2_lj = (buck1[itype][jtype] / rho[itype][jtype]) * rexp - 7 * buck2[itype][jtype] * r8inv;
+  // Reminder: lj1[i][j] = 18.0 * epsilon[i][j] * pow(sigma[i][j], 9.0);
+  // Reminder: lj2[i][j] = 18.0 * epsilon[i][j] * pow(sigma[i][j], 6.0);
+  du_lj = r7inv * (lj2[itype][jtype] - lj1[itype][jtype] * r3inv);
+  du2_lj = r8inv * (10 * lj1[itype][jtype] * r3inv - 7 * lj2[itype][jtype]);
 
   // Reminder: qqrd2e converts  q^2/r to energy w/ dielectric constant
-
   du_coul = -qqrd2e * q[i] * q[j] * r2inv;
   du2_coul = 2.0 * qqrd2e * q[i] * q[j] * r3inv;
 
@@ -516,10 +519,11 @@ void PairBuckCoulCut::born_matrix(int i, int j, int itype, int jtype, double rsq
 
 /* ---------------------------------------------------------------------- */
 
-void *PairBuckCoulCut::extract(const char *str, int &dim)
+void *PairLJClass2CoulCut::extract(const char *str, int &dim)
 {
   dim = 2;
-  if (strcmp(str, "a") == 0) return (void *) a;
-  if (strcmp(str, "c") == 0) return (void *) c;
+  if (strcmp(str, "cut_coul") == 0) return (void *) &cut_coul;
+  if (strcmp(str, "epsilon") == 0) return (void *) epsilon;
+  if (strcmp(str, "sigma") == 0) return (void *) sigma;
   return nullptr;
 }

@@ -5,10 +5,18 @@
 # Example: bash apply_patch.sh ~/software/lammps
 #
 # What it does:
-#   1. Copies 40 new/updated pair_*_omp.{h,cpp} into lammps/src/OPENMP/
-#   2. Copies 15 A-3 optimized pair_*.cpp into lammps/src/
-#   3. Copies 4 A-4 nm/cut pair_*.cpp into lammps/src/EXTRA-PAIR/
+#   1. Copies new/updated pair_*_omp.{h,cpp} into lammps/src/OPENMP/        (A-1)
+#   2. Copies every A-3 optimized pair_*.cpp into its LAMMPS package dir    (A-3)
+#      (src/ plus 37 package subdirectories — inventory in
+#       Paper/tableS6_a3_files.csv)
+#   3. A-4 pow()-reduction files ship inside the same tree (src/EXTRA-PAIR/,
+#      src/OPENMP/) and are copied by the same walk.
 #   4. No CMakeLists.txt changes needed — LAMMPS auto-discovers _omp.cpp files.
+#
+# A-3 files are copied by walking this repository's src/ tree instead of from a
+# hard-coded list, so the script cannot drift out of sync with the shipped code.
+# Only files that already exist in the target tree are replaced, so a package
+# the user did not enable is reported rather than silently created.
 
 set -e
 
@@ -30,104 +38,71 @@ fi
 echo "=== Applying LLM-optimized LAMMPS patches to: $LAMMPS_ROOT ==="
 echo ""
 
-# ── A-1: Copy new OMP pair_style files ──────────────────────────────────────
+# ── A-1: new / updated OMP pair styles ──────────────────────────────────────
 OMP_SRC="$REPO_ROOT/src/OPENMP"
 OMP_DST="$LAMMPS_ROOT/src/OPENMP"
 
+echo "-- A-1: OpenMP pair styles --"
 if [[ ! -d "$OMP_DST" ]]; then
   echo "WARNING: $OMP_DST not found. Is PKG_OPENMP available in this LAMMPS?"
   echo "         Skipping OMP files."
 else
-  count=0
+  new=0; upd=0
   for f in "$OMP_SRC"/pair_*_omp.cpp "$OMP_SRC"/pair_*_omp.h; do
+    [[ -e "$f" ]] || continue
     fname=$(basename "$f")
     if [[ -e "$OMP_DST/$fname" ]]; then
-      echo "  [SKIP] $fname already exists in OPENMP/"
+      upd=$((upd + 1))
     else
-      cp "$f" "$OMP_DST/$fname"
-      echo "  [COPY] OPENMP/$fname"
-      ((count++))
+      new=$((new + 1))
     fi
+    cp "$f" "$OMP_DST/$fname"
   done
-  echo "  → $count new OMP files copied."
+  echo "  -> $new new, $upd updated OMP files."
 fi
 
 echo ""
 
-# ── A-3: Copy optimized standard pair files ─────────────────────────────────
-STD_SRC="$REPO_ROOT/src"
-STD_DST="$LAMMPS_ROOT/src"
+# ── A-3 / A-4: restrict + local-accumulator (and pow-reduced) pair files ────
+# Layout mirrors LAMMPS:
+#   src/pair_x.cpp           -> <lammps>/src/pair_x.cpp
+#   src/<PACKAGE>/pair_x.cpp -> <lammps>/src/<PACKAGE>/pair_x.cpp
+echo "-- A-3/A-4: restrict/accumulator + pow()-reduced pair files --"
+copied=0; missing=0
+skipped_pkg=""
 
-a3_files=(
-  pair_born.cpp pair_buck.cpp pair_buck_coul_cut.cpp
-  pair_coul_cut.cpp pair_coul_debye.cpp pair_coul_dsf.cpp pair_coul_wolf.cpp
-  pair_lj_cut.cpp pair_lj_cut_coul_cut.cpp pair_lj_expand.cpp
-  pair_morse.cpp pair_soft.cpp pair_table.cpp pair_yukawa.cpp pair_zbl.cpp
-)
-
-count=0
-for f in "${a3_files[@]}"; do
-  if [[ ! -e "$STD_SRC/$f" ]]; then
-    echo "  [WARN] $f not found in repo src/ — skipping"
+while IFS= read -r f; do
+  rel="${f#"$REPO_ROOT/src/"}"          # MANYBODY/pair_eam.cpp | pair_lj_cut.cpp
+  case "$rel" in
+    OPENMP/*) continue ;;               # handled above
+  esac
+  dst="$LAMMPS_ROOT/src/$rel"
+  dstdir="$(dirname "$dst")"
+  if [[ ! -d "$dstdir" ]]; then
+    skipped_pkg="$skipped_pkg $(dirname "$rel")"
     continue
   fi
-  cp "$STD_SRC/$f" "$STD_DST/$f"
-  echo "  [COPY] src/$f (A-3 optimized)"
-  ((count++))
-done
-echo "  → $count standard pair files replaced."
+  if [[ ! -e "$dst" ]]; then
+    echo "  [WARN] $rel not present in target tree - skipping"
+    missing=$((missing + 1))
+    continue
+  fi
+  cp "$f" "$dst"
+  copied=$((copied + 1))
+done < <(find "$REPO_ROOT/src" -name 'pair_*.cpp' | sort)
 
-echo ""
-
-# ── A-4: Copy pow()-reduced EXTRA-PAIR files ─────────────────────────────────
-EP_SRC="$REPO_ROOT/src/EXTRA-PAIR"
-EP_DST="$LAMMPS_ROOT/src/EXTRA-PAIR"
-
-a4_files=(
-  pair_nm_cut.cpp pair_nm_cut_coul_cut.cpp
-  pair_nm_cut_coul_long.cpp pair_nm_cut_split.cpp
-  pair_lj_pirani.cpp pair_mie_cut.cpp
-)
-
-if [[ ! -d "$EP_DST" ]]; then
-  echo "WARNING: $EP_DST not found. Build with PKG_EXTRA-PAIR=yes."
-  echo "         Skipping A-4 nm/cut files."
-else
-  count=0
-  for f in "${a4_files[@]}"; do
-    if [[ ! -e "$EP_SRC/$f" ]]; then
-      echo "  [WARN] $f not found in repo src/EXTRA-PAIR/ — skipping"
-      continue
-    fi
-    cp "$EP_SRC/$f" "$EP_DST/$f"
-    echo "  [COPY] EXTRA-PAIR/$f (A-4 pow reduction)"
-    ((count++))
-  done
-  echo "  → $count EXTRA-PAIR pow-reduction files replaced."
-fi
-
-echo ""
-
-# ── A-4 OMP: lj/pirani OMP pow()-reduction (replaces existing OMP file) ──────
-a4_omp_files=(
-  pair_lj_pirani_omp.cpp
-)
-
-if [[ -d "$OMP_DST" ]]; then
-  count=0
-  for f in "${a4_omp_files[@]}"; do
-    if [[ ! -e "$OMP_SRC/$f" ]]; then
-      echo "  [WARN] $f not found in repo src/OPENMP/ — skipping"
-      continue
-    fi
-    cp "$OMP_SRC/$f" "$OMP_DST/$f"
-    echo "  [COPY] OPENMP/$f (A-4 pow reduction)"
-    ((count++))
-  done
-  echo "  → $count OMP pow-reduction files replaced."
+echo "  -> $copied pair files replaced."
+[[ $missing -gt 0 ]] && echo "  -> $missing not found in target tree."
+if [[ -n "$skipped_pkg" ]]; then
+  uniq_pkg=$(printf '%s\n' $skipped_pkg | sort -u | tr '\n' ' ')
+  echo "  -> packages absent from target tree (not enabled?): $uniq_pkg"
 fi
 
 echo ""
 echo "=== Patch applied successfully ==="
 echo ""
-echo "Next step: build LAMMPS (see INSTALL.md)"
+echo "Next step: build LAMMPS (see INSTALL.md), e.g."
+echo "  cd $LAMMPS_ROOT && mkdir -p build && cd build"
+echo "  cmake ../cmake -D CMAKE_BUILD_TYPE=Release -D PKG_OPENMP=on \\"
+echo "        -D BUILD_OMP=on -D BUILD_MPI=on"
+echo "  cmake --build . -j"
