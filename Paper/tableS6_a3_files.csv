@@ -126,7 +126,6 @@ src/INTERLAYER/pair_coul_shield.cpp,INTERLAYER,coul/shield,yes,yes,yes
 src/INTERLAYER/pair_ilp_graphene_hbn.cpp,INTERLAYER,ilp/graphene/hbn,yes,yes,yes
 src/INTERLAYER/pair_ilp_tmd.cpp,INTERLAYER,ilp/tmd,yes,yes,yes
 src/INTERLAYER/pair_kolmogorov_crespi_full.cpp,INTERLAYER,kolmogorov/crespi/full,yes,yes,yes
-src/INTERLAYER/pair_kolmogorov_crespi_z.cpp,INTERLAYER,kolmogorov/crespi/z,yes,no,yes
 src/INTERLAYER/pair_lebedeva_z.cpp,INTERLAYER,lebedeva/z,yes,no,yes
 src/INTERLAYER/pair_saip_metal.cpp,INTERLAYER,saip/metal,yes,yes,yes
 src/INTERLAYER/pair_saip_metal_tmd.cpp,INTERLAYER,saip/metal/tmd,yes,yes,yes
@@ -164,7 +163,6 @@ src/MANYBODY/pair_extep.cpp,MANYBODY,extep,yes,yes,yes
 src/MANYBODY/pair_gw.cpp,MANYBODY,gw,yes,yes,yes
 src/MANYBODY/pair_local_density.cpp,MANYBODY,local/density,yes,yes,yes
 src/MANYBODY/pair_nb3b_harmonic.cpp,MANYBODY,nb3b/harmonic,yes,yes,yes
-src/MANYBODY/pair_polymorphic.cpp,MANYBODY,polymorphic,yes,yes,yes
 src/MANYBODY/pair_sw.cpp,MANYBODY,sw,yes,yes,yes
 src/MANYBODY/pair_sw_angle_table.cpp,MANYBODY,sw/angle/table,yes,yes,yes
 src/MANYBODY/pair_tersoff.cpp,MANYBODY,tersoff,yes,yes,yes
@@ -214,7 +212,6 @@ src/YAFF/pair_lj_switch3_coulgauss_long.cpp,YAFF,lj/switch3/coulgauss/long,yes,y
 src/YAFF/pair_mm3_switch3_coulgauss_long.cpp,YAFF,mm3/switch3/coulgauss/long,yes,yes,yes
 src/pair_born.cpp,src,born,yes,yes,yes
 src/pair_buck.cpp,src,buck,yes,yes,yes
-src/pair_buck_coul_cut.cpp,src,buck/coul/cut,yes,yes,yes
 src/pair_coul_cut.cpp,src,coul/cut,yes,yes,yes
 src/pair_coul_debye.cpp,src,coul/debye,yes,yes,yes
 src/pair_coul_dsf.cpp,src,coul/dsf,yes,yes,yes
