@@ -1,0 +1,18 @@
+units lj
+atom_style sphere
+boundary p p p
+newton off
+lattice fcc 0.4
+region box block 0 5 0 5 0 5
+create_box 1 box
+create_atoms 1 box
+set group all diameter 1.0 density 1.0
+pair_style brownian/poly 1.0 1 1 2.5 2.5 1.0 12345
+pair_coeff * *
+neighbor 0.3 bin
+fix 1 all nve/sphere
+timestep 0.0001
+thermo 5
+thermo_style custom step temp epair etotal press
+thermo_modify format float %20.15g
+run 20

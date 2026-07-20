@@ -39,10 +39,6 @@
 using namespace LAMMPS_NS;
 using namespace MathExtra;
 
-namespace {
-using dbl3_t = struct { double x,y,z; };
-}
-
 /* ---------------------------------------------------------------------- */
 
 PairPolymorphic::PairParameters::PairParameters()
@@ -151,22 +147,23 @@ void PairPolymorphic::compute(int eflag, int vflag)
   double delr1[3],delr2[3],fi[3],fj[3],fk[3];
   double zeta_ij,prefactor,wfac,pfac,gfac,fa,fa_d,bij,bij_d;
   double costheta;
+  int *ilist,*jlist,*numneigh,**firstneigh;
   double emb;
 
   evdwl = 0.0;
   ev_init(eflag,vflag);
 
-  const auto * _noalias const x = (dbl3_t *) atom->x[0];
-  auto * _noalias const f = (dbl3_t *) atom->f[0];
+  double **x = atom->x;
+  double **f = atom->f;
   tagint *tag = atom->tag;
-  const int * _noalias const type = atom->type;
+  int *type = atom->type;
   int nlocal = atom->nlocal;
   int newton_pair = force->newton_pair;
 
   inum = list->inum;
-  const int * _noalias const ilist = list->ilist;
-  int * const numneigh = list->numneigh;
-  int ** const firstneigh = list->firstneigh;
+  ilist = list->ilist;
+  numneigh = list->numneigh;
+  firstneigh = list->firstneigh;
 
   // loop over full neighbor list of my atoms
 
@@ -174,13 +171,12 @@ void PairPolymorphic::compute(int eflag, int vflag)
     i = ilist[ii];
     itag = tag[i];
     itype = map[type[i]];
-    xtmp = x[i].x;
-    ytmp = x[i].y;
-    ztmp = x[i].z;
+    xtmp = x[i][0];
+    ytmp = x[i][1];
+    ztmp = x[i][2];
 
-    const int * _noalias const jlist = firstneigh[i];
+    jlist = firstneigh[i];
     jnum = numneigh[i];
-    double fxtmp = 0.0, fytmp = 0.0, fztmp = 0.0;
 
     if (neighsize < jnum) {
       delete [] firstneighV;
@@ -222,9 +218,9 @@ void PairPolymorphic::compute(int eflag, int vflag)
       j &= NEIGHMASK;
       jtype = map[type[j]];
 
-      delx = xtmp - x[j].x;
-      dely = ytmp - x[j].y;
-      delz = ztmp - x[j].z;
+      delx = xtmp - x[j][0];
+      dely = ytmp - x[j][1];
+      delz = ztmp - x[j][2];
       rsq = delx*delx + dely*dely + delz*delz;
       if (rsq >= cutmaxsq) continue;
       r0 = sqrt(rsq);
@@ -275,21 +271,21 @@ void PairPolymorphic::compute(int eflag, int vflag)
       } else if (itag < jtag) {
         if ((itag+jtag) % 2 == 1) continue;
       } else {
-        if (x[j].z < ztmp) continue;
-        if (x[j].z == ztmp && x[j].y < ytmp) continue;
-        if (x[j].z == ztmp && x[j].y == ytmp && x[j].x < xtmp) continue;
+        if (x[j][2] < x[i][2]) continue;
+        if (x[j][2] == ztmp && x[j][1] < ytmp) continue;
+        if (x[j][2] == ztmp && x[j][1] == ytmp && x[j][0] < xtmp) continue;
       }
 
       if (rsq >= (p.U)->get_xmaxsq() || (p.U)->get_vmax() <= epsilon) continue;
       (p.U)->value(r0,evdwl,eflag,fpair,1);
       fpair = -fpair/r0;
 
-      fxtmp += delx*fpair;
-      fytmp += dely*fpair;
-      fztmp += delz*fpair;
-      f[j].x -= delx*fpair;
-      f[j].y -= dely*fpair;
-      f[j].z -= delz*fpair;
+      f[i][0] += delx*fpair;
+      f[i][1] += dely*fpair;
+      f[i][2] += delz*fpair;
+      f[j][0] -= delx*fpair;
+      f[j][1] -= dely*fpair;
+      f[j][2] -= delz*fpair;
 
       if (evflag) ev_tally(i,j,nlocal,newton_pair,evdwl,0.0,fpair,delx,dely,delz);
     }
@@ -342,12 +338,12 @@ void PairPolymorphic::compute(int eflag, int vflag)
           (q.W)->value(drW[kk],wfac,0,fpair,1);
           fpair = -prefactor*fpair/drW[kk];
 
-          fxtmp += delr2[0]*fpair;
-          fytmp += delr2[1]*fpair;
-          fztmp += delr2[2]*fpair;
-          f[k].x -= delr2[0]*fpair;
-          f[k].y -= delr2[1]*fpair;
-          f[k].z -= delr2[2]*fpair;
+          f[i][0] += delr2[0]*fpair;
+          f[i][1] += delr2[1]*fpair;
+          f[i][2] += delr2[2]*fpair;
+          f[k][0] -= delr2[0]*fpair;
+          f[k][1] -= delr2[1]*fpair;
+          f[k][2] -= delr2[2]*fpair;
 
           if (vflag_either) v_tally2(i, k, -fpair, delr2);
         }
@@ -409,12 +405,12 @@ void PairPolymorphic::compute(int eflag, int vflag)
         prefactor = 0.5* fa * bij_d;
         if (eflag) evdwl = -0.5*bij*fa;
 
-        fxtmp += delr1[0]*fpair;
-        fytmp += delr1[1]*fpair;
-        fztmp += delr1[2]*fpair;
-        f[j].x -= delr1[0]*fpair;
-        f[j].y -= delr1[1]*fpair;
-        f[j].z -= delr1[2]*fpair;
+        f[i][0] += delr1[0]*fpair;
+        f[i][1] += delr1[1]*fpair;
+        f[i][2] += delr1[2]*fpair;
+        f[j][0] -= delr1[0]*fpair;
+        f[j][1] -= delr1[1]*fpair;
+        f[j][2] -= delr1[2]*fpair;
 
         if (evflag) ev_tally(i,j,nlocal,newton_pair,evdwl,0.0,
                              -fpair,-delr1[0],-delr1[1],-delr1[2]);
@@ -438,24 +434,20 @@ void PairPolymorphic::compute(int eflag, int vflag)
 
           attractive(&p,&q,&trip,prefactor,r1,r2,delr1,delr2,fi,fj,fk);
 
-          fxtmp += fi[0];
-          fytmp += fi[1];
-          fztmp += fi[2];
-          f[j].x += fj[0];
-          f[j].y += fj[1];
-          f[j].z += fj[2];
-          f[k].x += fk[0];
-          f[k].y += fk[1];
-          f[k].z += fk[2];
+          f[i][0] += fi[0];
+          f[i][1] += fi[1];
+          f[i][2] += fi[2];
+          f[j][0] += fj[0];
+          f[j][1] += fj[1];
+          f[j][2] += fj[2];
+          f[k][0] += fk[0];
+          f[k][1] += fk[1];
+          f[k][2] += fk[2];
 
           if (vflag_either) v_tally3(i,j,k,fj,fk,delr1,delr2);
         }
       }
     }
-
-    f[i].x += fxtmp;
-    f[i].y += fytmp;
-    f[i].z += fztmp;
   }
   if (vflag_fdotr) virial_fdotr_compute();
 }

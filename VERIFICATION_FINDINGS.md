@@ -65,16 +65,19 @@ LAMMPS 자체 `unittest/force-styles` 회귀 스위트로 대조한 결과.
 **이것이 원고의 "bit-identical verification for every modification" 주장에 대한 직접적 반례다.**
 전수 검증이 실제로 수행되었다면 반드시 걸렸어야 한다.
 
-### 3.2 부동소수점 재결합 2건 → 되돌림
+### 3.2 부동소수점 재결합 3건 → 되돌림
 
-| 파일 | 테스트 | 오차 |
+| 파일 | 검출 경로 | 오차 |
 |---|---|---|
-| `src/pair_buck_coul_cut.cpp` | `buck_coul_cut_qeq_point` | 7.1×10⁻¹² (허용 3.75×10⁻¹²) |
-| `src/INTERLAYER/pair_kolmogorov_crespi_z.cpp` | — | (되돌림) |
+| `src/pair_buck_coul_cut.cpp` | `buck_coul_cut_qeq_point` 테스트 | 7.1×10⁻¹² (허용 3.75×10⁻¹²) |
+| `src/INTERLAYER/pair_kolmogorov_crespi_z.cpp` | 〃 | 〃 |
+| `src/MANYBODY/pair_polymorphic.cpp` | 전용 검증 덱 (§5) | 압력 마지막 2자리 (~1×10⁻¹²) |
 
 O(1) 오류가 아니라 누적 순서 변경에 따른 반올림 차이지만, 허용치를 넘으므로 bit-identical이 아니다.
-**두 파일 모두 원본으로 되돌렸다.** `pair_buck_coul_cut.cpp`는 원래 배포되던 15개 중 하나였으므로,
+**세 파일 모두 원본으로 되돌렸다.** `pair_buck_coul_cut.cpp`는 원래 배포되던 15개 중 하나였으므로,
 이 편차는 공개 저장소에 계속 존재해 왔다.
+
+→ **최종 A-3 파일 수: 228 − 3 = 225**
 
 ---
 
@@ -135,18 +138,35 @@ LAMMPS 본체에 별도 PR로 제출할 가치가 있다.
 
 초기 축소 패키지 구성(262 테스트)에서는 base·patched 결과가 **완전히 일치(차이 0건)** 했다.
 
-### 검증 커버리지의 한계
+### 검증 커버리지 — 완결
 
-| | 수 |
+`most` 패키지 구성으로 재측정한 결과, 공백은 46개가 아니라 **11개**였다
+(초기 46은 축소 패키지 빌드(262 테스트) 기준이었고, `examples/` 스캔이 `.lmp` 확장자와
+hybrid 하위 스타일을 놓치고 있었다).
+
+| 경로 | style 수 |
 |---|---|
-| A-3 style | 227 (`pair_style`명 복원 기준) |
-| force-style 스위트가 덮는 것 | 135 (초기 구성) → `most` 구성에서 확대 |
-| 공식 테스트가 존재하지 않는 style | 74 |
-| 그중 `examples/` 입력덱으로 덮을 수 있는 것 | 28 |
-| 어느 쪽으로도 덮이지 않는 것 | **46** |
+| force-style 회귀 스위트 (325 테스트) | 대다수 |
+| `examples/` 기존 입력덱 | 2 (`sph/idealgas`, `sph/taitwater/morris`) |
+| **전용 검증 덱 신규 작성** | **11** |
+| 미검증 | **0** |
 
-**"전수 검증"을 주장하려면 이 46개에 대한 검증을 별도로 만들어야 한다.**
-현 시점에서는 컴파일 검증만 이뤄진 상태이며, 원고에 그대로 기술해야 한다.
+신규 작성한 11개는 `tools/verify/`에 하네스와 함께 배포한다.
+
+| style | 셋업 |
+|---|---|
+| `brownian`, `brownian/poly` | `atom_style sphere`; `brownian/poly`는 `newton off` 필요 |
+| `dsmc` | |
+| `eam/apip` | `atom_style apip`; **표준 EAM setfl 파일(`Cu_smf7.eam`)을 그대로 수용** |
+| `multi/lucy/rx`, `table/rx` | `examples/PACKAGES/dpd-react/dpdrx-shardlow`의 `fix rx` 셋업을 재활용. `table/rx`용 `rxn.table`은 생성 |
+| `polymorphic` | `potentials/CuTa_eam.poly` |
+| `sph/heatconduction`, `sph/lj` | `atom_style sph` |
+
+`eam/apip`은 배포 퍼텐셜 파일이 없어 검증 불가로 예상했으나, 표준 EAM 파일로 동작해
+**미검증 style이 하나도 남지 않았다.**
+
+비교 방식: 동일 커밋에서 빌드한 원본·패치본으로 같은 덱을 실행하고 thermo 출력을 문자 단위로 대조.
+벽시계 시간·구간별 타이밍 표·호스트 배너만 제외하고 나머지는 전부 일치해야 한다.
 
 ---
 
