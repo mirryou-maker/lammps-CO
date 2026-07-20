@@ -1,0 +1,219 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+  11pt,
+]{article}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% Shared preamble for the LAMMPS-CO manuscript, supplementary, and cover letter.
+% Compiled with xelatex. Latin Modern is used rather than a system font so the
+% build is reproducible on any TeX installation; the characters it lacks
+% (Greek, super/subscripts, arrows, a few symbols) are mapped explicitly below.
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}[Scale=0.85]
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage[table]{xcolor}
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+\usepackage{microtype}
+\usepackage{newunicodechar}
+
+% Characters that appear in the text but not in Latin Modern's text font.
+\newunicodechar{λ}{\ensuremath{\lambda}}
+\newunicodechar{Δ}{\ensuremath{\Delta}}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{σ}{\ensuremath{\sigma}}
+\newunicodechar{ρ}{\ensuremath{\rho}}
+\newunicodechar{τ}{\ensuremath{\tau}}
+\newunicodechar{φ}{\ensuremath{\varphi}}
+\newunicodechar{δ}{\ensuremath{\delta}}
+\newunicodechar{α}{\ensuremath{\alpha}}
+\newunicodechar{θ}{\ensuremath{\theta}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{√}{\ensuremath{\sqrt{}}}
+\newunicodechar{∫}{\ensuremath{\int}}
+\newunicodechar{⟨}{\ensuremath{\langle}}
+\newunicodechar{⟩}{\ensuremath{\rangle}}
+\newunicodechar{■}{\ensuremath{\blacksquare}}
+\newunicodechar{⁺}{\ensuremath{^{+}}}
+\newunicodechar{⁻}{\ensuremath{^{-}}}
+\newunicodechar{⁰}{\ensuremath{^{0}}}
+\newunicodechar{⁴}{\ensuremath{^{4}}}
+\newunicodechar{⁵}{\ensuremath{^{5}}}
+\newunicodechar{⁶}{\ensuremath{^{6}}}
+\newunicodechar{⁷}{\ensuremath{^{7}}}
+\newunicodechar{₀}{\ensuremath{_{0}}}
+\newunicodechar{₁}{\ensuremath{_{1}}}
+\newunicodechar{₂}{\ensuremath{_{2}}}
+\newunicodechar{₃}{\ensuremath{_{3}}}
+\newunicodechar{₄}{\ensuremath{_{4}}}
+\newunicodechar{₆}{\ensuremath{_{6}}}
+
+% pandoc emits this when a document mixes tables and lists
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Long tables of file names need to break across pages
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\renewcommand{\arraystretch}{1.15}
+
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{0pt}
+\sloppy
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\section{Cover Letter}\label{cover-letter}
+
+\textbf{Chun-Yeol You} Department of Physics and Chemistry DGIST (Daegu
+Gyeongbuk Institute of Science and Technology) Daegu, Republic of Korea
+cyyou@dgist.ac.kr
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\textbf{To the Editors of \emph{Computer Physics Communications}}
+
+Dear Editors,
+
+I submit for your consideration the manuscript \textbf{``LAMMPS-CO:
+extended OpenMP coverage and compiler-friendly force kernels for 261
+LAMMPS pair styles''} as a Computer Programs in Physics (CPiP) paper.
+
+\subsection{What the program does}\label{what-the-program-does}
+
+LAMMPS parallelizes across MPI ranks by spatial decomposition, but
+within a rank a pair style is threaded only if an OpenMP variant of that
+style exists --- and fewer than half of the 307 pair styles have one. On
+a many-core node, a simulation using one of the remaining styles leaves
+most of the node idle. Separately, the serial force kernels are written
+in a form the compiler cannot vectorize: positions and forces are
+reached through unqualified \texttt{double\ **} pointers, so aliasing
+cannot be ruled out, and the per-atom force array is updated inside the
+innermost loop, creating a loop-carried dependence.
+
+LAMMPS-CO addresses both. It supplies 36 new OpenMP pair-style variants,
+raising coverage from 157 to 193 of 307 styles, and rewrites the force
+kernels of 225 further pair files across 38 packages to use
+\texttt{\_\_restrict\_\_}-qualified typed pointers and local
+accumulators. Redundant \texttt{pow()} evaluations are removed from the
+\texttt{nm/cut}, \texttt{lj/pirani}, and \texttt{mie/cut} families.
+Measured gains are 4.31× at four OpenMP threads and 4.93× at eight on a
+32,000-atom benchmark, 4--8\% on pair time from the kernel rewrite, and
+19.9--40.8\% within the styles where \texttt{pow()} was eliminated.
+
+\subsection{Why it belongs in CPC}\label{why-it-belongs-in-cpc}
+
+The program is a direct, reusable contribution to the most widely used
+open-source molecular dynamics engine, and it targets a gap that affects
+every LAMMPS user running a style without an accelerated variant. It
+also illustrates a programming technique of current interest to the
+computational physics community: the code was generated with the
+assistance of a large language model coding agent, working from the
+reference implementations already present in the OPENMP and OPT
+packages. We report that protocol, its measured error rate, and ---
+importantly --- the verification that caught its errors.
+
+That verification is the part I would draw your attention to. Rather
+than assert numerical equivalence, we build the unmodified and modified
+trees from the same LAMMPS commit and run both through LAMMPS's own
+\texttt{unittest/force-styles} regression suite: 325 pair-style tests,
+identical outcomes. Eleven modified styles are not reachable by that
+suite; we distribute dedicated decks and a comparison harness for those,
+so every modified style is checked. The process found ten files that did
+not compile in packages absent from our original build, one file whose
+force expression had a multiplication transcribed as a division, and
+three files where the rewrite did not preserve operation order --- the
+last of which we reverted rather than ship. All of this is reported in
+the manuscript. We take the view that a software paper is more useful
+for saying what the verification found than for claiming it found
+nothing.
+
+The exercise also surfaced a defect in unmodified LAMMPS:
+\texttt{pair\_style\ hybrid/overlay\ kolmogorov/crespi/z} aborts under
+\texttt{-sf\ omp}, because \texttt{hybrid/overlay} is registered under
+two names and the sub-style tests
+\texttt{force-\textgreater{}pair\_style} for exact equality. The
+upstream test suite cannot see this, as the OpenMP branch is skipped
+when no OMP variant of the sub-style exists. We offer the one-line fix
+upstream separately.
+
+\subsection{Availability}\label{availability}
+
+The code is public at \url{https://github.com/mirryou-maker/lammps-CO}
+under GPLv2, matching LAMMPS, and is being deposited in the CPC Program
+Library on Mendeley Data. It applies to an existing LAMMPS tree with a
+single script and needs no build-system changes. The complete file-level
+inventory of modified styles, the verification decks, and the benchmark
+harness are distributed with it.
+
+\subsection{Statements}\label{statements}
+
+This manuscript is original, is not under consideration elsewhere, and
+has not been published previously. An earlier version was submitted to
+\emph{Archives of Computational Methods in Engineering} and declined
+without review as outside that journal's scope (it publishes
+state-of-the-art reviews); it has not been peer reviewed. The author
+declares no competing interests.
+
+Thank you for considering this submission.
+
+Sincerely,
+
+Chun-Yeol You DGIST
+
+\end{document}

@@ -1,0 +1,1376 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+  11pt,
+]{article}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textbf{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% Shared preamble for the LAMMPS-CO manuscript, supplementary, and cover letter.
+% Compiled with xelatex. Latin Modern is used rather than a system font so the
+% build is reproducible on any TeX installation; the characters it lacks
+% (Greek, super/subscripts, arrows, a few symbols) are mapped explicitly below.
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}[Scale=0.85]
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage[table]{xcolor}
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+\usepackage{microtype}
+\usepackage{newunicodechar}
+
+% Characters that appear in the text but not in Latin Modern's text font.
+\newunicodechar{λ}{\ensuremath{\lambda}}
+\newunicodechar{Δ}{\ensuremath{\Delta}}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{σ}{\ensuremath{\sigma}}
+\newunicodechar{ρ}{\ensuremath{\rho}}
+\newunicodechar{τ}{\ensuremath{\tau}}
+\newunicodechar{φ}{\ensuremath{\varphi}}
+\newunicodechar{δ}{\ensuremath{\delta}}
+\newunicodechar{α}{\ensuremath{\alpha}}
+\newunicodechar{θ}{\ensuremath{\theta}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{√}{\ensuremath{\sqrt{}}}
+\newunicodechar{∫}{\ensuremath{\int}}
+\newunicodechar{⟨}{\ensuremath{\langle}}
+\newunicodechar{⟩}{\ensuremath{\rangle}}
+\newunicodechar{■}{\ensuremath{\blacksquare}}
+\newunicodechar{⁺}{\ensuremath{^{+}}}
+\newunicodechar{⁻}{\ensuremath{^{-}}}
+\newunicodechar{⁰}{\ensuremath{^{0}}}
+\newunicodechar{⁴}{\ensuremath{^{4}}}
+\newunicodechar{⁵}{\ensuremath{^{5}}}
+\newunicodechar{⁶}{\ensuremath{^{6}}}
+\newunicodechar{⁷}{\ensuremath{^{7}}}
+\newunicodechar{₀}{\ensuremath{_{0}}}
+\newunicodechar{₁}{\ensuremath{_{1}}}
+\newunicodechar{₂}{\ensuremath{_{2}}}
+\newunicodechar{₃}{\ensuremath{_{3}}}
+\newunicodechar{₄}{\ensuremath{_{4}}}
+\newunicodechar{₆}{\ensuremath{_{6}}}
+
+% pandoc emits this when a document mixes tables and lists
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Long tables of file names need to break across pages
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\renewcommand{\arraystretch}{1.15}
+
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{0pt}
+\sloppy
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\section{Supplementary Materials}\label{supplementary-materials}
+
+\subsection{AI-Assisted Systematic Optimization of the LAMMPS Molecular
+Dynamics Simulator via Large Language Model Coding
+Agents}\label{ai-assisted-systematic-optimization-of-the-lammps-molecular-dynamics-simulator-via-large-language-model-coding-agents}
+
+\textbf{Chun-Yeol You}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Contents}\label{contents}
+
+\begin{itemize}
+\tightlist
+\item
+  Supplementary Table S1: Complete list of 35 new OMP pair variants
+\item
+  Supplementary Table S2: A-3 restrict/fxtmp modification log (102
+  files, representative entries)
+\item
+  Supplementary Table S3: OPLS-AA force field parameters used in FEP
+  Case Study
+\item
+  Supplementary Table S4: Li⁺ Joung--Cheatham parameters and
+  Lorentz--Berthelot mixed coefficients
+\item
+  Supplementary Table S5: OPLS-AA FEP dU/dλ by lambda window (all
+  solvents)
+\item
+  Supplementary Table S6: A-3 restrict/fxtmp optimization scope by
+  category
+\item
+  Supplementary Table S7: A-3 before/after performance benchmarks (three
+  representative styles)
+\item
+  Supplementary Methods S1: Claude Code prompt templates (OMP port
+  generation)
+\item
+  Supplementary Methods S2: OPLS-AA system construction and FEP protocol
+\item
+  Supplementary Figure S1: Full OMP scaling benchmarks for new styles
+\item
+  Supplementary Figure S2: NVE energy conservation comparison
+\item
+  Supplementary Figure S3: A-3 code transformation (before/after pair
+  hotloop)
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Table S1: Complete List of 35 New OMP Pair
+Variants}\label{supplementary-table-s1-complete-list-of-35-new-omp-pair-variants}
+
+All styles below were generated by Claude Code, compiled with zero new
+MSVC warnings, and verified bit-identical to their serial counterparts
+by a 50-step NVE thermo comparison
+(\texttt{thermo\_modify\ format\ float\ \%20.15g}). Files are located in
+\texttt{src/OPENMP/} with the naming convention
+\texttt{pair\_{[}style\_name{]}\_omp.\{h,cpp\}}.
+
+% Table S1 rendered in landscape so wide \nolinkurl{} style names fit without overflow
+\begin{landscape}
+\begingroup
+\small
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.18}
+% landscape text width = 11in - 2in margins = 9in = 22.86cm
+% column allocation: r(0.4) + 2.4 + 4.8 + 5.4 + 2.8 + 3.2 = 19.0 + sep(1.8) = 20.8cm < 22.86cm
+\begin{longtable}{r l p{4.8cm} p{5.4cm} l p{3.2cm}}
+\toprule
+\# & Package & Standard style & OMP variant & Loop type & New register \\
+\midrule
+\endfirsthead
+\multicolumn{6}{l}{\small\itshape (Table S1 continued\ldots)}\\[2pt]
+\toprule
+\# & Package & Standard style & OMP variant & Loop type & New register \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{\small\itshape (continued on next page)}\\
+\endfoot
+\bottomrule
+\endlastfoot
+ 1 & EXTRA-PAIR & \nolinkurl{lj/cut/soft}                  & \nolinkurl{lj/cut/soft/omp}                  & half-Newton      & ---                  \\
+ 2 & EXTRA-PAIR & \nolinkurl{lj/cut/coul/long/soft}         & \nolinkurl{lj/cut/coul/long/soft/omp}         & half-Newton      & ---                  \\
+ 3 & EXTRA-PAIR & \nolinkurl{lj/class2/soft}                & \nolinkurl{lj/class2/soft/omp}                & half-Newton      & ---                  \\
+ 4 & EXTRA-PAIR & \nolinkurl{lj/cut/coul/cut/soft}          & \nolinkurl{lj/cut/coul/cut/soft/omp}          & half-Newton      & ---                  \\
+ 5 & EXTRA-PAIR & \nolinkurl{lj/cut/coul/dsf/soft}          & \nolinkurl{lj/cut/coul/dsf/soft/omp}          & half-Newton      & ---                  \\
+ 6 & EXTRA-PAIR & \nolinkurl{morse/soft}                    & \nolinkurl{morse/soft/omp}                    & half-Newton      & ---                  \\
+ 7 & EXTRA-PAIR & \nolinkurl{coul/cut/soft/gapsys}          & \nolinkurl{coul/cut/soft/gapsys/omp}          & half-Newton      & ---                  \\
+ 8 & EXTRA-PAIR & \nolinkurl{nm/cut/split}                  & \nolinkurl{nm/cut/split/omp}                  & half-Newton      & ---                  \\
+ 9 & EXTRA-PAIR & \nolinkurl{born/coul/dsf}                 & \nolinkurl{born/coul/dsf/omp}                 & half-Newton      & ---                  \\
+10 & EXTRA-PAIR & \nolinkurl{born/coul/wolf/cs}             & \nolinkurl{born/coul/wolf/cs/omp}             & half-Newton      & ---                  \\
+11 & EXTRA-PAIR & \nolinkurl{bpm/spring}                    & \nolinkurl{bpm/spring/omp}                    & half-Newton      & ---                  \\
+12 & EXTRA-PAIR & \nolinkurl{dpd/fdt}                       & \nolinkurl{dpd/fdt/omp}                       & half-Newton      & random seed/thr      \\
+13 & EXTRA-PAIR & \nolinkurl{dpd/fdt/energy}                & \nolinkurl{dpd/fdt/energy/omp}                & half-Newton      & random seed/thr      \\
+14 & EXTRA-PAIR & \nolinkurl{lj/relres/soft}                & \nolinkurl{lj/relres/soft/omp}                & half-Newton      & ---                  \\
+15 & EXTRA-PAIR & \nolinkurl{coul/diel}                     & \nolinkurl{coul/diel/omp}                     & half-Newton      & ---                  \\
+16 & EXTRA-PAIR & \nolinkurl{momb}                          & \nolinkurl{momb/omp}                          & half-Newton      & ---                  \\
+17 & EXTRA-PAIR & \nolinkurl{coul/streitz}                  & \nolinkurl{coul/streitz/omp}                  & half-Newton      & charge\_thr buf      \\
+18 & EXTRA-PAIR & \nolinkurl{extep}                         & \nolinkurl{extep/omp}                         & half-Newton      & ---                  \\
+19 & DIELECTRIC & \nolinkurl{lj/cut/coul/cut/dielectric}    & \nolinkurl{lj/cut/coul/cut/dielectric/omp}    & full (no Newton) & ef\_tally\_thr       \\
+20 & DIELECTRIC & \nolinkurl{lj/cut/coul/long/dielectric}   & \nolinkurl{lj/cut/coul/long/dielectric/omp}   & full (no Newton) & ef\_tally\_thr       \\
+21 & DIELECTRIC & \nolinkurl{lj/cut/coul/msm/dielectric}    & \nolinkurl{lj/cut/coul/msm/dielectric/omp}    & full (no Newton) & ef\_tally\_thr       \\
+22 & DIELECTRIC & \nolinkurl{coul/long/dielectric}          & \nolinkurl{coul/long/dielectric/omp}          & full (no Newton) & ef\_tally\_thr       \\
+23 & DIELECTRIC & \nolinkurl{lj/long/coul/long/dielectric}  & \nolinkurl{lj/long/coul/long/dielectric/omp}  & full (no Newton) & ef\_tally\_thr       \\
+24 & DIELECTRIC & \nolinkurl{lj/cut/coul/debye/dielectric}  & \nolinkurl{lj/cut/coul/debye/dielectric/omp}  & full (no Newton) & ef\_tally\_thr       \\
+25 & DIELECTRIC & \nolinkurl{coul/cut/dielectric}           & \nolinkurl{coul/cut/dielectric/omp}           & full (no Newton) & ef\_tally\_thr       \\
+26 & KSPACE     & \nolinkurl{lj/long/coul/long}             & \nolinkurl{lj/long/coul/long/omp}             & half-Newton      & ---                  \\
+27 & KSPACE     & \nolinkurl{buck/long/coul/long}           & \nolinkurl{buck/long/coul/long/omp}           & half-Newton      & ---                  \\
+28 & KSPACE     & \nolinkurl{lj/long/tip4p/long}            & \nolinkurl{lj/long/tip4p/long/omp}            & half-Newton      & tip4p\_h\_thr        \\
+29 & KSPACE     & \nolinkurl{lj/cut/tip4p/long}             & \nolinkurl{lj/cut/tip4p/long/omp}             & half-Newton      & tip4p\_h\_thr        \\
+30 & KSPACE     & \nolinkurl{lj/long/dipole/long}           & \nolinkurl{lj/long/dipole/long/omp}           & half-Newton      & ---                  \\
+31 & EXTRA-PAIR & \nolinkurl{buck/coul/cut/soft}            & \nolinkurl{buck/coul/cut/soft/omp}            & half-Newton      & ---                  \\
+32 & EXTRA-PAIR & \nolinkurl{buck/coul/long/soft}           & \nolinkurl{buck/coul/long/soft/omp}           & half-Newton      & ---                  \\
+33 & EXTRA-PAIR & \nolinkurl{lj/charmm/coul/long/soft}      & \nolinkurl{lj/charmm/coul/long/soft/omp}      & half-Newton      & ---                  \\
+34 & EXTRA-PAIR & \nolinkurl{lj/charmm/coul/charmm/soft}    & \nolinkurl{lj/charmm/coul/charmm/soft/omp}    & half-Newton      & ---                  \\
+35 & EXTRA-PAIR & \nolinkurl{coul/ctip}                     & \nolinkurl{coul/ctip/omp}                     & half-Newton      & charge\_iter\_thr    \\
+\end{longtable}
+\endgroup
+\end{landscape}
+
+\textbf{Notes}: - \emph{Loop type ``full''}: DIELECTRIC styles use a
+full neighbor list (all neighbors i→j, not half-list) because the
+dielectric boundary condition requires summing contributions from all
+neighbors of i. No Newton's third law write-back is applied. -
+\emph{ef\_tally\_thr}: The \texttt{ef\_tally\_thr()} function (added to
+\texttt{src/OPENMP/thr\_omp.h}) accumulates per-thread electric field
+contributions \texttt{efield{[}i{]}{[}k{]}} in addition to
+energy/virial. - \emph{tip4p\_h\_thr}: For TIP4P water, the hydrogen
+force redistribution (from the virtual M-site) is thread-safe only with
+per-thread hydrogen force buffers. - \emph{random seed/thr}: DPD
+stochastic forces use per-thread random number generators seeded with
+\texttt{seed\ +\ thread\_id} to ensure deterministic but uncorrelated
+thread-local sequences.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Table S2: A-3 Modification Log (Representative
+Subset)}\label{supplementary-table-s2-a-3-modification-log-representative-subset}
+
+Full log contains 102 entries. Representative entries spanning each
+category:
+
+% Table S2: scale-to-linewidth so file names with underscores fit
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.2}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l l p{5.5cm} c p{2.6cm}}
+\toprule
+File & Category & Modification & Bit-id. & Pair improv. \\
+\midrule
+\nolinkurl{pair_lj_cut.cpp}               & Simple LJ      & \texttt{\_noalias} + \texttt{fxtmp/fytmp/fztmp}          & \checkmark & +4.2\% (4k FCC) \\
+\nolinkurl{pair_lj_expand.cpp}            & Simple LJ      & same                                                      & \checkmark & +3.8\%          \\
+\nolinkurl{pair_coul_cut.cpp}             & Simple Coul    & same                                                      & \checkmark & +4.1\%          \\
+\nolinkurl{pair_coul_wolf.cpp}            & Comp.\ Coul    & same                                                      & \checkmark & +5.2\%          \\
+\nolinkurl{pair_born_coul_dsf.cpp}        & Comp.\ Coul    & same                                                      & \checkmark & +5.7\%          \\
+\nolinkurl{pair_born_coul_wolf_cs.cpp}    & Comp.\ Coul    & same                                                      & \checkmark & +4.9\%          \\
+\nolinkurl{pair_lj_long_coul_long.cpp}    & Long-range     & same (real-space loop only)                               & \checkmark & +3.5\%          \\
+\nolinkurl{pair_lj_cut_coul_long_dielectric.cpp} & DIELECTRIC & same + \texttt{ef\_tmp} for field accum          & \checkmark & +4.0\%          \\
+\nolinkurl{pair_momb.cpp}                 & Specialty      & same                                                      & \checkmark & +7.5\%          \\
+\nolinkurl{pair_coul_ctip.cpp}            & Charge-iter    & same (inner pair loop only)                               & \checkmark & +5.7\%          \\
+\nolinkurl{pair_dispersion_d3.cpp}        & Multi-pass     & NOT applicable --- multi-pass loop structure              & n/a        & ---             \\
+\nolinkurl{pair_eam.cpp}                  & Multi-body EAM & NOT applicable --- loop-carried $\phi_i$ accumulation     & n/a        & ---             \\
+\nolinkurl{pair_tersoff.cpp}              & Multi-body     & NOT applicable --- three-body sums                        & n/a        & ---             \\
+\nolinkurl{pair_snap.cpp}                 & ML potential   & NOT applicable --- internal vectorization                 & n/a        & ---             \\
+\bottomrule
+\end{tabular}
+}% end resizebox
+\endgroup
+
+\textbf{Note on non-applicable styles}: Multi-body potentials (EAM,
+Tersoff, SW, ReaxFF) use multi-pass loops where force contributions from
+one atom depend on previously visited neighbors; the \texttt{fxtmp}
+pattern requires a single-pass inner loop. ML potentials (SNAP, ACE,
+DeePMD) implement their own BLAS-based or SIMD-specialized inner
+operations that supersede simple pointer qualification.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Table S3: OPLS-AA Force Field Parameters for
+Battery Electrolyte
+Solvents}\label{supplementary-table-s3-opls-aa-force-field-parameters-for-battery-electrolyte-solvents}
+
+All parameters follow Jorgensen \emph{et al.} (1996) OPLS-AA
+conventions. LJ potential: U\_LJ = 4ε{[}(σ/r)¹²−(σ/r)⁶{]}; harmonic
+bond: U\_bond = K(r−r₀)²; harmonic angle: U\_angle = K(θ−θ₀)²; OPLS
+dihedral: U\_torsion = ½V₁(1+cos φ) + ½V₂(1−cos 2φ) + ½V₃(1+cos 3φ) +
+½V₄(1−cos 4φ).
+
+\subsubsection{Atom Types (shared across EC and
+PC)}\label{atom-types-shared-across-ec-and-pc}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1618}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1912}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1176}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2059}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3235}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Atom type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+σ (Å)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ε (kcal/mol)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Partial charge q (e)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+C\_co3 & Carbonyl C in carbonate & 3.750 & 0.1050 & +0.76 \\
+O\_co3 & Carbonyl O (C=O) & 2.960 & 0.2100 & −0.50 \\
+O\_ete & Ether O (ring C−O−C) & 3.000 & 0.1700 & −0.35 \\
+C\_sp3 & Aliphatic CH₂ in ring & 3.500 & 0.0660 & +0.10 \\
+H\_c & H on aliphatic C & 2.500 & 0.0300 & +0.06 \\
+\end{longtable}
+}
+
+\textbf{EC molecule charge neutrality}: C\_co3 + 2×O\_co3 + 2×O\_ete +
+2×C\_sp3 + 4×H\_c = +0.76 + 2×(−0.50) + 2×(−0.35) + 2×(+0.10) +
+4×(+0.06) = +0.76 − 1.00 − 0.70 + 0.20 + 0.24 = 0.00 (neutral)
+
+\subsubsection{Atom Types (DME:
+1,2-dimethoxyethane)}\label{atom-types-dme-12-dimethoxyethane}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1618}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1912}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1176}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2059}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3235}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Atom type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+σ (Å)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ε (kcal/mol)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Partial charge q (e)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+C\_sp3(CH₃) & Terminal methyl C & 3.500 & 0.0660 & +0.022 \\
+O\_ete & Ether O & 3.000 & 0.1700 & −0.400 \\
+C\_sp3(CH₂) & Central methylene C & 3.500 & 0.0660 & +0.164 \\
+H\_c(CH₃) & H on methyl & 2.500 & 0.0300 & +0.034 \\
+H\_c(CH₂) & H on methylene & 2.500 & 0.0300 & +0.056 \\
+\end{longtable}
+}
+
+\textbf{DME molecule charge neutrality}: 2×C\_sp3(CH₃) + 2×O\_ete +
+2×C\_sp3(CH₂) + 6×H\_c(CH₃) + 4×H\_c(CH₂) = 2×(+0.022) + 2×(−0.400) +
+2×(+0.164) + 6×(+0.034) + 4×(+0.056) = 0.044 − 0.800 + 0.328 + 0.204 +
+0.224 = 0.000 (neutral)
+
+\subsubsection{Bond Parameters}\label{bond-parameters}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Bond & K (kcal/mol/Å²) & r₀ (Å) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+C\_co3−O\_co3 & 570.0 & 1.229 \\
+C\_co3−O\_ete & 415.0 & 1.344 \\
+C\_sp3−O\_ete & 320.0 & 1.430 \\
+C\_sp3−C\_sp3 & 224.0 & 1.529 \\
+C\_sp3−H\_c & 340.0 & 1.090 \\
+\end{longtable}
+}
+
+\subsubsection{Angle Parameters}\label{angle-parameters}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Angle & K (kcal/mol/rad²) & θ₀ (°) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+O\_co3−C\_co3−O\_ete & 90.0 & 124.4 \\
+C\_co3−O\_ete−C\_sp3 & 70.0 & 109.5 \\
+O\_ete−C\_sp3−C\_sp3 & 70.0 & 111.5 \\
+O\_ete−C\_sp3−H\_c & 55.0 & 109.5 \\
+H\_c−C\_sp3−H\_c & 35.0 & 107.8 \\
+C\_sp3−C\_sp3−H\_c & 37.5 & 110.7 \\
+\end{longtable}
+}
+
+\subsubsection{Dihedral Parameters (OPLS style, V₁−V₄ in
+kcal/mol)}\label{dihedral-parameters-opls-style-vux2081vux2084-in-kcalmol}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lllll@{}}
+\toprule\noalign{}
+Dihedral & V₁ & V₂ & V₃ & V₄ \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+O\_co3−C\_co3−O\_ete−C\_sp3 & 1.950 & 2.250 & 0.000 & 0.000 \\
+C\_co3−O\_ete−C\_sp3−C\_sp3 & 0.650 & −0.250 & 0.670 & 0.000 \\
+C\_co3−O\_ete−C\_sp3−H\_c & 0.000 & 0.000 & 0.760 & 0.000 \\
+O\_ete−C\_sp3−C\_sp3−O\_ete & −0.550 & −0.550 & 0.000 & 0.000 \\
+O\_ete−C\_sp3−C\_sp3−H\_c & 0.000 & 0.000 & 0.468 & 0.000 \\
+H\_c−C\_sp3−C\_sp3−H\_c & 0.000 & 0.000 & 0.318 & 0.000 \\
+\end{longtable}
+}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Table S4: Li⁺ Parameters and
+Lorentz--Berthelot Mixed Pair
+Coefficients}\label{supplementary-table-s4-li-parameters-and-lorentzberthelot-mixed-pair-coefficients}
+
+\textbf{Li⁺ source}: Joung \& Cheatham (2008), SPC/E water
+parameterization.\\
+\textbf{Mixing rules}: σ₁₂ = (σ₁ + σ₂)/2 (arithmetic); ε₁₂ = √(ε₁ × ε₂)
+(geometric).
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Parameter & Li⁺ & Reference \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+σ (Å) & 1.4094 & Joung \& Cheatham 2008 \\
+ε (kcal/mol) & 0.3367 & Joung \& Cheatham 2008 \\
+q (e) & +1.0 & formal charge \\
+\end{longtable}
+}
+
+\subsubsection{Lorentz--Berthelot Mixed Coefficients: Li⁺ × OPLS-AA
+Solvent
+Atoms}\label{lorentzberthelot-mixed-coefficients-li-opls-aa-solvent-atoms}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+Pair & σ\_mix (Å) & ε\_mix (kcal/mol) & Context \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Li--Li & 1.4094 & 0.33670 & self-pair (irrelevant, single Li+) \\
+Li--C\_co3 & 2.5797 & 0.18802 & EC/PC carbonyl carbon \\
+Li--O\_co3 & 2.1847 & 0.26591 & EC/PC carbonyl oxygen \\
+Li--O\_ete & 2.2047 & 0.23921 & EC/PC/DME ether oxygen \\
+Li--C\_sp3 & 2.4547 & 0.14898 & EC/PC/DME aliphatic carbon \\
+Li--H\_c & 1.9547 & 0.10049 & all H atoms \\
+\end{longtable}
+}
+
+\textbf{Note on Coulombic interactions}: The
+\texttt{lj/cut/coul/long/soft} potential scales \emph{both} the LJ and
+Coulomb interactions by λ simultaneously. The Li⁺ charge (+1.0 e)
+interacts with OPLS-AA partial charges via PPPM long-range Coulomb. The
+dominant contribution to dU/dλ is the Coulombic Li⁺--O\_co3 and
+Li⁺--O\_ete attraction (solvation coordination shell). A +1 net charge
+in the simulation box is handled by PPPM with a uniform background
+charge correction, which introduces a small but systematic correction to
+the absolute ΔG (estimated \textless{} 0.1 kcal/mol for the box sizes
+used) without affecting relative comparisons between solvents {[}ref:
+Hummer et al.~1996, J. Phys. Chem.{]}.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Table S5: OPLS-AA FEP Results --- dU/dλ by
+Lambda
+Window}\label{supplementary-table-s5-opls-aa-fep-results-dudux3bb-by-lambda-window}
+
+Values shown are mean ± SEM (kcal/mol) over 40 ps production (20,000
+steps × 2 fs/step) from individual-window equilibration (50 ps NPT + 50
+ps NVT for EC/PC; NVT-only for DME). All three estimators (TI, BAR,
+MBAR) applied; TI uses the trapezoidal rule over 21 points.
+
+\subsubsection{EC (ethylene carbonate) +
+Li⁺}\label{ec-ethylene-carbonate-li}
+
+Production: 40 ps (20,000 × 2 fs steps), 101 samples/window. Protocol:
+NPT 100 ps + NVT 25 ps equilibration per window.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+λ & ⟨dU/dλ⟩ (kcal/mol) & SEM & n\_frames \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0.00 & −0.29 & 0.03 & 101 \\
+0.05 & −2.88 & 0.27 & 101 \\
+0.10 & −8.99 & 0.90 & 101 \\
+0.15 & −56.61 & 2.19 & 101 \\
+0.20 & −109.42 & 1.48 & 101 \\
+0.25 & −161.04 & 1.66 & 101 \\
+0.30 & −230.18 & 1.06 & 101 \\
+0.35 & −292.22 & 1.26 & 101 \\
+0.40 & −378.43 & 1.30 & 101 \\
+0.45 & −454.16 & 1.71 & 101 \\
+0.50 & −530.22 & 1.41 & 101 \\
+0.55 & −80.04 & 0.99 & 101 \\
+0.60 & −89.00 & 1.10 & 101 \\
+0.65 & −106.08 & 1.04 & 101 \\
+0.70 & −122.67 & 0.95 & 101 \\
+0.75 & −139.93 & 0.97 & 101 \\
+0.80 & −161.66 & 0.94 & 101 \\
+0.85 & −179.61 & 1.21 & 101 \\
+0.90 & −207.37 & 1.32 & 101 \\
+0.95 & −249.79 & 1.01 & 101 \\
+1.00 & −267.21 & 1.12 & 101 \\
+\end{longtable}
+}
+
+\textbf{Note on non-monotone integrand}: The dU/dλ curve exhibits a
+characteristic peak at λ=0.50 (−530 kcal/mol) followed by a sharp drop
+to −80 kcal/mol at λ=0.55. This arises from the simultaneous LJ
+soft-core (n=2, α\_LJ=0.5) and Coulomb soft-core (α\_C=0.3) coupling in
+\texttt{lj/cut/coul/long/soft}: the LJ soft-core contributes maximally
+near λ≈0.5, while the Coulomb term dominates at λ\textgreater0.5. The
+abrupt transition at λ=0.50→0.55 is the primary driver of the TI--BAR
+discrepancy (15.6 kcal/mol, 9\%) and motivates the extended 200
+ps/window run.
+
+\subsubsection{PC (propylene carbonate) +
+Li⁺}\label{pc-propylene-carbonate-li}
+
+Production: 40 ps (20,000 × 2 fs steps), 101 samples/window. Protocol:
+NPT 100 ps + NVT 25 ps equilibration per window.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+λ & ⟨dU/dλ⟩ (kcal/mol) & SEM & n\_frames \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0.00 & −0.26 & 0.03 & 101 \\
+0.05 & −3.33 & 0.32 & 101 \\
+0.10 & −8.43 & 0.88 & 101 \\
+0.15 & −36.81 & 2.55 & 101 \\
+0.20 & −106.69 & 1.65 & 101 \\
+0.25 & −166.00 & 1.16 & 101 \\
+0.30 & −218.07 & 1.51 & 101 \\
+0.35 & −295.32 & 1.37 & 101 \\
+0.40 & −378.32 & 1.23 & 101 \\
+0.45 & −463.10 & 0.99 & 101 \\
+0.50 & −519.57 & 1.63 & 101 \\
+0.55 & −75.23 & 1.10 & 101 \\
+0.60 & −88.81 & 1.05 & 101 \\
+0.65 & −111.05 & 1.05 & 101 \\
+0.70 & −122.34 & 0.97 & 101 \\
+0.75 & −139.85 & 1.07 & 101 \\
+0.80 & −154.54 & 1.01 & 101 \\
+0.85 & −177.73 & 1.09 & 101 \\
+0.90 & −209.25 & 1.40 & 101 \\
+0.95 & −244.26 & 1.40 & 101 \\
+1.00 & −276.25 & 1.05 & 101 \\
+\end{longtable}
+}
+
+\subsubsection{DME (1,2-dimethoxyethane) +
+Li⁺}\label{dme-12-dimethoxyethane-li}
+
+Production: 40 ps (20,000 × 2 fs steps), 101 samples/window. Protocol:
+NVT-only (staged: nve/limit → NVT ramp → NVT 35 ps equilibration per
+window).
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+λ & ⟨dU/dλ⟩ (kcal/mol) & SEM & n\_frames \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0.00 & −0.26 & 0.03 & 101 \\
+0.05 & −2.54 & 0.30 & 101 \\
+0.10 & −8.13 & 0.92 & 101 \\
+0.15 & −32.15 & 2.62 & 101 \\
+0.20 & −92.66 & 1.70 & 101 \\
+0.25 & −141.94 & 1.36 & 101 \\
+0.30 & −192.26 & 1.23 & 101 \\
+0.35 & −248.70 & 1.33 & 101 \\
+0.40 & −314.17 & 1.11 & 101 \\
+0.45 & −375.96 & 1.23 & 101 \\
+0.50 & −424.57 & 1.35 & 101 \\
+0.55 & −73.05 & 0.95 & 101 \\
+0.60 & −85.54 & 1.13 & 101 \\
+0.65 & −95.54 & 0.82 & 101 \\
+0.70 & −109.23 & 0.90 & 101 \\
+0.75 & −124.77 & 1.28 & 101 \\
+0.80 & −159.45 & 1.13 & 101 \\
+0.85 & −180.73 & 1.09 & 101 \\
+0.90 & −199.54 & 0.97 & 101 \\
+0.95 & −217.50 & 0.91 & 101 \\
+1.00 & −237.92 & 0.83 & 101 \\
+\end{longtable}
+}
+
+\textbf{Note on DME dU/dλ profile}: Peak at λ=0.50 (−424.6 kcal/mol) is
+smaller than EC/PC (\textasciitilde−520--530 kcal/mol), reflecting the
+weaker OPLS-AA oxygen partial charges on ether oxygens (−0.40 e)
+vs.~carbonate carbonyl oxygens (−0.50 e). The bidentate coordination of
+DME (two oxygens/molecule) partially compensates for the weaker
+per-oxygen interaction.
+
+\subsubsection{Free energy summary (40 ps/window short
+run)}\label{free-energy-summary-40-pswindow-short-run}
+
+\emph{These values correspond to the 40 ps/window production run. The
+200 ps/window extended-run values (Table 7 in main text) are: EC −183.7
+± 0.1 (TI), −168.4 (BAR); PC −182.1 ± 0.1 (TI), −167.2 (BAR); DME −159.4
+± 0.1 (TI), −147.0 (BAR).}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1139}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3038}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3165}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1519}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1139}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Solvent
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ΔG\_TI 40 ps (kcal/mol)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ΔG\_BAR 40 ps (kcal/mol)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+TI--BAR gap
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Windows
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+EC & \textbf{−184.7 ± 0.3} & \textbf{−169.1} & 15.6 (9\%) & 21/21 \\
+PC & \textbf{−182.8 ± 0.3} & \textbf{−167.8} & 15.0 (8\%) & 21/21 \\
+DME & \textbf{−159.9 ± 0.3} & \textbf{−147.4} & 12.5 (8\%) & 21/21 \\
+CG (reference) & −0.257 ± 0.004 & −0.265 & 0.008 (3\%) & 21/21 \\
+\end{longtable}
+}
+
+Relative solvation strengths (TI): ΔΔΔG(EC−DME) = 24.8 kcal/mol;
+ΔΔΔG(PC−DME) = 22.9 kcal/mol; ΔΔΔG(EC−PC) = 1.9 kcal/mol.
+
+\emph{Physical interpretation}: ΔG is the free energy of coupling Li⁺ to
+the solvent (λ: 0→1). Solvation free energy = −ΔG\_coupling. More
+negative ΔG\_coupling indicates stronger solvation. Expected ordering:
+EC \textgreater{} PC \textgreater{} DME based on dielectric constant
+(ε\_r: EC=89.8, PC=64.9, DME=7.2) and Li⁺ coordination in quantum
+chemistry studies.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Methods S1: Claude Code Prompt
+Templates}\label{supplementary-methods-s1-claude-code-prompt-templates}
+
+\subsubsection{S1.1 Template for Half-List OMP Port (EXTRA-PAIR
+styles)}\label{s1.1-template-for-half-list-omp-port-extra-pair-styles}
+
+\begin{verbatim}
+Context:
+  Working directory: lammps-src/src/
+  Task: Add OMP variant for pair style [STYLE_NAME]
+  Source files: EXTRA-PAIR/pair_[style_file].{h,cpp}
+  Reference implementation: OPENMP/pair_lj_cut_omp.{h,cpp}
+  Reference source: pair_lj_cut.{h,cpp}
+
+Rules for half-list Newton-on style:
+  1. File pair_[style_file]_omp.h:
+     - class Pair[StyleClass]OMP : public Pair[StyleClass], public ThrOMP
+     - Constructor sets "no_virial_fdotr_compute = 1"
+     - Override: compute(int, int), settings(int, char**), init_one(int, int)
+     - Keep all data members from parent; no new members except inherited ThrOMP
+
+  2. File pair_[style_file]_omp.cpp:
+     - compute() parallel region pattern (copy from pair_lj_cut_omp.cpp:80-155):
+       a. OpenMP parallel over outer atom loop
+       b. thr->get_f() provides per-thread force buffer
+       c. Dispatch: eval<0,0,1>(), eval<0,1,1>(), eval<1,0,1>(), eval<1,1,1>()
+          (EVFLAG×EFLAG×NEWTON_PAIR combinations)
+       d. reduce_thr(this, eflag, vflag, thr) at end of parallel region
+     - eval<EVFLAG,EFLAG,NEWTON_PAIR>() method:
+       a. Reads: atom->x, atom->type, list->ilist etc. from parent class
+       b. Inner neighbor loop uses list->firstneigh[ii] etc.
+       c. Force accumulation into fxtmp/fytmp/fztmp (not f[i][k] directly)
+       d. Energy/virial: ev_tally_thr(this, i, j, nlocal, NEWTON_PAIR,
+                                      evdwl, ecoul, fpair, delx, dely, delz, thr)
+       e. Newton write: if NEWTON_PAIR: fj[0]-=fpairx, fj[1]-=fpairy, fj[2]-=fpairz
+  
+  3. CMakeLists.txt (src/OPENMP/CMakeLists.txt):
+     - Add pair_[style_file]_omp.{h,cpp} in alphabetical order
+  
+  4. src/OPENMP/style_pair.h or the auto-generated pair styles list:
+     - Add:  PairStyle(lj/cut/[name]/omp, Pair[Class]OMP)
+
+Verification:
+  Compile with: cmake --build build --config Release --target lmp
+  Run serial: lmp.exe -in tools/tests/in.[style]_test -log none > serial.out
+  Run OMP:    lmp.exe -sf omp -pk omp 4 -in tools/tests/in.[style]_test -log none > omp.out
+  Verify: python tools/tests/compare_thermo.py serial.out omp.out
+          (must print "PASS: bit-identical" for all columns)
+\end{verbatim}
+
+\subsubsection{S1.2 Template for DIELECTRIC Full-List OMP
+Port}\label{s1.2-template-for-dielectric-full-list-omp-port}
+
+\begin{verbatim}
+Context:
+  Task: Add OMP variant for DIELECTRIC pair style [STYLE_NAME]
+  Source: DIELECTRIC/pair_[style_file].{h,cpp}
+  Reference OMP structure: OPENMP/pair_lj_cut_coul_long_omp.cpp
+  Reference DIELECTRIC physics: DIELECTRIC/pair_lj_cut_coul_cut_dielectric.cpp
+
+Special rules for DIELECTRIC full-list:
+  1. No Newton's third law (full list, each pair counted once from i's side only)
+     → remove all "if (NEWTON_PAIR) {fj[k] -= ...}" blocks
+     → template has only one NEWTON_PAIR=0 specialization
+  2. Per-atom dielectric epsilon: read atom->epsilon array
+     epsj = (epsiloni + epsilon[jtype]) * 0.5
+  3. Electric field accumulation:
+     ef_tally_thr(this, i, j, nlocal, evdwl_ij, ex, ey, ez, thr)
+     where (ex,ey,ez) is the field contribution from pair i-j
+  4. Thread-safe efield accumulation uses per-thread ef_buf in ThrOMP
+  5. Outer atom loop is over ALL local atoms (not ghost-list subset)
+     neigh_list->ilist covers i in [0, nlocal)
+
+Verification: same as S1.1 but also check efield[i][k] values match serial.
+\end{verbatim}
+
+\subsubsection{S1.3 Template for A-3 Restrict/fxtmp
+Backport}\label{s1.3-template-for-a-3-restrictfxtmp-backport}
+
+\begin{verbatim}
+Context:
+  Task: Apply A-3 restrict/fxtmp optimization to src/pair_[name].cpp
+  Target function: compute(int eflag, int vflag)
+  Reference before-state: src/pair_lj_cut.cpp (lines 69-139)
+  Reference after-state:  src/OPENMP/pair_lj_cut_omp.cpp (lines 99-140, eval<>)
+
+Transformation rules (apply ONLY to the inner Newton-pair loop; do NOT touch
+multi-body loops, charge equilibration loops, or indirect-index patterns):
+
+  1. Immediately before the outer loop (for i = 0; i < inum; i++):
+     Add:
+       double * _noalias const f0 = atom->f[0];
+     Replace existing  double **f = atom->f;  (keep x, v, other **ptrs unchanged)
+
+  2. At the START of the outer loop body (inside "for ii = 0..."):
+     Add:
+       const int i   = ilist[ii];
+       double fxtmp  = 0.0;
+       double fytmp  = 0.0;
+       double fztmp  = 0.0;
+       double * fi   = f0 + 3*i;   // pointer arithmetic for AoS layout
+
+  3. In the INNER loop: replace
+       f[i][0] += delx*fpair;
+       f[i][1] += dely*fpair;
+       f[i][2] += delz*fpair;
+     with:
+       fxtmp += delx*fpair;
+       fytmp += dely*fpair;
+       fztmp += delz*fpair;
+
+  4. Keep Newton write-back (fj[k] -= fk) UNCHANGED.
+
+  5. After the inner loop (jj loop), before next outer iteration:
+     Add:
+       fi[0] += fxtmp;
+       fi[1] += fytmp;
+       fi[2] += fztmp;
+
+CRITICAL constraint: The floating-point operation ORDER for each (delx*fpair),
+(dely*fpair), (delz*fpair) must be unchanged relative to the original code.
+Only the partial accumulation into f[i][k] is deferred to after the inner loop.
+
+Verification:
+  Run: lmp.exe -in tools/tests/in.[style]_test > before.out  (original binary)
+       lmp.exe -in tools/tests/in.[style]_test > after.out   (modified binary)
+  Check: python tools/tests/compare_thermo.py before.out after.out
+         Must print "PASS: bit-identical"
+\end{verbatim}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Methods S2: OPLS-AA FEP Case Study --- Full
+Protocol}\label{supplementary-methods-s2-opls-aa-fep-case-study-full-protocol}
+
+\subsubsection{S2.1 System Construction}\label{s2.1-system-construction}
+
+All-atom data files were generated by a custom Python script
+(\texttt{tools/fep/data/build\_opls\_systems.py}) without external tools
+(no Packmol required). The packing algorithm:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Computes target box length from molecular density: L = (N × M\_mol /
+  (N\_A × ρ\_target))\^{}(1/3)
+\item
+  Generates a 3D integer grid of N\_mol sites within a box of L\_scale ×
+  L
+\item
+  Assigns each molecule a random SO(3) rotation via Rodrigues formula
+\item
+  Adds a uniform random jitter ±0.1 L\_scale × L / N\_sites\^{}(1/3) per
+  site
+\item
+  Places atoms relative to a pre-defined geometry template with bond
+  lengths at equilibrium values
+\end{enumerate}
+
+Molecule geometries: - \textbf{EC}: Regular pentagon ring
+(C₁--O₁--C₂--O₂--C₃, circumradius R=1.216 Å), carbonyl O at R=1.206 Å
+from C₁, H atoms at ±z=1.09 Å from CH₂ carbons - \textbf{PC}: EC ring
+with C₃ replaced by a CH group bearing a −CH₃ substituent at (0.715,
+−1.609, −1.408) Å relative to the ring center - \textbf{DME}: All-trans
+backbone; C₁H₃−O₁−C₂H₂−C₃H₂−O₂−C₄H₃ along the x-axis; methyl H atoms
+positioned via tetrahedral geometry
+
+The \texttt{lj/cut/coul/long/soft} pair style was applied to ALL Li⁺
+cross-pairs with the lambda parameter; solvent--solvent interactions
+used standard \texttt{lj/cut/coul/long} (not soft-core, no lambda
+coupling). This is the standard single-topology FEP approach for
+charging/annihilating a single ion.
+
+\subsubsection{S2.2 Equilibration
+Protocol}\label{s2.2-equilibration-protocol}
+
+\textbf{EC and PC} (601 atoms / 651 atoms): 1. Energy minimization:
+conjugate-gradient, etol=10⁻⁴, ftol=10⁻⁶, max 5000 iterations / 50000
+force evaluations 2. Velocity initialization: 300 K, Gaussian
+distribution, seed=12345 3. NPT equilibration: 50,000 steps (100 ps),
+Nosé--Hoover T=300 K (τ=200 fs), iso P=1 atm (τ=1000 fs) 4. NVT
+equilibration: 25,000 steps (50 ps), Nosé--Hoover T=300 K (τ=200 fs)
+
+\textbf{DME} (961 atoms; NVT-only to avoid PPPM out-of-range errors at
+the target density): 1. Energy minimization: etol=10⁻⁵, ftol=10⁻⁷, max
+10000 iterations / 100000 force evaluations 2. Velocity init: 100 K
+(gentle start) 3. NVE/limit: 5000 steps with max displacement 0.05
+Å/step + temp/rescale 100→200 K 4. NVT ramp: 10,000 steps (15 ps),
+200→300 K (τ=200 fs), timestep=1.5 fs 5. NVT production equil: 35,000
+steps (70 ps), 300 K, timestep=2 fs
+
+\subsubsection{S2.3 FEP Production
+Protocol}\label{s2.3-fep-production-protocol}
+
+For each of the 21 lambda windows (λ = 0.00, 0.05, \ldots, 1.00) and
+each of the 3 solvents: - Starting configuration: re-generated from
+scratch for each window (independent equilibration) - Post-equilibration
+NVT: 5000 steps (10 ps) - Production: 20,000 steps (40 ps), thermo
+output every 200 steps (100 frames/window) - PPPM: accuracy 10⁻⁴, mesh
+automatically determined - FEP compute:
+\texttt{compute\ FEP\ all\ fep\ 300.0\ pair\ lj/cut/coul/long/soft\ lambda\ 1\ *\ 0.01}
+- Output: step, λ, dU/dλ, exp(−ΔU/kT) via
+\texttt{thermo\_style\ custom\ step\ v\_LAMv\ v\_dUdL\ c\_FEP{[}2{]}}
+
+\subsubsection{S2.4 Free Energy
+Analysis}\label{s2.4-free-energy-analysis}
+
+TI: trapezoidal rule over 21 λ points\\
+BAR: adjacent-window estimator using
+\texttt{pymbar.other\_estimators.bar()} (pymbar 4.x)\\
+MBAR: full multi-state estimator using linear potential energy
+approximation
+
+The TI error is propagated from the per-window standard error of the
+mean (SEM), combined with the trapezoidal quadrature weights as
+described in Shirts \& Chodera (2008).
+
+\subsubsection{S2.5 Charge Neutrality and
+PPPM}\label{s2.5-charge-neutrality-and-pppm}
+
+The simulation box contains +1 net charge (from Li⁺). PPPM in LAMMPS
+handles this by adding a compensating uniform background charge density
+(the ``jellium'' background), which introduces a spurious
+self-interaction energy E\_corr = −q²/(2ε₀V) × (dimensionful prefactor).
+For a box of V ≈ 30³ Å³ and q = +1e, this correction is approximately
+0.02--0.05 kcal/mol and affects all λ windows equally, canceling in the
+ΔG\_coupling calculation. For absolute solvation free energies, a
+finite-size correction following Hummer et al.~(1996) should be applied;
+this is outside the scope of the present method demonstration.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Figure S1: Full OMP Scaling Benchmarks for New
+Styles}\label{supplementary-figure-s1-full-omp-scaling-benchmarks-for-new-styles}
+
+\emph{{[}Figure generated by the Run-Benchmark.ps1 harness; stored as
+tools/plots/figure\_s1\_omp\_scaling.pdf{]}}
+
+OMP scaling benchmark for three representative newly ported pair styles:
+\texttt{born/coul/dsf}, \texttt{lj/class2/soft}, and
+\texttt{nm/cut/split}. Each style was benchmarked on an 864-atom FCC
+lattice (500 NVE steps, N=3 runs) at 1, 2, 4, and 8 OMP threads using
+\texttt{-sf\ omp\ -pk\ omp\ N}. Data correspond to Table 4 in the main
+text (same 500-step runs).
+
+\textbf{Panel (a)}: Loop time (s) vs.~OMP thread count for all three
+styles. Error bars show ±1 standard deviation over 3 runs.
+
+\textbf{Panel (b)}: Speedup (serial loop time / N-thread loop time)
+vs.~OMP thread count. Dashed line shows ideal linear scaling. Amdahl-law
+fits (parallelizable fraction f) overlay the measured data,
+demonstrating that pair-dominated styles (pair fraction \textgreater{}
+90\%) approach but do not reach the ideal limit due to fixed overhead in
+neighbor building and output.
+
+\textbf{Panel (c)}: Pair time fraction (pair time / loop time)
+vs.~thread count, confirming that the non-parallelized overhead grows as
+a relative fraction with increasing thread count---the primary cause of
+sub-linear scaling at 8 threads.
+
+Measured speedup values (500-step runs, N=3, mean ± 1σ). These values
+are the same dataset as Table 4 in the main text.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Style
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+4t speedup
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+8t speedup
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Pair fraction (1t)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Serial fraction \emph{f}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{born/coul/dsf} & \textbf{2.92×} & \textbf{3.96×} & 92.9\% &
+12\% \\
+\texttt{lj/class2/soft} & \textbf{3.14×} & \textbf{3.75×} & 94.8\% &
+9\% \\
+\texttt{nm/cut/split} & \textbf{2.63×} & \textbf{2.81×} & 85.9\% &
+17\% \\
+\end{longtable}
+}
+
+The serial fraction \emph{f} was estimated from Amdahl's law fitted to
+the measured 4-thread speedup: f = (4/S₄ − 1)/3. \texttt{nm/cut/split}
+has the largest \emph{f} (17\%) because approximately 10\% of loop time
+is spent in neighbor-list building (\texttt{Neigh} section), which does
+not benefit from OMP pair parallelism.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Figure S2: NVE Energy Conservation
+Comparison}\label{supplementary-figure-s2-nve-energy-conservation-comparison}
+
+\emph{{[}Figure description{]}}
+
+For verification of all new OMP variants, 250-step NVE simulations were
+run with \texttt{thermo\ 1} and
+\texttt{thermo\_modify\ format\ float\ \%20.15g}. The total energy
+(etotal) was recorded at each step for both the serial and OMP-4-thread
+runs of \texttt{born/coul/dsf} (864 atoms FCC) and \texttt{lj/cut/soft}
+(864 atoms FCC with λ=0.5). In both cases:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The total energy trajectories overlay exactly: the maximum point-wise
+  difference \textbar E\_serial − E\_OMP4t\textbar{} across all 251
+  steps is \textbf{8.97×10⁻¹⁴} (\texttt{born/coul/dsf}) and
+  \textbf{4.11×10⁻¹³} (\texttt{lj/cut/soft}), corresponding to agreement
+  at \textgreater13 decimal places.
+\item
+  Total energy drift over 250 steps: \textbf{0.021\%} for
+  \texttt{born/coul/dsf} (charge-neutral ionic FCC lattice,
+  well-equilibrated initial state). For \texttt{lj/cut/soft} at λ = 0.5
+  the drift is \textbf{0.65\%}, dominated by a transient in the first
+  \textasciitilde50 steps as the FCC crystal lattice relaxes into the
+  soft-core potential well --- the trajectory stabilises around a mean
+  after step 50, and the NVE integrator conserves the running total
+  energy throughout. Both results confirm NVE stability of the generated
+  OMP code.
+\end{enumerate}
+
+The bit-identical agreement confirms that the thread-safe force
+accumulation (\texttt{thr-\textgreater{}get\_f()} +
+\texttt{ev\_tally\_thr()} + \texttt{reduce\_thr()}) reproduces
+floating-point sums in the same order as the serial implementation, as
+required for scientific reproducibility.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Notes on Key Technical
+Decisions}\label{notes-on-key-technical-decisions}
+
+\subsubsection{Why separate equilibration per lambda
+window?}\label{why-separate-equilibration-per-lambda-window}
+
+The standard practice in thermodynamic integration is to equilibrate
+each λ window independently, rather than using sequential tempering
+(starting from λ=0 and stepping to λ=1 sequentially). Independent
+windows are preferred because: 1. They eliminate serial correlation
+between windows, enabling independent error estimation 2. They guarantee
+that each window samples its own equilibrium ensemble 3. They allow
+trivial parallelization
+
+The 40 ps production period per window is shorter than ideal for
+production calculations (10--100 ns is recommended for accurate ΔG);
+however, it is sufficient to demonstrate the methodology, to verify the
+correct sign and ordering of ΔG values, and to show that the OMP
+pipeline produces physically meaningful results. A full quantitative
+comparison with experimental desolvation free energies would require
+longer simulations and finite-size corrections (see S2.5).
+
+\subsubsection{\texorpdfstring{Why \texttt{lj/cut/coul/long/soft} and
+not
+\texttt{lj/cut/soft}?}{Why lj/cut/coul/long/soft and not lj/cut/soft?}}\label{why-ljcutcoullongsoft-and-not-ljcutsoft}
+
+EC, PC, and DME are polar solvents with permanent partial charges. The
+dominant solvation contribution is Coulombic (Li⁺ charge +1 e attracting
+O partial charges −0.35 to −0.50 e). Using
+\texttt{lj/cut/coul/long/soft} simultaneously scales both LJ and Coulomb
+interactions, which is physically correct for full annihilation of an
+ion. Using only \texttt{lj/cut/soft} would leave the Coulomb interaction
+at full strength, giving physically incorrect dU/dλ values and ΔG.
+
+\subsubsection{Why Lorentz--Berthelot and not geometric
+mixing?}\label{why-lorentzberthelot-and-not-geometric-mixing}
+
+OPLS-AA specifies Lorentz--Berthelot (arithmetic σ, geometric ε) mixing
+rules. These are enforced via \texttt{pair\_modify\ mix\ arithmetic} in
+LAMMPS (arithmetic σ) combined with the geometric default for ε. Li⁺ was
+parameterized in SPC/E water by Joung \& Cheatham (2008) using
+Lorentz--Berthelot mixing; applying the same rules to OPLS-AA solvent
+atoms is the standard practice in electrolyte FEP literature.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Table S6: Pair files modified by the
+force-kernel
+rewrite}\label{supplementary-table-s6-pair-files-modified-by-the-force-kernel-rewrite}
+
+\emph{Table S6: the 225 pair files whose serial force kernels were
+rewritten to use \texttt{\_\_restrict\_\_}-qualified typed pointers and
+local accumulators, grouped by LAMMPS package. The complete file-level
+inventory --- source path, package, \texttt{pair\_style} name recovered
+from each file's registration macro, and which of the three code markers
+(\texttt{\_noalias}, \texttt{fxtmp}, \texttt{dbl3\_t}) each file carries
+--- is distributed with the software as
+\texttt{Paper/tableS6\_a3\_files.csv}.}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Package
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Files
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Representative styles
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+EXTRA-PAIR & 42 & \texttt{beck}, \texttt{born/coul/dsf},
+\texttt{born/coul/wolf} \\
+MANYBODY & 20 & \texttt{adp}, \texttt{atm}, \texttt{comb3} \\
+KSPACE & 19 & \texttt{born/coul/long}, \texttt{born/coul/msm},
+\texttt{buck/coul/long} \\
+(top level) & 14 & \texttt{born}, \texttt{buck}, \texttt{coul/cut} \\
+FEP & 13 & \texttt{coul/cut/soft}, \texttt{coul/cut/soft/gapsys},
+\texttt{coul/long/soft} \\
+CG-DNA & 10 & \texttt{oxdna2/coaxstk}, \texttt{oxdna2/dh},
+\texttt{oxdna3/xstk} \\
+CORESHELL & 8 & \texttt{born/coul/dsf/cs}, \texttt{born/coul/long/cs},
+\texttt{born/coul/wolf/cs} \\
+DIELECTRIC & 7 & \texttt{coul/cut/dielectric},
+\texttt{coul/long/dielectric}, \texttt{lj/cut/coul/cut/dielectric} \\
+INTERLAYER & 7 & \texttt{coul/shield}, \texttt{ilp/graphene/hbn},
+\texttt{ilp/tmd} \\
+MOLECULE & 7 & \texttt{hbond/dreiding/lj},
+\texttt{hbond/dreiding/morse}, \texttt{lj/charmm/coul/charmm} \\
+SPIN & 7 & \texttt{spin/dipole/cut}, \texttt{spin/dipole/long},
+\texttt{spin/dmi} \\
+DPD-REACT & 6 & \texttt{dpd/fdt}, \texttt{dpd/fdt/energy},
+\texttt{exp6/rx} \\
+SPH & 6 & \texttt{sph/heatconduction}, \texttt{sph/idealgas},
+\texttt{sph/lj} \\
+ASPHERE & 5 & \texttt{gayberne}, \texttt{line/lj}, \texttt{resquared} \\
+DPD-BASIC & 5 & \texttt{dpd}, \texttt{dpd/coul/slater/long},
+\texttt{dpd/ext} \\
+PERI & 5 & \texttt{peri/eps}, \texttt{peri/lps}, \texttt{peri/pmb} \\
+COLLOID & 4 & \texttt{brownian}, \texttt{brownian/poly},
+\texttt{colloid} \\
+DPD-MESO & 4 & \texttt{edpd}, \texttt{mdpd}, \texttt{mdpd/rhosum} \\
+CLASS2 & 3 & \texttt{lj/class2}, \texttt{lj/class2/coul/cut},
+\texttt{lj/class2/coul/long} \\
+DIPOLE & 3 & \texttt{lj/cut/dipole/cut}, \texttt{lj/cut/dipole/long},
+\texttt{lj/sf/dipole/sf} \\
+DRUDE & 3 & \texttt{coul/tt}, \texttt{lj/cut/thole/long},
+\texttt{thole} \\
+GRANULAR & 3 & \texttt{gran/hertz/history}, \texttt{gran/hooke},
+\texttt{gran/hooke/history} \\
+SMTBQ & 3 & \texttt{smatb}, \texttt{smatb/single}, \texttt{smtbq} \\
+APIP & 2 & \texttt{eam/apip}, \texttt{lambda/input/csp/apip} \\
+MACHDYN & 2 & \texttt{smd/hertz}, \texttt{smd/tri\_surface} \\
+MISC & 2 & \texttt{agni}, \texttt{tracker} \\
+MOFFF & 2 & \texttt{buck6d/coul/gauss/dsf},
+\texttt{buck6d/coul/gauss/long} \\
+RHEO & 2 & \texttt{rheo}, \texttt{rheo/solid} \\
+YAFF & 2 & \texttt{lj/switch3/coulgauss/long},
+\texttt{mm3/switch3/coulgauss/long} \\
+AMOEBA & 1 & \texttt{amoeba} \\
+BODY & 1 & \texttt{body/nparticle} \\
+BPM & 1 & \texttt{bpm/spring} \\
+DPD-SMOOTH & 1 & \texttt{sdpd/taitwater/isothermal} \\
+EFF & 1 & \texttt{eff/cut} \\
+MC & 1 & \texttt{dsmc} \\
+ML-SNAP & 1 & \texttt{snap} \\
+ML-UF3 & 1 & \texttt{uf3} \\
+PYTHON & 1 & \texttt{python} \\
+\textbf{Total} & \textbf{225} & \\
+\end{longtable}
+}
+
+Three further files were rewritten and then reverted, because the
+rewrite did not preserve floating-point operation order for them:
+\texttt{pair\_buck\_coul\_cut}, \texttt{pair\_kolmogorov\_crespi\_z},
+and \texttt{pair\_polymorphic} (see Correctness Verification). They are
+counted in neither the table above nor the 225 total.
+
+Styles left unmodified are those without a standard half-list or
+full-list neighbor loop. Contrary to our initial expectation, multi-body
+potentials (EAM, Tersoff, SW, Vashishta) and two machine-learning
+potentials (SNAP, UF3) proved amenable to the transformation and are
+included above; all of them reproduce the reference forces and energies
+of the unmodified code.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Table S7: A-3 Before/After Performance
+Benchmarks}\label{supplementary-table-s7-a-3-beforeafter-performance-benchmarks}
+
+\emph{Table S7: Loop-time and pair-time improvement for three
+representative pair styles after A-3 backporting. Benchmarks: 864-atom
+FCC cell, 500 NVE steps, serial 1T, N=3 runs, mean ± std. Loop
+improvement = (before − after)/before × 100\%; pair improvement uses
+pair time column.}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Style
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Before loop (s)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+After loop (s)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Loop improvement
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Before pair (s)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+After pair (s)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Pair improvement
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+momb & 1.768 ± 0.018 & 1.643 ± 0.032 & \textbf{+7.1\%} & 1.706 & 1.579 &
++7.5\% \\
+coul/ctip & 22.25 ± 1.06 & 20.97 ± 0.54 & \textbf{+5.7\%} & 22.17 &
+20.90 & +5.7\% \\
+dispersion/d3 & 15.31 ± 0.35 & 15.81 ± 1.95 & ≈0\% (noise) & 15.27 &
+15.76 & --- \\
+\end{longtable}
+}
+
+The \texttt{dispersion/d3} style uses a multi-pass loop structure that
+already has loop-carried dependencies from three-body dispersion; the
+restrict/fxtmp pattern provides no benefit in this case and was left
+unchanged in the final submission.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Supplementary Figure S3: A-3 Code
+Transformation}\label{supplementary-figure-s3-a-3-code-transformation}
+
+\emph{Figure S3: Representative before/after code transformation applied
+in Step A-3 (compiler-friendly serial hotloop backporting). The pattern
+was applied to \textasciitilde102 of 307 pair\_style files.}
+
+\textbf{Before (standard \texttt{pair\_lj\_cut.cpp} hotloop):}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DataTypeTok{double} \OperatorTok{**}\NormalTok{x }\OperatorTok{=}\NormalTok{ atom}\OperatorTok{{-}\textgreater{}}\NormalTok{x}\OperatorTok{;}
+\DataTypeTok{double} \OperatorTok{**}\NormalTok{f }\OperatorTok{=}\NormalTok{ atom}\OperatorTok{{-}\textgreater{}}\NormalTok{f}\OperatorTok{;}
+
+\ControlFlowTok{for} \OperatorTok{(}\NormalTok{ii }\OperatorTok{=} \DecValTok{0}\OperatorTok{;}\NormalTok{ ii }\OperatorTok{\textless{}}\NormalTok{ inum}\OperatorTok{;}\NormalTok{ ii}\OperatorTok{++)} \OperatorTok{\{}
+\NormalTok{  i }\OperatorTok{=}\NormalTok{ ilist}\OperatorTok{[}\NormalTok{ii}\OperatorTok{];}
+  \CommentTok{// ... inner loop ...}
+  \ControlFlowTok{for} \OperatorTok{(}\NormalTok{jj }\OperatorTok{=} \DecValTok{0}\OperatorTok{;}\NormalTok{ jj }\OperatorTok{\textless{}}\NormalTok{ jnum}\OperatorTok{;}\NormalTok{ jj}\OperatorTok{++)} \OperatorTok{\{}
+    \CommentTok{// ...}
+\NormalTok{    f}\OperatorTok{[}\NormalTok{i}\OperatorTok{][}\DecValTok{0}\OperatorTok{]} \OperatorTok{+=}\NormalTok{ delx }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}   \CommentTok{// per{-}pair write to f[i]: loop{-}carried dependency}
+\NormalTok{    f}\OperatorTok{[}\NormalTok{i}\OperatorTok{][}\DecValTok{1}\OperatorTok{]} \OperatorTok{+=}\NormalTok{ dely }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+\NormalTok{    f}\OperatorTok{[}\NormalTok{i}\OperatorTok{][}\DecValTok{2}\OperatorTok{]} \OperatorTok{+=}\NormalTok{ delz }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+    \ControlFlowTok{if} \OperatorTok{(}\NormalTok{newton\_pair }\OperatorTok{||}\NormalTok{ j }\OperatorTok{\textless{}}\NormalTok{ nlocal}\OperatorTok{)} \OperatorTok{\{}
+\NormalTok{      f}\OperatorTok{[}\NormalTok{j}\OperatorTok{][}\DecValTok{0}\OperatorTok{]} \OperatorTok{{-}=}\NormalTok{ delx }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+\NormalTok{      f}\OperatorTok{[}\NormalTok{j}\OperatorTok{][}\DecValTok{1}\OperatorTok{]} \OperatorTok{{-}=}\NormalTok{ dely }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+\NormalTok{      f}\OperatorTok{[}\NormalTok{j}\OperatorTok{][}\DecValTok{2}\OperatorTok{]} \OperatorTok{{-}=}\NormalTok{ delz }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+    \OperatorTok{\}}
+  \OperatorTok{\}}
+\OperatorTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{After (A-3 backported pattern):}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{const} \KeywordTok{auto} \OperatorTok{*}\NormalTok{ \_noalias }\AttributeTok{const}\NormalTok{ x }\OperatorTok{=} \OperatorTok{(}\DataTypeTok{dbl3\_t} \OperatorTok{*)}\NormalTok{ atom}\OperatorTok{{-}\textgreater{}}\NormalTok{x}\OperatorTok{[}\DecValTok{0}\OperatorTok{];}  \CommentTok{// restrict: no aliasing}
+\KeywordTok{auto} \OperatorTok{*}\NormalTok{ \_noalias }\AttributeTok{const}\NormalTok{ f }\OperatorTok{=} \OperatorTok{(}\DataTypeTok{dbl3\_t} \OperatorTok{*)}\NormalTok{ atom}\OperatorTok{{-}\textgreater{}}\NormalTok{f}\OperatorTok{[}\DecValTok{0}\OperatorTok{];}
+
+\ControlFlowTok{for} \OperatorTok{(}\NormalTok{ii }\OperatorTok{=} \DecValTok{0}\OperatorTok{;}\NormalTok{ ii }\OperatorTok{\textless{}}\NormalTok{ inum}\OperatorTok{;}\NormalTok{ ii}\OperatorTok{++)} \OperatorTok{\{}
+\NormalTok{  i }\OperatorTok{=}\NormalTok{ ilist}\OperatorTok{[}\NormalTok{ii}\OperatorTok{];}
+  \DataTypeTok{double}\NormalTok{ fxtmp }\OperatorTok{=} \FloatTok{0.0}\OperatorTok{,}\NormalTok{ fytmp }\OperatorTok{=} \FloatTok{0.0}\OperatorTok{,}\NormalTok{ fztmp }\OperatorTok{=} \FloatTok{0.0}\OperatorTok{;}         \CommentTok{// local accumulators}
+
+  \ControlFlowTok{for} \OperatorTok{(}\NormalTok{jj }\OperatorTok{=} \DecValTok{0}\OperatorTok{;}\NormalTok{ jj }\OperatorTok{\textless{}}\NormalTok{ jnum}\OperatorTok{;}\NormalTok{ jj}\OperatorTok{++)} \OperatorTok{\{}
+    \CommentTok{// ...}
+\NormalTok{    fxtmp }\OperatorTok{+=}\NormalTok{ delx }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}   \CommentTok{// accumulate locally: no memory dependency}
+\NormalTok{    fytmp }\OperatorTok{+=}\NormalTok{ dely }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+\NormalTok{    fztmp }\OperatorTok{+=}\NormalTok{ delz }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+    \ControlFlowTok{if} \OperatorTok{(}\NormalTok{newton\_pair }\OperatorTok{||}\NormalTok{ j }\OperatorTok{\textless{}}\NormalTok{ nlocal}\OperatorTok{)} \OperatorTok{\{}
+\NormalTok{      f}\OperatorTok{[}\NormalTok{j}\OperatorTok{].}\NormalTok{x }\OperatorTok{{-}=}\NormalTok{ delx }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+\NormalTok{      f}\OperatorTok{[}\NormalTok{j}\OperatorTok{].}\NormalTok{y }\OperatorTok{{-}=}\NormalTok{ dely }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+\NormalTok{      f}\OperatorTok{[}\NormalTok{j}\OperatorTok{].}\NormalTok{z }\OperatorTok{{-}=}\NormalTok{ delz }\OperatorTok{*}\NormalTok{ fpair}\OperatorTok{;}
+    \OperatorTok{\}}
+  \OperatorTok{\}}
+\NormalTok{  f}\OperatorTok{[}\NormalTok{i}\OperatorTok{].}\NormalTok{x }\OperatorTok{+=}\NormalTok{ fxtmp}\OperatorTok{;}   \CommentTok{// single write per outer atom}
+\NormalTok{  f}\OperatorTok{[}\NormalTok{i}\OperatorTok{].}\NormalTok{y }\OperatorTok{+=}\NormalTok{ fytmp}\OperatorTok{;}
+\NormalTok{  f}\OperatorTok{[}\NormalTok{i}\OperatorTok{].}\NormalTok{z }\OperatorTok{+=}\NormalTok{ fztmp}\OperatorTok{;}
+\OperatorTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Key changes}: 1. \texttt{double\ **x/f} →
+\texttt{dbl3\_t\ *\ \_noalias} cast: informs compiler that x and f do
+not alias each other or atom type arrays, enabling auto-vectorization of
+distance calculations. 2. Per-pair \texttt{f{[}i{]}{[}k{]}\ +=\ ...} →
+post-inner-loop \texttt{f{[}i{]}.k\ +=\ ftmp}: eliminates loop-carried
+memory dependency on the outer atom's force accumulation, allowing the
+compiler to keep the running sum in a register across inner-loop
+iterations. 3. \texttt{cutsq{[}itype{]}} and other 2D arrays cached as
+1D \texttt{const\ double\ *} row pointers before the inner loop.
+
+Floating-point operation order is preserved exactly (verified
+bit-identical for all 102 modified files using
+\texttt{compare\_thermo.py}).
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\emph{End of Supplementary Materials}
+
+\end{document}
