@@ -1,0 +1,201 @@
+﻿{
+    "Label":  "s1_lj_class2_soft-t4",
+    "Timestamp":  "20260720-105228",
+    "Note":  "S1 OMP scaling 4t",
+    "LammpsVersion":  "30 Mar 2026 - Development - 91d4111a9-modified",
+    "LammpsCommit":  "91d4111a9",
+    "LmpPath":  "D:\\Claude-Code-R\\LAMMPS-CO\\build\\omp-fep\\Release\\lmp.exe",
+    "InputFile":  "D:\\Claude-Code-R\\LAMMPS-CO\\tools\\bench\\in.s1_lj_class2_soft",
+    "ExtraArgs":  [
+                      "-sf",
+                      "omp",
+                      "-pk",
+                      "omp",
+                      "4"
+                  ],
+    "Vars":  [
+
+             ],
+    "ThreadsArg":  4,
+    "Repeats":  3,
+    "NAtoms":  864,
+    "NSteps":  500,
+    "NProcs":  4,
+    "OmpThreads":  4,
+    "LoopTime":  {
+                     "Mean":  0.16464966666666667,
+                     "Std":  0.0013147662656660126,
+                     "N":  3
+                 },
+    "WallTime":  {
+                     "Mean":  0.214623,
+                     "Std":  0.0050061670936955294,
+                     "N":  3
+                 },
+    "Sections":  {
+                     "Pair":  {
+                                  "AvgTime":  {
+                                                  "Mean":  0.14851999999999999,
+                                                  "Std":  0.0012848735346328839,
+                                                  "N":  3
+                                              },
+                                  "PctTotal":  {
+                                                   "Mean":  90.203333333333333,
+                                                   "Std":  0.06110100926607346,
+                                                   "N":  3
+                                               }
+                              },
+                     "Neigh":  {
+                                   "AvgTime":  {
+                                                   "Mean":  0.0057970666666666663,
+                                                   "Std":  0.00038734031978782368,
+                                                   "N":  3
+                                               },
+                                   "PctTotal":  {
+                                                    "Mean":  3.52,
+                                                    "Std":  0.22516660498395411,
+                                                    "N":  3
+                                                }
+                               },
+                     "Comm":  {
+                                  "AvgTime":  {
+                                                  "Mean":  0.0050989333333333331,
+                                                  "Std":  2.3674740406883733E-05,
+                                                  "N":  3
+                                              },
+                                  "PctTotal":  {
+                                                   "Mean":  3.0966666666666671,
+                                                   "Std":  0.035118845842842389,
+                                                   "N":  3
+                                               }
+                              },
+                     "Output":  {
+                                    "AvgTime":  {
+                                                    "Mean":  7.37E-05,
+                                                    "Std":  2.7999999999999965E-06,
+                                                    "N":  3
+                                                },
+                                    "PctTotal":  {
+                                                     "Mean":  0.046666666666666669,
+                                                     "Std":  0.005773502691896258,
+                                                     "N":  3
+                                                 }
+                                },
+                     "Modify":  {
+                                    "AvgTime":  {
+                                                    "Mean":  0.0049421333333333336,
+                                                    "Std":  0.0003411689659587071,
+                                                    "N":  3
+                                                },
+                                    "PctTotal":  {
+                                                     "Mean":  3,
+                                                     "Std":  0.21702534414210706,
+                                                     "N":  3
+                                                 }
+                                },
+                     "Other":  {
+                                   "AvgTime":  {
+                                                   "Mean":  0.00021863333333333333,
+                                                   "Std":  1.8902468974536979E-05,
+                                                   "N":  3
+                                               },
+                                   "PctTotal":  {
+                                                    "Mean":  0.13333333333333333,
+                                                    "Std":  0.011547005383792525,
+                                                    "N":  3
+                                                }
+                               }
+                 },
+    "Runs":  [
+                 {
+                     "WallTimeSec":  0.2116113,
+                     "LoopTime":  0.163956,
+                     "Sections":  {
+                                      "Pair":  {
+                                                   "AvgTime":  0.14787,
+                                                   "PctTotal":  90.19
+                                               },
+                                      "Neigh":  {
+                                                    "AvgTime":  0.0053519,
+                                                    "PctTotal":  3.26
+                                                },
+                                      "Comm":  {
+                                                   "AvgTime":  0.005087,
+                                                   "PctTotal":  3.1
+                                               },
+                                      "Output":  {
+                                                     "AvgTime":  7.05E-05,
+                                                     "PctTotal":  0.04
+                                                 },
+                                      "Modify":  {
+                                                     "AvgTime":  0.0053359,
+                                                     "PctTotal":  3.25
+                                                 },
+                                      "Other":  {
+                                                    "AvgTime":  0.000236,
+                                                    "PctTotal":  0.14
+                                                }
+                                  }
+                 },
+                 {
+                     "WallTimeSec":  0.21185579999999998,
+                     "LoopTime":  0.163827,
+                     "Sections":  {
+                                      "Pair":  {
+                                                   "AvgTime":  0.14769,
+                                                   "PctTotal":  90.15
+                                               },
+                                      "Neigh":  {
+                                                    "AvgTime":  0.0059822,
+                                                    "PctTotal":  3.65
+                                                },
+                                      "Comm":  {
+                                                   "AvgTime":  0.0051262,
+                                                   "PctTotal":  3.13
+                                               },
+                                      "Output":  {
+                                                     "AvgTime":  7.57E-05,
+                                                     "PctTotal":  0.05
+                                                 },
+                                      "Modify":  {
+                                                     "AvgTime":  0.0047349,
+                                                     "PctTotal":  2.89
+                                                 },
+                                      "Other":  {
+                                                    "AvgTime":  0.0002214,
+                                                    "PctTotal":  0.14
+                                                }
+                                  }
+                 },
+                 {
+                     "WallTimeSec":  0.22040189999999998,
+                     "LoopTime":  0.166166,
+                     "Sections":  {
+                                      "Pair":  {
+                                                   "AvgTime":  0.15,
+                                                   "PctTotal":  90.27
+                                               },
+                                      "Neigh":  {
+                                                    "AvgTime":  0.0060571,
+                                                    "PctTotal":  3.65
+                                                },
+                                      "Comm":  {
+                                                   "AvgTime":  0.0050836,
+                                                   "PctTotal":  3.06
+                                               },
+                                      "Output":  {
+                                                     "AvgTime":  7.49E-05,
+                                                     "PctTotal":  0.05
+                                                 },
+                                      "Modify":  {
+                                                     "AvgTime":  0.0047556,
+                                                     "PctTotal":  2.86
+                                                 },
+                                      "Other":  {
+                                                    "AvgTime":  0.0001985,
+                                                    "PctTotal":  0.12
+                                                }
+                                  }
+                 }
+             ]
+}

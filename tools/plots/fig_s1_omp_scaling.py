@@ -34,24 +34,24 @@ THREADS = np.array([1, 2, 4, 8], dtype=float)
 STYLES = {
     "born/coul/dsf": {
         "color": "#1565C0",
-        "pair_frac": [97.1, 96.8, 94.2, 90.5],   # % pair time at 1/2/4/8t
-        "loop_mean": [0.463, 0.250, 0.129, 0.083],
-        "loop_std":  [0.006, 0.003, 0.002, 0.003],
-        "f_amdahl": 0.030,   # serial fraction (1 - pair_frac)
+        "pair_frac": [92.90, 90.76, 86.50, 78.67],  # measured (N=3 runs)
+        "loop_mean": [0.3597, 0.2035, 0.1231, 0.0909],
+        "loop_std":  [0.0069, 0.0024, 0.0074, 0.0068],
+        "f_amdahl": 0.12,   # Amdahl fit from 4t speedup = 2.92×
     },
     "lj/class2/soft": {
         "color": "#E53935",
-        "pair_frac": [88.3, 87.2, 81.5, 76.9],
-        "loop_mean": [0.934, 0.541, 0.291, 0.203],
-        "loop_std":  [0.011, 0.008, 0.005, 0.006],
-        "f_amdahl": 0.120,
+        "pair_frac": [94.79, 93.35, 90.20, 85.03],
+        "loop_mean": [0.5170, 0.2789, 0.1646, 0.1378],
+        "loop_std":  [0.0126, 0.0020, 0.0013, 0.0099],
+        "f_amdahl": 0.09,   # Amdahl fit from 4t speedup = 3.14×
     },
     "nm/cut/split": {
         "color": "#2E7D32",
-        "pair_frac": [96.4, 95.9, 93.1, 88.7],
-        "loop_mean": [0.332, 0.184, 0.109, 0.064],
-        "loop_std":  [0.004, 0.003, 0.002, 0.002],
-        "f_amdahl": 0.040,
+        "pair_frac": [85.90, 81.02, 74.85, 67.74],
+        "loop_mean": [0.1678, 0.0910, 0.0639, 0.0598],
+        "loop_std":  [0.0020, 0.0014, 0.0008, 0.0023],
+        "f_amdahl": 0.17,   # Amdahl fit from 4t speedup = 2.63×
     },
 }
 
@@ -72,7 +72,7 @@ ax.set_xlabel("OMP thread count", fontsize=13)
 ax.set_ylabel("Loop time (s, 864 atoms / 500 steps)", fontsize=13)
 ax.set_xticks(THREADS)
 ax.set_xticklabels(["1", "2", "4", "8"])
-ax.set_ylim(0, 1.15)
+ax.set_ylim(0, 0.70)
 ax.legend(fontsize=11, loc="upper right")
 ax.grid(alpha=0.35, zorder=0)
 ax.set_title("(a) Loop time vs. thread count\n(N=3 runs, error bars ±1σ)", fontsize=14, pad=10)

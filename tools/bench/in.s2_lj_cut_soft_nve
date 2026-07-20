@@ -1,0 +1,25 @@
+# S2 NVE energy conservation: lj/cut/soft (lambda=0.5)
+# 864-atom FCC, 250 steps, high-precision thermo for serial vs OMP comparison
+
+units           lj
+atom_style      atomic
+
+lattice         fcc 0.8442
+region          box block 0 6 0 6 0 6
+create_box      1 box
+create_atoms    1 box
+mass            1 1.0
+
+velocity        all create 1.0 87287 loop geom
+
+pair_style      lj/cut/soft 2 0.5 2.5
+pair_coeff      1 1 1.0 1.0 0.5
+
+neighbor        0.3 bin
+neigh_modify    every 20 delay 0 check no
+
+fix             1 all nve
+
+thermo          1
+thermo_modify   format float %20.15g
+run             250
