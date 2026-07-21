@@ -1,0 +1,31 @@
+---
+title: "AI-Assisted Systematic Optimization of the LAMMPS Molecular Dynamics Simulator via Large Language Model Coding Agents"
+author:
+  - name: Chun-Yeol You
+    affiliation: "Department of Physics and Chemistry, DGIST (Daegu Gyeongbuk Institute of Science and Technology), Daegu, Republic of Korea"
+    email: cyyou@dgist.ac.kr
+date: "2026"
+bibliography: refs.bib
+biblio-style: unsrt
+geometry: "margin=1in"
+fontsize: 11pt
+documentclass: article
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{multirow}
+  - \usepackage{amsmath}
+  - \usepackage{amssymb}
+  - \usepackage{graphicx}
+  - \usepackage{caption}
+  - \usepackage{float}
+  - \usepackage{microtype}
+  - \usepackage[hidelinks]{hyperref}
+  - \usepackage{xcolor}
+  - \usepackage{listings}
+  - \usepackage{setspace}
+  - \usepackage{array}
+  - \lstset{basicstyle=\small\ttfamily, breaklines=true, frame=single, backgroundcolor=\color{gray!10}}
+  - \setlength{\parskip}{6pt}
+  - \setlength{\parindent}{0pt}
+  - \usepackage[T1]{fontenc}
+---

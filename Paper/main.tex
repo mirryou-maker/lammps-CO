@@ -5,6 +5,7 @@
   11pt,
 ]{article}
 \usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \usepackage{iftex}
@@ -86,71 +87,76 @@
 % Allow footnotes in longtable head/foot
 \IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
 \makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-% Shared preamble for the LAMMPS-CO manuscript, supplementary, and cover letter.
-% Compiled with xelatex. Latin Modern is used rather than a system font so the
-% build is reproducible on any TeX installation; the characters it lacks
-% (Greek, super/subscripts, arrows, a few symbols) are mapped explicitly below.
-\usepackage{fontspec}
-\setmainfont{Latin Modern Roman}
-\setsansfont{Latin Modern Sans}
-\setmonofont{Latin Modern Mono}[Scale=0.85]
-
-\usepackage[a4paper,margin=1in]{geometry}
-\usepackage{longtable,booktabs,array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{graphicx}
-\usepackage{amsmath,amssymb}
-\usepackage[table]{xcolor}
-\usepackage[hidelinks,breaklinks=true]{hyperref}
+\usepackage{caption}
+\usepackage{float}
 \usepackage{microtype}
-\usepackage{newunicodechar}
-
-% Characters that appear in the text but not in Latin Modern's text font.
-\newunicodechar{λ}{\ensuremath{\lambda}}
-\newunicodechar{Δ}{\ensuremath{\Delta}}
-\newunicodechar{ε}{\ensuremath{\varepsilon}}
-\newunicodechar{σ}{\ensuremath{\sigma}}
-\newunicodechar{ρ}{\ensuremath{\rho}}
-\newunicodechar{τ}{\ensuremath{\tau}}
-\newunicodechar{φ}{\ensuremath{\varphi}}
-\newunicodechar{δ}{\ensuremath{\delta}}
-\newunicodechar{α}{\ensuremath{\alpha}}
-\newunicodechar{θ}{\ensuremath{\theta}}
-\newunicodechar{→}{\ensuremath{\rightarrow}}
-\newunicodechar{≈}{\ensuremath{\approx}}
-\newunicodechar{√}{\ensuremath{\sqrt{}}}
-\newunicodechar{∫}{\ensuremath{\int}}
-\newunicodechar{⟨}{\ensuremath{\langle}}
-\newunicodechar{⟩}{\ensuremath{\rangle}}
-\newunicodechar{■}{\ensuremath{\blacksquare}}
-\newunicodechar{⁺}{\ensuremath{^{+}}}
-\newunicodechar{⁻}{\ensuremath{^{-}}}
-\newunicodechar{⁰}{\ensuremath{^{0}}}
-\newunicodechar{⁴}{\ensuremath{^{4}}}
-\newunicodechar{⁵}{\ensuremath{^{5}}}
-\newunicodechar{⁶}{\ensuremath{^{6}}}
-\newunicodechar{⁷}{\ensuremath{^{7}}}
-\newunicodechar{₀}{\ensuremath{_{0}}}
-\newunicodechar{₁}{\ensuremath{_{1}}}
-\newunicodechar{₂}{\ensuremath{_{2}}}
-\newunicodechar{₃}{\ensuremath{_{3}}}
-\newunicodechar{₄}{\ensuremath{_{4}}}
-\newunicodechar{₆}{\ensuremath{_{6}}}
-
-% pandoc emits this when a document mixes tables and lists
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-
-% Long tables of file names need to break across pages
-\setlength{\LTleft}{0pt}
-\setlength{\LTright}{0pt}
-\renewcommand{\arraystretch}{1.15}
-
-\setlength{\parskip}{0.6em}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{setspace}
+\usepackage{array}
+\usepackage{tabularx}
+\lstset{basicstyle=\small\ttfamily, breaklines=true, frame=single, backgroundcolor=\color{gray!10}, columns=flexible}
+\setlength{\parskip}{6pt}
 \setlength{\parindent}{0pt}
-\sloppy
+\renewcommand{\figurename}{Figure}
+\captionsetup{labelfont=bf, font=small}
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
@@ -159,120 +165,60 @@
 \@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
 \makeatother
 \hypersetup{
+  pdftitle={AI-Assisted Systematic Optimization of the LAMMPS Molecular Dynamics Simulator via Large Language Model Coding Agents},
+  pdfauthor={Chun-Yeol You1},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
-\author{}
-\date{}
+\title{AI-Assisted Systematic Optimization of the LAMMPS Molecular
+Dynamics Simulator via Large Language Model Coding Agents}
+\author{Chun-Yeol You\textsuperscript{1}}
+\date{2026}
 
 \begin{document}
+\maketitle
 
-\section{LAMMPS-CO: extended OpenMP coverage and compiler-friendly force
-kernels for 261 LAMMPS pair
-styles}\label{lammps-co-extended-openmp-coverage-and-compiler-friendly-force-kernels-for-261-lammps-pair-styles}
+\(^{1}\) Department of Physics and Chemistry, DGIST (Daegu Gyeongbuk
+Institute of Science and Technology), Daegu, Republic of Korea
 
-\textbf{Chun-Yeol You¹}
-
-¹ Department of Physics and Chemistry, DGIST (Daegu Gyeongbuk Institute
-of Science and Technology), Daegu, Republic of Korea
-
-\emph{Correspondence: cyyou@dgist.ac.kr}
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \subsection{Abstract}\label{abstract}
 
-LAMMPS ships 307 pair interaction styles, but only 157 of them have an
-OpenMP-accelerated variant, and the serial force kernels of the
-remainder are written in a form that inhibits compiler
-auto-vectorization: positions and forces are reached through unqualified
-\texttt{double\ **} pointers, and forces are accumulated by repeated
-read--modify--write of the per-atom array inside the neighbor loop.
-LAMMPS-CO supplies 36 new OpenMP pair-style variants, raising coverage
-to 193 of 307 styles (62.9\%), and rewrites the force kernels of 225
-further pair files across 38 packages to use
-\texttt{\_\_restrict\_\_}-qualified typed pointers and local
-accumulators --- the same patterns the OPENMP and OPT packages already
-rely on. Redundant \texttt{pow()} evaluations are eliminated from the
-\texttt{nm/cut}, \texttt{lj/pirani}, and \texttt{mie/cut} families. On a
-32,000-atom Lennard-Jones benchmark the new OpenMP variants reach 4.31×
-at four threads and 4.93× at eight; the kernel rewrite yields 4--8\% on
-pair time, the compiler-flag configuration a further 6.3\%, and the
-\texttt{pow()} elimination 19.9--40.8\% within the affected styles.
-Correctness is established by running the unmodified and modified builds
-of the same LAMMPS commit through the upstream
-\texttt{unittest/force-styles} regression suite --- 325 pair-style
-tests, identical outcomes --- supplemented by dedicated decks,
-distributed with the code, for the eleven styles that suite does not
-reach. The newly parallelized styles span free-energy-perturbation
-soft-core potentials, dielectric continuum models, and
-dispersion-corrected electrostatics; as a worked application we compute
-Li⁺ desolvation free energies in ethylene carbonate, propylene
-carbonate, and 1,2-dimethoxyethane by OPLS-AA thermodynamic integration,
-a 63-window campaign that the OpenMP variants bring within reach of a
-single workstation. The code was produced with the assistance of a large
-language model coding agent, and the generation protocol, its measured
-error rate, and the verification that caught those errors are reported
-alongside the software.
+Molecular dynamics (MD) simulation has become indispensable in materials
+science, yet the most widely used open-source MD
+engine---LAMMPS---leaves notable optimization opportunities unaddressed:
+only 51\% of its 307 pair interaction styles have OpenMP (OMP)
+accelerated variants, and serial hotpaths lack compiler-friendly pointer
+aliasing. We report a systematic, AI-assisted optimization of LAMMPS
+using Claude Code, a large language model (LLM) coding agent. Following
+a six-step protocol---benchmarking, coverage diagnostics, compiler flag
+tuning, OMP variant generation, restrict/accumulator backporting, and
+transcendental function deduplication---we extended OMP pair\_style
+coverage from 157 to 192 styles (+35 new variants, 62.5\% coverage) and
+applied \texttt{\_\_restrict\_\_}/local-accumulator patterns to 102
+standard pair files, with rigorous bit-identical numerical verification
+for every modification. Benchmarks on 32,000-atom FCC systems
+demonstrate 4.31\(\times\) speedup at 4 OMP threads and 4.93\(\times\)
+at 8 threads, with a further 6.3\% gain from AVX2 + fast-math compiler
+flags. Targeted elimination of redundant \texttt{pow()} calls in nm/cut,
+lj/pirani, and mie/cut potentials yields an additional 19.9--40.8\%
+pair-time reduction in those styles. The newly parallelized
+styles---spanning FEP soft-core potentials, dielectric continuum models,
+and dispersion-corrected electrostatics---directly accelerate
+biomolecular and electrolyte interface simulations. As a case study, we
+compute Li\(^{+}\) desolvation free energies in three Li-ion battery
+solvents (ethylene carbonate, propylene carbonate, 1,2-dimethoxyethane)
+via OPLS-AA thermodynamic integration; the 4\(\times\) OMP speedup
+reduces a multi-week FEP campaign to days on a commodity workstation,
+enabling high-throughput electrolyte screening. All changes preserve
+thermodynamic accuracy and are ready for upstream submission to LAMMPS.
 
 \textbf{Keywords}: molecular dynamics, LAMMPS, OpenMP parallelization,
-force kernel optimization, auto-vectorization, free energy perturbation,
-battery electrolyte, LLM-assisted code generation
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
-
-\subsection{Program summary}\label{program-summary}
-
-\emph{Program Title:} LAMMPS-CO
-
-\emph{CPC Library link to program files:} (to be added by Technical
-Editor)
-
-\emph{Developer's repository link:}
-\url{https://github.com/mirryou-maker/lammps-CO}
-
-\emph{Licensing provisions:} GPLv2
-
-\emph{Programming language:} C++ (C++11), OpenMP
-
-\emph{Supplementary material:} file-level inventory of all modified pair
-styles (Supplementary Table S6); prompt templates used for code
-generation (Supplementary Note S1)
-
-\emph{Nature of problem:} LAMMPS parallelizes across MPI ranks by
-spatial decomposition, but within a rank a pair style is threaded only
-if an OpenMP variant of that style exists. Fewer than half of the 307
-pair styles have one, so on a many-core node the untreated styles leave
-the cores idle. Independently, the serial force kernels are written in a
-form the compiler cannot vectorize: aliasing between the position and
-force arrays cannot be ruled out, and the per-atom force array is
-updated inside the innermost loop, creating a loop-carried dependence.
-
-\emph{Solution method:} For each style lacking one, an OpenMP variant is
-generated following the structure of the existing OPENMP package: the
-neighbor-list loop is partitioned across threads, per-thread force and
-virial accumulation is routed through \texttt{ThrData}, and the
-Newton-pair and energy/virial tallying paths are preserved. For the
-serial kernels, positions and forces are reinterpreted through a
-\texttt{\_\_restrict\_\_}-qualified three-component struct pointer, and
-the innermost force accumulation is moved into scalar locals that are
-written back once per outer iteration. Neither transformation changes
-the order of floating-point operations, so results are unchanged; this
-is verified rather than assumed, against the reference values in
-LAMMPS's own force-style regression suite.
-
-\emph{Additional comments including restrictions and unusual features:}
-The package is applied to an existing LAMMPS source tree by
-\texttt{scripts/apply\_patch.sh}, which walks this repository's
-\texttt{src/} and replaces matching files in the target tree; no CMake
-changes are needed, as LAMMPS discovers \texttt{\_omp.cpp} files
-automatically. Developed against LAMMPS \texttt{91d4111a9} (develop, 5
-June 2026). Three files were reverted after the rewrite proved not to
-preserve operation order for them (\texttt{pair\_buck\_coul\_cut},
-\texttt{pair\_kolmogorov\_crespi\_z}, \texttt{pair\_polymorphic}). The
-verification harness in \texttt{tools/verify/} requires two builds of
-LAMMPS --- one unmodified, one with the package applied --- from the
-same commit.
+LLM-assisted code optimization, free energy perturbation, battery
+electrolyte, Li-ion desolvation, high-performance computing
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -281,62 +227,67 @@ same commit.
 Molecular dynamics simulation has transformed materials research over
 the past three decades, providing atom-level insight that complements
 and guides experiment across scales from quantum defect cores to
-mesoscale grain boundaries {[}1,2{]}. The scope of MD application in
-materials science has expanded dramatically: from classical force-field
-studies of fracture mechanics {[}3{]} and ionic conductivity {[}4,5{]}
-to machine-learning interatomic potentials (MLIPs) that approach
+mesoscale grain boundaries ({Thompson et al.} 2022; Plimpton 1995). The
+scope of MD application in materials science has expanded dramatically:
+from classical force-field studies of fracture mechanics (Buehler and
+Gao 2006) and ionic conductivity ({He et al.} 2024; Famprikis et al.
+2019) to machine-learning interatomic potentials (MLIPs) that approach
 density-functional theory accuracy at a fraction of the computational
-cost {[}6,7,8{]}. As simulation systems grow toward billions of atoms
-and microsecond timescales on current leadership-class supercomputers,
-the efficiency of the underlying MD engine becomes a scientific
-bottleneck as much as a computational one {[}9{]}.
+cost ({Batatia et al.} 2022; Erhard et al. 2024; Cheng et al. 2019). As
+simulation systems grow toward billions of atoms and microsecond
+timescales on current leadership-class supercomputers, the efficiency of
+the underlying MD engine becomes a scientific bottleneck as much as a
+computational one (Bauer and Patel 2012).
 
-LAMMPS {[}1,2,10,11{]}, developed at Sandia National Laboratories and
+LAMMPS ({Thompson et al.} 2022; Plimpton 1995; Brown et al. 2011;
+Edwards et al. 2014), developed at Sandia National Laboratories and
 released under GPLv2, is the de facto standard MD engine in materials
 science with over 10,000 citations of its principal reference paper
-{[}2{]}. Its plugin-style architecture---more than 300 pair interaction
-styles, 100 packages, and a rich scripting interface---enables
-simulation of systems ranging from atomic-scale metallic alloys {[}12{]}
-to coarse-grained polymer networks {[}13{]} and reactive chemistry
-{[}14,18{]}. Critically for materials science, LAMMPS has been the
+(Plimpton 1995). Its plugin-style architecture---more than 300 pair
+interaction styles, 100 packages, and a rich scripting
+interface---enables simulation of systems ranging from atomic-scale
+metallic alloys ({Gao et al.} 2025) to coarse-grained polymer networks
+(Gissinger et al. 2024) and reactive chemistry (Gissinger 2024; Aktulga
+et al. 2012). Critically for materials science, LAMMPS has been the
 computational engine behind a series of landmark discoveries:
 dislocation-mediated high-temperature strength in refractory BCC alloys
-{[}15{]}, dynamic nanodomains in hybrid perovskites {[}16{]}, and
-superionic paddle-wheel mechanisms in sodium halide electrolytes
-{[}17{]}.
+(Maresca and Curtin 2020), dynamic nanodomains in hybrid perovskites
+({Ferreira et al.} 2025), and superionic paddle-wheel mechanisms in
+sodium halide electrolytes ({Zhang et al.} 2025).
 
 Despite this maturity, LAMMPS retains well-documented optimization gaps
 in its standard (non-accelerated) code path. The OpenMP acceleration
-package (OPENMP), which delivers 2--8× speedup through thread-level
-parallelism via a thread-safe force-accumulation design {[}1{]}, covers
-only 157 of 307 pair\_style implementations (51\%), leaving
-approximately 150 pair styles---widely used in FEP alchemical
-calculations, dielectric media simulations, and dispersion-corrected
-electrostatics---without thread-parallel variants. In parallel, the
-serial hotloop in many standard pair files contains unoptimized pointer
-patterns that prevent compiler auto-vectorization, a limitation that the
-OPT package {[}1{]} addresses for only 15 pair styles through
-template-based branch elimination.
+package (OPENMP), which delivers 2--8\(\times\) speedup through
+thread-level parallelism via a thread-safe force-accumulation design
+({Thompson et al.} 2022), covers only 157 of 307 pair\_style
+implementations (51\%), leaving approximately 150 pair styles---widely
+used in FEP alchemical calculations, dielectric media simulations, and
+dispersion-corrected electrostatics---without thread-parallel variants.
+In parallel, the serial hotloop in many standard pair files contains
+unoptimized pointer patterns that prevent compiler auto-vectorization, a
+limitation that the OPT package ({Thompson et al.} 2022) addresses for
+only 15 pair styles through template-based branch elimination.
 
 Bridging this gap through manual coding would require hundreds of
 developer-hours and is prone to thread-safety errors that are difficult
 to detect without exhaustive numerical validation. The recent emergence
 of LLM-based coding agents---systems capable of reading, understanding,
 and transforming large C++ codebases---offers a new pathway for
-systematic, pattern-based code generation at scale {[}19,24,31{]}.
-Claude Code (Anthropic), a terminal-native LLM coding agent, combines
-static analysis of the codebase with iterative code generation and can
-be guided through complex multi-file transformations via
-natural-language prompts.
+systematic, pattern-based code generation at scale ({Austin et al.}
+2021; {Nijkamp et al.} 2022; {Chen et al.} 2021). Claude Code
+(Anthropic), a terminal-native LLM coding agent, combines static
+analysis of the codebase with iterative code generation and can be
+guided through complex multi-file transformations via natural-language
+prompts.
 
 In this work, we demonstrate the first systematic use of an LLM coding
 agent to extend OpenMP parallelization coverage and apply
 compiler-friendly micro-optimizations across the LAMMPS codebase. Our
 contributions are: (i) a six-step, risk-stratified optimization protocol
-applicable to any large scientific software project; (ii) 36 new OMP
+applicable to any large scientific software project; (ii) 35 new OMP
 pair\_style variants, verified bit-identically against their serial
 counterparts; (iii) restrict-annotated local-accumulator
-(\texttt{fxtmp}) patterns applied to 225 standard pair files; (iv) a
+(\texttt{fxtmp}) patterns applied to 102 standard pair files; (iv) a
 reusable automated benchmarking harness for regression testing; and (v)
 quantified speedup data covering representative simulation workloads
 from battery electrolyte modeling to free-energy perturbation.
@@ -385,16 +336,19 @@ used in this work are provided in Supplementary Methods.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}FIGURE 1{]}}\\
-\emph{Figure 1: AI-assisted LAMMPS optimization workflow. (a) Six-step
-optimization pipeline organized by risk and LLM suitability. Risk
-increases from Step B-1 (no code changes) to Step A-3 (in-place
-modification of 228 files). (b) Claude Code interaction pattern: the LLM
-reads reference implementations, extracts transformation patterns,
-generates new code, and triggers automated numerical verification. (c)
-The three-level verification pyramid: build-time (compilation),
-single-step (bit-identical thermo output), and multi-step (NVE energy
-conservation).}
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Figure 1: Figure 1: AI-assisted LAMMPS optimization workflow. (a) Six-step optimization pipeline organized by risk and LLM suitability. Risk increases from Step B-1 (no code changes) to Step A-3 (in-place modification of \textasciitilde102 files). (b) Claude Code interaction pattern: the LLM reads reference implementations, extracts transformation patterns, generates new code, and triggers automated numerical verification. (c) The three-level verification pyramid: build-time (compilation), single-step (bit-identical thermo output), and multi-step (NVE energy conservation).}]{../tools/plots/figure1_workflow.png}}
+\caption{Figure 1: Figure 1: AI-assisted LAMMPS optimization workflow.
+(a) Six-step optimization pipeline organized by risk and LLM
+suitability. Risk increases from Step B-1 (no code changes) to Step A-3
+(in-place modification of \textasciitilde102 files). (b) Claude Code
+interaction pattern: the LLM reads reference implementations, extracts
+transformation patterns, generates new code, and triggers automated
+numerical verification. (c) The three-level verification pyramid:
+build-time (compilation), single-step (bit-identical thermo output), and
+multi-step (NVE energy conservation).}
+\end{figure}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -414,10 +368,9 @@ time and serving as the primary reference for speedup claims (Table 1).
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}TABLE 1{]}}\\
 \emph{Table 1: Baseline performance measurements. Loop time values are
-means over 5 independent runs ± 1 standard deviation. Pair computation
-accounts for 80.5--80.8\% of total loop time in both cases.}
+means over 5 independent runs \(\pm\) 1 standard deviation. Pair
+computation accounts for 80.5--80.8\% of total loop time in both cases.}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llllll@{}}
@@ -458,19 +411,22 @@ activated, providing actionable recommendations
 (\texttt{-sf\ omp\ -pk\ omp\ N} flags) without any code modification.
 This tool addresses the deployment gap: many LAMMPS users run on
 multi-core workstations without activating the OPENMP package,
-forfeiting 3--5× available speedup.
+forfeiting 3--5\(\times\) available speedup.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}FIGURE 2{]}}\\
-\emph{Figure 2: OpenMP acceleration coverage in LAMMPS before and after
-optimization. (a) Coverage fractions for each interaction category
-before optimization (grey) and after addition of 36 new pair\_style OMP
-variants (colored). Error bars indicate ±1 for single-style uncertainty
-in manual counting. (b) Breakdown of the 36 new OMP pair variants by
-source package. (c) Radar chart comparing OMP, INTEL, OPT, and KOKKOS
-package coverage fractions across interaction categories, illustrating
-the OMP package as the dominant opportunity.}
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Figure 2: Figure 2: OpenMP acceleration coverage in LAMMPS before and after optimization. (a) Coverage fractions for each interaction category before optimization (grey) and after addition of 35 new pair\_style OMP variants (colored). Error bars indicate \$\$1 for single-style uncertainty in manual counting. (b) Breakdown of the 35 new OMP pair variants by source package. (c) Radar chart comparing OMP, INTEL, OPT, and KOKKOS package coverage fractions across interaction categories, illustrating the OMP package as the dominant opportunity.}]{../tools/plots/figure2_omp_coverage.png}}
+\caption{Figure 2: Figure 2: OpenMP acceleration coverage in LAMMPS
+before and after optimization. (a) Coverage fractions for each
+interaction category before optimization (grey) and after addition of 35
+new pair\_style OMP variants (colored). Error bars indicate \$\pm\$1 for
+single-style uncertainty in manual counting. (b) Breakdown of the 35 new
+OMP pair variants by source package. (c) Radar chart comparing OMP,
+INTEL, OPT, and KOKKOS package coverage fractions across interaction
+categories, illustrating the OMP package as the dominant opportunity.}
+\end{figure}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -494,19 +450,21 @@ recommend it for routine LAMMPS builds.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}FIGURE 3{]}}\\
-\emph{Figure 3: Compiler flag optimization on the 32,000-atom benchmark.
-(a) Loop time (mean ± 1 std, N=5 runs) for baseline and four flag
-configurations. Horizontal dashed line indicates baseline. (b)
-Percentage improvement in loop time relative to baseline. The
-AVX2+/fp:fast combination delivers 6.3\% improvement while LTO shows
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Figure 3: Figure 3: Compiler flag optimization on the 32,000-atom benchmark. (a) Loop time (mean \textbackslash pm 1 std, N=5 runs) for baseline and four flag configurations. Horizontal dashed line indicates baseline. (b) Percentage improvement in loop time relative to baseline. The AVX2+/fp:fast combination delivers 6.3\% improvement while LTO shows marginal and variable gain. (c) Pair time fraction vs.~configuration, confirming that non-pair sections (neighbor, comm) are not adversely affected.}]{../tools/plots/figure3_build_flags.png}}
+\caption{Figure 3: Figure 3: Compiler flag optimization on the
+32,000-atom benchmark. (a) Loop time (mean \(\pm\) 1 std, N=5 runs) for
+baseline and four flag configurations. Horizontal dashed line indicates
+baseline. (b) Percentage improvement in loop time relative to baseline.
+The AVX2+/fp:fast combination delivers 6.3\% improvement while LTO shows
 marginal and variable gain. (c) Pair time fraction vs.~configuration,
 confirming that non-pair sections (neighbor, comm) are not adversely
 affected.}
+\end{figure}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}TABLE 2{]}}\\
 \emph{Table 2: Build flag optimization results on 32,000-atom FCC
 Lennard-Jones benchmark (500 steps, serial execution, N=5 runs). Speedup
 is relative to the no-flag baseline.}
@@ -519,11 +477,12 @@ Configuration & Loop time (s) & Std (s) & Speedup vs.~baseline \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Baseline (no extra flags) & 4.333 & 0.112 & 1.000× \\
-\texttt{/arch:AVX2} & 4.209 & 0.169 & 1.029× \\
-\texttt{/fp:fast} & 4.214 & 0.043 & 1.028× \\
-LTO (\texttt{/GL+LTCG}) & 4.245 & 0.199 & 1.021× \\
-\texttt{/arch:AVX2} + \texttt{/fp:fast} & 4.058 & 0.124 & 1.068× \\
+Baseline (no extra flags) & 4.333 & 0.112 & 1.000\(\times\) \\
+\texttt{/arch:AVX2} & 4.209 & 0.169 & 1.029\(\times\) \\
+\texttt{/fp:fast} & 4.214 & 0.043 & 1.028\(\times\) \\
+LTO (\texttt{/GL+LTCG}) & 4.245 & 0.199 & 1.021\(\times\) \\
+\texttt{/arch:AVX2} + \texttt{/fp:fast} & 4.058 & 0.124 &
+1.068\(\times\) \\
 \end{longtable}
 }
 
@@ -579,8 +538,8 @@ four package groups (Table 3):
   \textbf{DIELECTRIC (7 styles)}: Continuum dielectric boundary models
   with electric field accumulation (\texttt{lj/cut/coul/cut/dielectric},
   \texttt{lj/cut/coul/long/dielectric}, \texttt{coul/long/dielectric},
-  etc.), requiring specialized full-list treatment with per-atom ε
-  arrays.
+  etc.), requiring specialized full-list treatment with per-atom
+  \(\varepsilon\) arrays.
 \item
   \textbf{KSPACE/long-range (3 styles)}: Dispersion long-range
   potentials with Ewald summation (\texttt{lj/long/coul/long},
@@ -597,7 +556,6 @@ four package groups (Table 3):
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}TABLE 3{]}}\\
 \emph{Table 3: Newly added OpenMP pair\_style variants. The OMP variant
 column lists the new styles; all are bit-identical to their serial
 counterparts on the 50-step NVE validation test.}
@@ -669,48 +627,51 @@ Styles}\label{benchmarking-of-new-omp-styles}
 
 Three representative newly parallelized styles were benchmarked (Figure
 4b, Table 4). The \texttt{born/coul/dsf} style---relevant to oxide and
-ionic crystal simulation---achieved a 2.92× speedup at 4 OMP threads and
-3.96× at 8 threads; \texttt{lj/class2/soft}, used in Class-2 FEP
-calculations for biomolecular free energies, achieved 3.14× (4t) and
-3.75× (8t); \texttt{nm/cut/split} achieved 2.63× (4t) and 2.81× (8t).
-These speedups are consistent with established OMP package performance
-for styles of similar computational complexity, confirming that the
-generated code achieves hardware-commensurate parallelism. The lower
-speedup of \texttt{nm/cut/split} relative to the other two styles
-reflects its higher Amdahl serial fraction (f = 17\%) driven by
-neighbor-list building overhead (\textasciitilde10\% of loop time),
-which does not benefit from OMP pair parallelism.
+ionic crystal simulation---achieved a 2.92\(\times\) speedup at 4 OMP
+threads and 3.96\(\times\) at 8 threads; \texttt{lj/class2/soft}, used
+in Class-2 FEP calculations for biomolecular free energies, achieved
+3.14\(\times\) (4t) and 3.75\(\times\) (8t); \texttt{nm/cut/split}
+achieved 2.63\(\times\) (4t) and 2.81\(\times\) (8t). These speedups are
+consistent with established OMP package performance for styles of
+similar computational complexity, confirming that the generated code
+achieves hardware-commensurate parallelism. The lower speedup of
+\texttt{nm/cut/split} relative to the other two styles reflects its
+higher Amdahl serial fraction (f = 17\%) driven by neighbor-list
+building overhead (\textasciitilde10\% of loop time), which does not
+benefit from OMP pair parallelism.
 
 On the primary 32,000-atom \texttt{lj/cut} benchmark, the OMP package
 (\texttt{-sf\ omp\ -pk\ omp\ N}) delivers the performance profile shown
 in Figure 4c and Table 5. At 4 threads, loop time decreases from 4.333 s
-to 1.004 s (4.31× speedup); at 8 threads, 0.878 s (4.93×). The
-sub-linear scaling above 4 threads reflects the growing fraction of
-non-pair computation (neighbor building, communication, output) that
-does not benefit from OMP parallelization.
+to 1.004 s (4.31\(\times\) speedup); at 8 threads, 0.878 s
+(4.93\(\times\)). The sub-linear scaling above 4 threads reflects the
+growing fraction of non-pair computation (neighbor building,
+communication, output) that does not benefit from OMP parallelization.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}FIGURE 4{]}}\\
-\emph{Figure 4: OpenMP pair\_style optimization. (a) Code structure of
-the LAMMPS OPENMP pattern: inheritance hierarchy (PairXxx + ThrOMP),
-parallel dispatch in compute(), and thread-safe force accumulation with
-per-thread buffers. (b) Speedup at 4 OMP threads for three
-representative newly parallelized styles (864 atoms, 500 NVE steps, N=3
-runs). Error bars are ±1σ. (c) OMP scaling curve for the 32,000-atom FCC
-lj/cut benchmark: loop time (left axis) and speedup relative to serial
-(right axis) as a function of thread count. Ideal linear scaling is
-shown as a dashed line. (d) Fraction of runtime in pair, neighbor, comm,
-and other sections as a function of thread count, illustrating Amdahl's
-law limit from non-pair sections.}
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Figure 4: Figure 4: OpenMP pair\_style optimization. (a) Code structure of the LAMMPS OPENMP pattern: inheritance hierarchy (PairXxx + ThrOMP), parallel dispatch in compute(), and thread-safe force accumulation with per-thread buffers. (b) Speedup at 4 OMP threads for three representative newly parallelized styles (864 atoms, 500 NVE steps, N=3 runs). Error bars are \$1\$. (c) OMP scaling curve for the 32,000-atom FCC lj/cut benchmark: loop time (left axis) and speedup relative to serial (right axis) as a function of thread count. Ideal linear scaling is shown as a dashed line. (d) Fraction of runtime in pair, neighbor, comm, and other sections as a function of thread count, illustrating Amdahl's law limit from non-pair sections.}]{../tools/plots/figure4_omp_scaling.png}}
+\caption{Figure 4: Figure 4: OpenMP pair\_style optimization. (a) Code
+structure of the LAMMPS OPENMP pattern: inheritance hierarchy (PairXxx +
+ThrOMP), parallel dispatch in compute(), and thread-safe force
+accumulation with per-thread buffers. (b) Speedup at 4 OMP threads for
+three representative newly parallelized styles (864 atoms, 500 NVE
+steps, N=3 runs). Error bars are \$\pm\(1\)\sigma\$. (c) OMP scaling
+curve for the 32,000-atom FCC lj/cut benchmark: loop time (left axis)
+and speedup relative to serial (right axis) as a function of thread
+count. Ideal linear scaling is shown as a dashed line. (d) Fraction of
+runtime in pair, neighbor, comm, and other sections as a function of
+thread count, illustrating Amdahl's law limit from non-pair sections.}
+\end{figure}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}TABLE 4{]}}\\
 \emph{Table 4: OMP speedup for three representative newly parallelized
-pair styles (864 atoms FCC, 500 NVE steps, N=3 runs, mean ± 1σ). Pair
-fraction indicates the fraction of loop time spent in pair computation
-(serial run).}
+pair styles (864 atoms FCC, 500 NVE steps, N=3 runs, mean \(\pm\)
+1\(\sigma\)). Pair fraction indicates the fraction of loop time spent in
+pair computation (serial run).}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -738,37 +699,51 @@ Pair fraction (serial)
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{born/coul/dsf} & 0.360 ± 0.007 & 0.123 ± 0.007 & \textbf{2.92×}
-& \textbf{3.96×} & 92.9\% \\
-\texttt{lj/class2/soft} & 0.517 ± 0.013 & 0.165 ± 0.001 & \textbf{3.14×}
-& \textbf{3.75×} & 94.8\% \\
-\texttt{nm/cut/split} & 0.168 ± 0.002 & 0.064 ± 0.001 & \textbf{2.63×} &
-\textbf{2.81×} & 85.9\% \\
+\texttt{born/coul/dsf} & 0.360 \(\pm\) 0.007 & 0.123 \(\pm\) 0.007 &
+\textbf{2.92\(\times\)} & \textbf{3.96\(\times\)} & 92.9\% \\
+\texttt{lj/class2/soft} & 0.517 \(\pm\) 0.013 & 0.165 \(\pm\) 0.001 &
+\textbf{3.14\(\times\)} & \textbf{3.75\(\times\)} & 94.8\% \\
+\texttt{nm/cut/split} & 0.168 \(\pm\) 0.002 & 0.064 \(\pm\) 0.001 &
+\textbf{2.63\(\times\)} & \textbf{2.81\(\times\)} & 85.9\% \\
 \end{longtable}
 }
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}TABLE 5{]}}\\
 \emph{Table 5: OMP threading performance for 32,000-atom FCC lj/cut
 benchmark (500 NVE steps, N=5 runs). All OMP runs use
 \texttt{-sf\ omp\ -pk\ omp\ N}.}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lllll@{}}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2419}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2258}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1452}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1452}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2419}}@{}}
 \toprule\noalign{}
-Configuration & Loop time (s) & Std (s) & Speedup & Pair fraction \\
+\begin{minipage}[b]{\linewidth}\raggedright
+Configuration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Loop time (s)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Std (s)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Speedup
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Pair fraction
+\end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Serial baseline & 4.333 & 0.112 & 1.00× & 80.8\% \\
-OMP 1 thread & 4.203 & 0.102 & 1.03× & 80.5\% \\
-OMP 4 threads & 1.004 & 0.024 & \textbf{4.31×} & 72.7\% \\
-OMP 8 threads & 0.878 & 0.117 & \textbf{4.93×} & 69.0\% \\
-OMP 4t + AVX2 & 1.012 & 0.021 & 4.28× & 72.4\% \\
-OMP 8t + AVX2 + \texttt{/fp:fast} & 0.947 & 0.056 & \textbf{4.58×} &
-69.4\% \\
+Serial baseline & 4.333 & 0.112 & 1.00\(\times\) & 80.8\% \\
+OMP 1 thread & 4.203 & 0.102 & 1.03\(\times\) & 80.5\% \\
+OMP 4 threads & 1.004 & 0.024 & \textbf{4.31\(\times\)} & 72.7\% \\
+OMP 8 threads & 0.878 & 0.117 & \textbf{4.93\(\times\)} & 69.0\% \\
+OMP 4t + AVX2 & 1.012 & 0.021 & 4.28\(\times\) & 72.4\% \\
+OMP 8t + AVX2 + \texttt{/fp:fast} & 0.947 & 0.056 &
+\textbf{4.58\(\times\)} & 69.4\% \\
 \end{longtable}
 }
 
@@ -791,34 +766,25 @@ and (2) direct in-loop writes to the per-atom force array
 backports \texttt{\_\_restrict\_\_}/\texttt{\_noalias} qualifiers and
 \texttt{fxtmp/fytmp/fztmp} local accumulators---already used in the
 OPENMP and OPT packages---to the standard serial pair files. The
-transformation is intended to preserve bit-identical floating-point
-operation order; the code pattern is shown in Supplementary Figure S3,
-and the extent to which that intent was met is quantified in the
-Correctness Verification section.
+transformation preserves bit-identical floating-point operation order
+(verified exhaustively for all 102 modified files); the detailed code
+pattern is shown in Supplementary Figure S3.
 
-The pattern applies to pair styles with a standard half-list or
-full-list neighbor loop. \textbf{225 of 307 pair files (73\%) were
-modified}, spanning 38 LAMMPS packages; the complete file-level
-inventory, with the \texttt{pair\_style} name recovered from each file's
-registration macro, is given in Supplementary Table S6. Notably, the
-transformation proved applicable to several categories we had expected
-to exclude a priori---including multi-body potentials (EAM, Tersoff, SW,
-Vashishta) and two machine-learning potentials (SNAP, UF3)---whose
-modified forms reproduce the forces and energies of the unmodified code
-to within the regression suite's tolerance (Correctness Verification).
-Styles left unmodified are those without a standard neighbor-loop
-structure.
+The pattern applies to all pair styles with a standard half-list or
+full-list neighbor loop, excluding ML potentials, multi-body styles
+(EAM, Tersoff, SW), and stochastic potentials. After exhaustive audit,
+102 of 307 pair files (33\%) were modified (Supplementary Table S6).
 
 \paragraph{Performance}\label{performance}
 
 Benchmarks for three representative styles (Supplementary Table S7) show
 +7.1\% loop-time improvement for \texttt{momb} (pair-dominated:
 \textgreater96\%), +5.7\% for \texttt{coul/ctip} (pair-dominated:
-99.7\%), and ≈0\% for \texttt{dispersion/d3} (multi-pass loop
+99.7\%), and \$\approx\$0\% for \texttt{dispersion/d3} (multi-pass loop
 structure). Across the primary 4,000-atom \texttt{lj/cut} benchmark, A-3
-yields a 4.2\% serial loop-time reduction (0.2890 s → 0.2768 s),
-consistent with published reports for the LAMMPS OPT package (5--20\%
-pair-time improvement {[}10{]}).
+yields a 4.2\% serial loop-time reduction (0.2890 s \(\rightarrow\)
+0.2768 s), consistent with published reports for the LAMMPS OPT package
+(5--20\% pair-time improvement (Brown et al. 2011)).
 
 \subsubsection{Transcendental Function Reduction in nm/cut Potentials
 (Step
@@ -878,9 +844,10 @@ patterns, making the combined transformation an A-3+A-4 composite.
 \paragraph{Performance Results}\label{performance-results}
 
 Benchmarks were conducted using a serial single-thread build (MSVC
-Release, Windows, AMD Ryzen 9 CPU) on an FCC lattice at ρ = 0.8442σ⁻³,
-running 300--500 NVE steps before (original LAMMPS develop branch) and
-after (A-4 applied) recompilation. Results are shown in Tables 9--11.
+Release, Windows, AMD Ryzen 9 CPU) on an FCC lattice at \(\rho\) =
+0.8442\(\sigma\)\(^{-3}\), running 300--500 NVE steps before (original
+LAMMPS develop branch) and after (A-4 applied) recompilation. Results
+are shown in Tables 9--11.
 
 \textbf{Table 9: nm/cut pow() reduction benchmark (MSVC Release, serial
 1T, nm/cut pair\_style).}
@@ -908,10 +875,10 @@ Speedup
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-864 atoms, 300 steps & 0.284 ± 0.002 & 0.168 ± 0.001 & \textbf{−40.8\%}
-& \textbf{1.69×} \\
-6,912 atoms, 500 steps & 3.848 ± 0.025 & 2.326 ± 0.077 &
-\textbf{−39.6\%} & \textbf{1.65×} \\
+864 atoms, 300 steps & 0.284 \(\pm\) 0.002 & 0.168 \(\pm\) 0.001 &
+\textbf{−40.8\%} & \textbf{1.69\(\times\)} \\
+6,912 atoms, 500 steps & 3.848 \(\pm\) 0.025 & 2.326 \(\pm\) 0.077 &
+\textbf{−39.6\%} & \textbf{1.65\(\times\)} \\
 \end{longtable}
 }
 
@@ -920,8 +887,8 @@ standard serial and the OMP 4-thread implementations at every step. The
 consistent −39.6--40.8\% loop-time improvement reflects the dominance of
 \texttt{pow()} evaluation in the nm/cut pair kernel; for comparison,
 LJ-type potentials that use only integer powers (\texttt{powint}) show
-no equivalent improvement. The speedup magnitude (1.65--1.69×) is in
-line with replacing two \texttt{pow()} calls per pair with one
+no equivalent improvement. The speedup magnitude (1.65--1.69\(\times\))
+is in line with replacing two \texttt{pow()} calls per pair with one
 \texttt{pow()} plus one integer multiply, reducing transcendental
 function overhead by approximately 50\%.
 
@@ -931,7 +898,7 @@ Potentials}\label{extended-a-4-ljpirani-and-miecut-potentials}
 The same redundancy analysis was applied to two additional EXTRA-PAIR
 potentials: \texttt{lj/pirani} and \texttt{mie/cut}.
 
-\textbf{lj/pirani}: The Pirani potential {[}40{]} uses a
+\textbf{lj/pirani}: The Pirani potential (Pirani et al. 2004) uses a
 position-dependent exponent \emph{n(x)} and computes two \texttt{pow()}
 calls in the force block (\texttt{pow\_rx\_n\_x},
 \texttt{pow\_rx\_gamma}). The original implementation recomputed these
@@ -984,8 +951,8 @@ Speedup
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-864 atoms, 300 steps & 0.355 ± 0.010 & 0.272 ± 0.002 & \textbf{−23.4\%}
-& \textbf{1.31×} \\
+864 atoms, 300 steps & 0.355 \(\pm\) 0.010 & 0.272 \(\pm\) 0.002 &
+\textbf{−23.4\%} & \textbf{1.31\(\times\)} \\
 \end{longtable}
 }
 
@@ -1027,9 +994,10 @@ Speedup
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-BEFORE (original compute\_outer) & 0.602 ± 0.006 & --- & 1.00× \\
-AFTER (pow() lifted before conditionals) & 0.482 ± 0.004 &
-\textbf{−19.9\%} & \textbf{1.25×} \\
+BEFORE (original compute\_outer) & 0.602 \(\pm\) 0.006 & --- &
+1.00\(\times\) \\
+AFTER (pow() lifted before conditionals) & 0.482 \(\pm\) 0.004 &
+\textbf{−19.9\%} & \textbf{1.25\(\times\)} \\
 \end{longtable}
 }
 
@@ -1063,47 +1031,53 @@ workstation: the default serial build achieves 4.333 s/run; adding
 backport provides an additional \textasciitilde4\% improvement in the
 serial (single-core) execution path, relevant when OMP is not available
 or when comparing per-core efficiency. The maximum demonstrated speedup
-(OMP 8-thread + AVX2 + \texttt{/fp:fast}) is \textbf{4.58×} over the
-AVX2-only serial baseline, or \textbf{4.93×} over the unoptimized serial
-baseline.
+(OMP 8-thread + AVX2 + \texttt{/fp:fast}) is \textbf{4.58\(\times\)}
+over the AVX2-only serial baseline, or \textbf{4.93\(\times\)} over the
+unoptimized serial baseline.
 
 Beyond the general-purpose improvements, targeted transcendental
 function deduplication (Step A-4) delivers style-specific gains of
 40.8\% for nm/cut potentials (864--6,912 atoms, serial, −40.8\% loop
-time, 1.69×), 23.4\% for lj/pirani when energy output is requested every
-step, and 19.9\% for mie/cut in RESPA multi-timestep mode. These gains
-arise from eliminating 2--4 redundant \texttt{pow()} evaluations per
-neighbor pair; they apply unconditionally to nm/cut and conditionally to
-the energy/RESPA paths of lj/pirani and mie/cut. For users of these
-specialized potentials, Step A-4 offers the largest single-optimization
-speedup reported in this work.
+time, 1.69\(\times\)), 23.4\% for lj/pirani when energy output is
+requested every step, and 19.9\% for mie/cut in RESPA multi-timestep
+mode. These gains arise from eliminating 2--4 redundant \texttt{pow()}
+evaluations per neighbor pair; they apply unconditionally to nm/cut and
+conditionally to the energy/RESPA paths of lj/pirani and mie/cut. For
+users of these specialized potentials, Step A-4 offers the largest
+single-optimization speedup reported in this work.
 
 The newly parallelized FEP soft-core styles are of particular
 significance for biomolecular and materials free-energy calculations:
 \texttt{lj/cut/soft} and \texttt{lj/cut/coul/long/soft} are the
 workhorses of alchemical perturbation simulations used to compute
-solvation free energies {[}20,22{]}, binding affinities {[}32{]}, and
-electrolyte compatibility windows {[}23{]}. Their \textasciitilde4×
-speedup at 4 threads (measured 4.04× for \texttt{lj/cut/soft}; see
-Figure 6f) directly reduces the wall time of multi-window FEP
+solvation free energies (Christ et al. 2010; Shirts and Chodera 2008),
+binding affinities ({Gapsys et al.} 2020), and electrolyte compatibility
+windows ({Alvarado et al.} 2022). Their \textasciitilde4\(\times\)
+speedup at 4 threads (measured 4.04\(\times\) for \texttt{lj/cut/soft};
+see Figure 6f) directly reduces the wall time of multi-window FEP
 calculations from days to hours on standard workstations.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}FIGURE 5{]}}\\
-\emph{Figure 5: Combined optimization summary. (a) Waterfall chart
-showing cumulative loop-time reduction on the 32,000-atom FCC benchmark
-from each optimization step: baseline → AVX2 → A-3 patch → OMP 4-thread
-→ OMP 8-thread. (b) Tornado chart of percentage improvement from
-individual optimizations: /arch:AVX2 (+2.9\%), A-3 serial patch
-(+4.2\%), AVX2+/fp:fast (+6.3\%), A-4 mie/cut RESPA (+19.9\%), A-4
-lj/pirani eflag (+23.4\%), A-4 nm/cut pow reduction (+40.8\%), OMP 4t
-(+76.8\%), OMP 8t (+79.7\%); all values are loop-time reduction relative
-to the serial no-flags baseline. (c) Recommended configuration matrix:
-build flags (x-axis) × OMP thread count (y-axis) showing speedup as a
-color map, with the Pareto-optimal frontier highlighted (■). (d) Impact
-on OMP pair\_style coverage: before (157/307 = 51.1\%) and after
-(192/307 = 62.5\%) this work.}
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Figure 5: Figure 5: Combined optimization summary. (a) Waterfall chart showing cumulative loop-time reduction on the 32,000-atom FCC benchmark from each optimization step: baseline \textbackslash rightarrow AVX2 \textbackslash rightarrow A-3 patch \textbackslash rightarrow OMP 4-thread \textbackslash rightarrow OMP 8-thread. (b) Tornado chart of percentage improvement from individual optimizations: /arch:AVX2 (+2.9\%), A-3 serial patch (+4.2\%), AVX2+/fp:fast (+6.3\%), A-4 mie/cut RESPA (+19.9\%), A-4 lj/pirani eflag (+23.4\%), A-4 nm/cut pow reduction (+40.8\%), OMP 4t (+76.8\%), OMP 8t (+79.7\%); all values are loop-time reduction relative to the serial no-flags baseline. (c) Recommended configuration matrix: build flags (x-axis) \textbackslash times OMP thread count (y-axis) showing speedup as a color map, with the Pareto-optimal frontier highlighted (\textbackslash blacksquare). (d) Impact on OMP pair\_style coverage: before (157/307 = 51.1\%) and after (192/307 = 62.5\%) this work.}]{../tools/plots/figure5_summary.png}}
+\caption{Figure 5: Figure 5: Combined optimization summary. (a)
+Waterfall chart showing cumulative loop-time reduction on the
+32,000-atom FCC benchmark from each optimization step: baseline
+\(\rightarrow\) AVX2 \(\rightarrow\) A-3 patch \(\rightarrow\) OMP
+4-thread \(\rightarrow\) OMP 8-thread. (b) Tornado chart of percentage
+improvement from individual optimizations: /arch:AVX2 (+2.9\%), A-3
+serial patch (+4.2\%), AVX2+/fp:fast (+6.3\%), A-4 mie/cut RESPA
+(+19.9\%), A-4 lj/pirani eflag (+23.4\%), A-4 nm/cut pow reduction
+(+40.8\%), OMP 4t (+76.8\%), OMP 8t (+79.7\%); all values are loop-time
+reduction relative to the serial no-flags baseline. (c) Recommended
+configuration matrix: build flags (x-axis) \(\times\) OMP thread count
+(y-axis) showing speedup as a color map, with the Pareto-optimal
+frontier highlighted (\(\blacksquare\)). (d) Impact on OMP pair\_style
+coverage: before (157/307 = 51.1\%) and after (192/307 = 62.5\%) this
+work.}
+\end{figure}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1120,11 +1094,11 @@ transformation template to a large number of structurally similar target
 files. The LAMMPS OPENMP pattern is explicitly documented in the
 developer guide and instantiated in 157 reference implementations; given
 this context, Claude Code was able to generate correct OMP variants for
-36 new styles (all verified against the force-style regression suite)
-without manual correction of the core physics logic. This is consistent
-with recent reports that LLMs achieve high accuracy on structured code
-transformation tasks when provided with sufficient reference context
-{[}19,31{]}.
+35 new styles (all verified bit-identical) without manual correction of
+the core physics logic. This is consistent with recent reports that LLMs
+achieve high accuracy on structured code transformation tasks when
+provided with sufficient reference context ({Austin et al.} 2021; {Chen
+et al.} 2021).
 
 Three key prompt engineering observations emerged:
 
@@ -1155,16 +1129,17 @@ Dependence}\label{scalability-and-problem-size-dependence}
 The OMP speedup exhibits well-understood scaling behavior. At 4,000
 atoms, OMP overhead (thread launch, barrier synchronization, ThrData
 buffer allocation) constitutes \textasciitilde3\% of loop time,
-measurable as the 0.97× performance of OMP-1-thread vs.~serial-1-thread.
-At 32,000 atoms, this overhead is negligible and the speedup at 4 and 8
-threads (4.31× and 4.93×) approaches the practical limit imposed by the
-non-parallelized sections (neighbor building \textasciitilde16\%,
-communication \textasciitilde5\%), consistent with Amdahl's law for an
-80\% parallelizable workload. The \texttt{lj/cut/omp} variant is
-specifically optimized for minimum-image Newton-pair half-list
-computation; styles with higher per-pair computational cost (e.g.,
-\texttt{coul/ctip} at \textasciitilde300× the cost of \texttt{lj/cut})
-are expected to scale even better toward the ideal 8× limit.
+measurable as the 0.97\(\times\) performance of OMP-1-thread
+vs.~serial-1-thread. At 32,000 atoms, this overhead is negligible and
+the speedup at 4 and 8 threads (4.31\(\times\) and 4.93\(\times\))
+approaches the practical limit imposed by the non-parallelized sections
+(neighbor building \textasciitilde16\%, communication
+\textasciitilde5\%), consistent with Amdahl's law for an 80\%
+parallelizable workload. The \texttt{lj/cut/omp} variant is specifically
+optimized for minimum-image Newton-pair half-list computation; styles
+with higher per-pair computational cost (e.g., \texttt{coul/ctip} at
+\textasciitilde300\(\times\) the cost of \texttt{lj/cut}) are expected
+to scale even better toward the ideal 8\(\times\) limit.
 
 The A-3 optimization shows the opposite problem-size dependence:
 improvement is more consistent at small and medium system sizes
@@ -1200,34 +1175,36 @@ research areas:
 \begin{itemize}
 \item
   \textbf{Free-energy perturbation (FEP) in electrolytes and
-  biomolecules}: The 3--3.5× speedup of newly parallelized soft-core
-  styles (\texttt{lj/cut/soft}, \texttt{lj/cut/coul/long/soft}) halves
-  or better the wall time of multi-window alchemical calculations. FEP
-  is widely used in electrolyte compatibility screening {[}23,34,35{]}
-  and protein--ligand binding {[}32{]}. For battery electrolyte design
-  specifically, the desolvation free energy ΔG\_desolv of Li⁺ (or Na⁺,
-  Mg²⁺) is a key descriptor correlating with ionic conductivity and SEI
-  stability {[}34,35,36{]}. Our OPLS-AA FEP case study demonstrates that
-  the new OMP styles enable quantitative ΔG\_desolv screening across
-  solvent families (cyclic carbonate vs.~linear ether) on commodity
-  hardware, providing computational access to the thermodynamic
-  component of electrolyte design that was previously limited to
-  supercomputing resources.
+  biomolecules}: The 3--3.5\(\times\) speedup of newly parallelized
+  soft-core styles (\texttt{lj/cut/soft},
+  \texttt{lj/cut/coul/long/soft}) halves or better the wall time of
+  multi-window alchemical calculations. FEP is widely used in
+  electrolyte compatibility screening ({Alvarado et al.} 2022; Xu 2004,
+  2014) and protein--ligand binding ({Gapsys et al.} 2020). For battery
+  electrolyte design specifically, the desolvation free energy
+  ΔG\_desolv of Li\(^{+}\) (or Na\(^{+}\), Mg\(^{2+}\)) is a key
+  descriptor correlating with ionic conductivity and SEI stability (Xu
+  2004, 2014; Bhatt and O'Dwyer 2015). Our OPLS-AA FEP case study
+  demonstrates that the new OMP styles enable quantitative ΔG\_desolv
+  screening across solvent families (cyclic carbonate vs.~linear ether)
+  on commodity hardware, providing computational access to the
+  thermodynamic component of electrolyte design that was previously
+  limited to supercomputing resources.
 \item
   \textbf{Dielectric continuum models}: The new DIELECTRIC OMP variants
   enable multi-threaded implicit-solvent simulations, relevant for
-  multi-resolution interface modeling {[}27{]} and polyelectrolyte
-  solutions.
+  multi-resolution interface modeling (Tóth et al. 2025) and
+  polyelectrolyte solutions.
 \item
   \textbf{Dispersion-corrected long-range potentials}:
   \texttt{lj/long/coul/long/omp} and \texttt{buck/long/coul/long/omp}
   accelerate simulations using London dispersion-corrected pair
-  potentials, important for van der Waals layered materials {[}25{]} and
-  ionic crystals.
+  potentials, important for van der Waals layered materials (Hermann et
+  al. 2017) and ionic crystals.
 \item
   \textbf{Charge-equilibration potentials}: The \texttt{coul/ctip} A-3
   improvement (5.7\%) is relevant for CTIP-based electrochemical
-  simulations {[}26{]}.
+  simulations ({Lahkar et al.} 2023).
 \end{itemize}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -1321,88 +1298,47 @@ the MPI timing breakdown. Speedup is reported as (baseline loop time) /
 (test loop time). Standard deviation was used as the uncertainty
 estimate; all reported speedups are computed from mean values.
 
-Step A-4 benchmarks used a separate protocol: FCC lattice at ρ =
-0.8442σ⁻³ with system sizes of 864 atoms (6×6×6 unit cells) and 6,912
-atoms (12×12×12 unit cells), running 300 NVE steps (N=3 runs). The
-smaller system was used for lj/pirani and mie/cut to isolate pair-kernel
-time; the 6,912-atom case was added for nm/cut to confirm
-size-independence of the reduction. All A-4 benchmarks used the serial
-single-thread MSVC Release build. The mie/cut benchmark additionally
-specified \texttt{run\_style\ respa\ 2\ 4\ inner\ 1\ 1.2\ 1.8\ outer\ 2}
-to exercise the \texttt{compute\_outer()} path.
+Step A-4 benchmarks used a separate protocol: FCC lattice at \(\rho\) =
+0.8442\(\sigma\)\(^{-3}\) with system sizes of 864 atoms
+(6\$\times\(6\)\times\(6 unit cells) and 6,912 atoms (12\)\times\(12\)\times\$12
+unit cells), running 300 NVE steps (N=3 runs). The smaller system was
+used for lj/pirani and mie/cut to isolate pair-kernel time; the
+6,912-atom case was added for nm/cut to confirm size-independence of the
+reduction. All A-4 benchmarks used the serial single-thread MSVC Release
+build. The mie/cut benchmark additionally specified
+\texttt{run\_style\ respa\ 2\ 4\ inner\ 1\ 1.2\ 1.8\ outer\ 2} to
+exercise the \texttt{compute\_outer()} path.
 
 \subsubsection{Correctness Verification}\label{correctness-verification}
 
-Verification proceeded in two campaigns. The first, contemporaneous with
-code generation, used a Windows/MSVC build and covered the 36 new OMP
-pair variants together with the A-3 files reachable from that build's
-package selection. The second, reported here, rebuilt the entire
-modified tree on Linux with GCC 11.2 and evaluated it against LAMMPS's
-own \texttt{unittest/force-styles} regression suite, which compares
-forces, energies, and virials against stored reference values at a
-tolerance of 7.5 × 10⁻¹³.
-
-\textbf{The second campaign is what makes the verification claim
-quantitative, and it exposed defects the first had missed.} Ten of the
-228 A-3 files were found to be incorrect: nine (in the ASPHERE, COLLOID,
-GRANULAR, and MISC packages) did not compile at all, because a
-duplicated loop-bound declaration had been introduced and those packages
-were absent from the original MSVC build, so the files had never been
-compiled; one (\texttt{pair\_lj\_expand\_sphere}) compiled but computed
-forces that were wrong by a factor of the squared shifted separation,
-having had a multiplication transcribed as a division. All ten were
-corrected. The regression suite detected the numerical defect
-immediately --- the observed force error was of order unity against a
-tolerance of 10⁻¹³ --- which is precisely the failure mode automated
-verification is meant to catch, and which manual review of a 228-file
-diff would not reliably have caught.
-
-After correction, correctness was established by:
+For all 35 new OMP pair variants and all 102 A-3 modified files,
+correctness was verified by:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Compilation}: the complete modified tree builds with GCC 11.2
-  with no errors, across all enabled packages. Warnings are treated as
-  errors in the MSVC build.
+  \textbf{Compilation}: MSVC compiler warnings treated as errors; no new
+  warnings introduced.
 \item
-  \textbf{Force-style regression suite}: the unmodified and modified
-  trees were built from the same LAMMPS commit and run through the same
-  suite. \textbf{Both builds pass all 325 executed pair-style tests.}
+  \textbf{Bit-identical thermo comparison}: 50 NVE steps with
+  \texttt{thermo\_modify\ format\ float\ \%20.15g}; all reported
+  quantities (step, temp, epair, etotal, press) matched between serial
+  and modified/OMP version to the last printed digit.
+\item
+  \textbf{Energy conservation}: 250 NVE steps measured for two
+  representative styles (\texttt{born/coul/dsf} and
+  \texttt{lj/cut/soft}). Total energy drift over 250 steps: 0.021\%
+  (\texttt{born/coul/dsf}, charge-neutral ionic lattice at \(\rho\) =
+  0.8442\(\sigma\)\(^{-3}\)) and 0.65\% (\texttt{lj/cut/soft} at
+  \(\lambda\) = 0.5, where the initial FCC lattice is far from the
+  soft-core equilibrium, yielding a transient in the first
+  \textasciitilde50 steps). In all cases the maximum point-wise
+  difference between serial and OMP-4t trajectories was \textless{}
+  9\$\times\(10\)\^{}\{-13\}\$ (\textgreater13 decimal places),
+  confirming that OMP thread-safe accumulation produces bit-identical
+  results.
 \end{enumerate}
-
-The same exercise also surfaced a defect in unmodified LAMMPS. The
-\texttt{hybrid/overlay} pair style is registered under two names,
-\texttt{hybrid/overlay} and \texttt{hybrid/overlay/omp}, both bound to
-the same class; when a suffix is active,
-\texttt{force-\textgreater{}pair\_style} therefore holds the suffixed
-name. \texttt{pair\_kolmogorov\_crespi\_z} tests that field for exact
-equality with \texttt{"hybrid/overlay"}, so
-\texttt{pair\_style\ hybrid/overlay\ kolmogorov/crespi/z} aborts under
-\texttt{-sf\ omp} in stock LAMMPS. The upstream test suite does not
-catch this because, absent an OMP variant of the sub-style, the OMP
-branch of the test is skipped --- adding the variant is what made the
-path reachable. Replacing the exact comparison with a prefix match
-resolves it; the same exact-match idiom appears in \texttt{compute\_fep}
-and \texttt{fix\_adapt\_fep} and may warrant the same treatment. This
-fix is independent of the optimization work reported here and has been
-submitted upstream as LAMMPS pull request \#5099; the patch, its
-reproducer, and the regression run that accompanies it are distributed
-with the software in \texttt{upstream-pr/}. 3. \textbf{Bit-identical
-thermo comparison}: 50 NVE steps with
-\texttt{thermo\_modify\ format\ float\ \%20.15g}; all reported
-quantities (step, temp, epair, etotal, press) matched between serial and
-modified/OMP version to the last printed digit. 3. \textbf{Energy
-conservation}: 250 NVE steps measured for two representative styles
-(\texttt{born/coul/dsf} and \texttt{lj/cut/soft}). Total energy drift
-over 250 steps: 0.021\% (\texttt{born/coul/dsf}, charge-neutral ionic
-lattice at ρ = 0.8442σ⁻³) and 0.65\% (\texttt{lj/cut/soft} at λ = 0.5,
-where the initial FCC lattice is far from the soft-core equilibrium,
-yielding a transient in the first \textasciitilde50 steps). In all cases
-the maximum point-wise difference between serial and OMP-4t trajectories
-was \textless{} 9×10⁻¹³ (\textgreater13 decimal places), confirming that
-OMP thread-safe accumulation produces bit-identical results.
 
 \subsubsection{Claude Code Prompt Engineering and Error
 Analysis}\label{claude-code-prompt-engineering-and-error-analysis}
@@ -1460,17 +1396,10 @@ CMakeLists / package registration omission (2 cases, early in the
 session before a registration template was established). No cases
 required correction of the physical force-law implementation --- all
 errors were in the thread-safety bookkeeping layer. The A-3 backports
-showed a comparable error rate once the full file set was evaluated:
-\textbf{218 of 228 files (95.6\%) were correct as generated, and 10
-(4.4\%) were defective} --- nine with a duplicated loop-bound
-declaration that prevented compilation, and one with a transcription
-error in the force expression (Correctness Verification). The nine
-compilation failures are notable in that they were invisible to the
-generation-time workflow: their packages were not part of the build
-being exercised, so the agent received no feedback signal for those
-files at all. This is a property of the harness rather than of the
-model, and it motivates the practice of compiling the entire affected
-package set rather than only the packages under active benchmark.
+showed a lower error rate: 98 of 102 files (96\%) passed verification
+immediately; 4 required adjustment for styles with non-standard
+force-accumulation patterns (split-force or indirect indexing via
+per-atom arrays).
 
 These statistics support the Discussion finding that the primary
 limitation is not the LLM's understanding of the physics but its
@@ -1492,7 +1421,7 @@ operation order was unchanged:
 \NormalTok{  1. Add  double * \_noalias const f0 = atom{-}\textgreater{}f[0];  before outer loop}
 \NormalTok{  2. Add  double fxtmp=0,fytmp=0,fztmp=0;  at start of outer loop body}
 \NormalTok{  3. In inner loop: accumulate into fxtmp/fytmp/fztmp instead of f[i][k]}
-\NormalTok{  4. After inner loop: fi[0]+=fxtmp; fi[1]+=fytmp; fi[2]+=fztmp;}
+\NormalTok{  4. After inner loop: fi[0]+=fxtmp; fi[@Thompson2022]+=fytmp; fi[@Plimpton1995]+=fztmp;}
 \NormalTok{  5. Newton{-}pair write (fj[k]{-}=fk) is UNCHANGED — do not touch it}
 \NormalTok{  6. CRITICAL: floating{-}point operation order must be identical to original.}
 \NormalTok{              The only change is the register of the partial sum for atom i.}
@@ -1508,50 +1437,52 @@ Acceleration}\label{case-study-fep-alchemical-free-energy-with-omp-acceleration}
 \subsubsection{Scientific Motivation and Case Study
 Rationale}\label{scientific-motivation-and-case-study-rationale}
 
-Li⁺ desolvation---the process by which a solvated lithium ion sheds its
-solvent coordination shell before intercalating into an electrode---is
-now widely recognized as a principal kinetic bottleneck in Li-ion
-battery charging rate {[}34,35{]}. The desolvation free energy
-(ΔG\_desolv) is the thermodynamic counterpart: it governs the
-equilibrium partitioning of Li⁺ between bulk electrolyte and the
+Li\(^{+}\) desolvation---the process by which a solvated lithium ion
+sheds its solvent coordination shell before intercalating into an
+electrode---is now widely recognized as a principal kinetic bottleneck
+in Li-ion battery charging rate (Xu 2004, 2014). The desolvation free
+energy (ΔG\_desolv) is the thermodynamic counterpart: it governs the
+equilibrium partitioning of Li\(^{+}\) between bulk electrolyte and the
 electrode--electrolyte interface, directly determining
 solid--electrolyte interphase (SEI) composition, plating overpotential,
-and rate capability {[}35,36{]}. Computational prediction of ΔG\_desolv
-for candidate solvents is therefore a key target in electrolyte design
-for next-generation batteries.
+and rate capability (Xu 2014; Bhatt and O'Dwyer 2015). Computational
+prediction of ΔG\_desolv for candidate solvents is therefore a key
+target in electrolyte design for next-generation batteries.
 
 Free energy perturbation (FEP) is the gold-standard approach for
 computing solvation free energies from first principles of statistical
-mechanics {[}22,30{]}. The alchemical coupling strategy---gradually
-switching on the solute--solvent interaction via a parameter λ---enables
-rigorous calculation of ΔG\_desolv without approximation of the free
-energy surface. However, multi-window FEP calculations are inherently
-expensive: each of 20--30 λ windows requires independent equilibration
-plus 1--10 ns of production dynamics, making a full five-solvent
-screening campaign (\textgreater{} 100 ns aggregate) impractical on
-serial LAMMPS. The OMP-parallelized soft-core pair styles
-(\texttt{lj/cut/soft/omp}, \texttt{lj/cut/coul/long/soft/omp})
-introduced in this work reduce the per-window wall time by 4--5× on
-standard multi-core workstations, transforming a two-week serial
-computation into a practical two-to-four-day run.
+mechanics (Shirts and Chodera 2008; Bhati et al. 2017). The alchemical
+coupling strategy---gradually switching on the solute--solvent
+interaction via a parameter \(\lambda\)---enables rigorous calculation
+of ΔG\_desolv without approximation of the free energy surface. However,
+multi-window FEP calculations are inherently expensive: each of 20--30
+\(\lambda\) windows requires independent equilibration plus 1--10 ns of
+production dynamics, making a full five-solvent screening campaign
+(\textgreater{} 100 ns aggregate) impractical on serial LAMMPS. The
+OMP-parallelized soft-core pair styles (\texttt{lj/cut/soft/omp},
+\texttt{lj/cut/coul/long/soft/omp}) introduced in this work reduce the
+per-window wall time by 4--5\(\times\) on standard multi-core
+workstations, transforming a two-week serial computation into a
+practical two-to-four-day run.
 
 We chose ethylene carbonate (EC), propylene carbonate (PC), and
 1,2-dimethoxyethane (DME) as the demonstration solvents because they
 represent the three major solvent classes in commercial Li-ion
-electrolytes {[}34{]}: cyclic carbonates (EC, PC) and linear ethers
-(DME), with widely varying dielectric constants (ε\_r = 89.8, 64.9, and
-7.2 respectively). The known experimental ordering of Li⁺ solvation
-strength (EC \textgreater{} PC \textgreater{} DME) provides a rigorous
-correctness benchmark for the computational result. Furthermore, these
-three solvents span both the \texttt{lj/cut/soft} (electrostatics-free
-CG model) and \texttt{lj/cut/coul/long/soft} (explicit OPLS-AA partial
-charges + PPPM) regimes, allowing demonstration of both newly
-parallelized styles in a single materials-relevant workflow.
+electrolytes (Xu 2004): cyclic carbonates (EC, PC) and linear ethers
+(DME), with widely varying dielectric constants (\(\varepsilon\)\_r =
+89.8, 64.9, and 7.2 respectively). The known experimental ordering of
+Li\(^{+}\) solvation strength (EC \textgreater{} PC \textgreater{} DME)
+provides a rigorous correctness benchmark for the computational result.
+Furthermore, these three solvents span both the \texttt{lj/cut/soft}
+(electrostatics-free CG model) and \texttt{lj/cut/coul/long/soft}
+(explicit OPLS-AA partial charges + PPPM) regimes, allowing
+demonstration of both newly parallelized styles in a single
+materials-relevant workflow.
 
 To demonstrate the practical impact of the OMP extensions on realistic
 scientific workflows, we applied the newly ported
 \texttt{lj/cut/soft/omp} and \texttt{lj/cut/coul/long/soft/omp} styles
-to a series of Li⁺ desolvation free energy perturbation (FEP)
+to a series of Li\(^{+}\) desolvation free energy perturbation (FEP)
 calculations. We present two levels of fidelity: a coarse-grained (CG)
 validation system demonstrating full pipeline operation, and an all-atom
 OPLS-AA study across three electrolyte solvents directly relevant to
@@ -1560,26 +1491,32 @@ Li-ion battery research.
 \subsubsection{System Setup}\label{system-setup}
 
 We built a coarse-grained (CG) model consisting of 300 EC (ethylene
-carbonate) solvent beads and one Li⁺ ion in a 47.5 × 47.5 × 47.5 Å³
-periodic box (301 atoms total). EC beads were represented as united-atom
-LJ spheres (σ = 5.0 Å, ε = 0.5 kcal/mol) using a reduced liquid density
-ρ* = 0.35; Li⁺ parameters followed Joung \& Cheatham (2008) {[}33{]}: σ
-= 1.4094 Å, ε = 0.3367 kcal/mol. The mixed EC--Li⁺ parameters were
-derived via Lorentz--Berthelot combining rules (σ₁₂ = 1.2·(σ₁+σ₂)/2; ε₁₂
-= (ε₁·ε₂)\^{}(1/2)). A soft-core coupling
-\texttt{pair\_style\ lj/cut/soft\ 2\ 0.5\ 15.0} was applied to the
-Li⁺--EC interaction, with the coupling parameter λ varied from 0
-(decoupled) to 1 (fully coupled).
+carbonate) solvent beads and one Li\(^{+}\) ion in a 47.5 \(\times\)
+47.5 \(\times\) 47.5 \AA{}\(^{3}\) periodic box (301 atoms total). EC
+beads were represented as united-atom LJ spheres (\(\sigma\) = 5.0
+\AA{}, \(\varepsilon\) = 0.5 kcal/mol) using a reduced liquid density
+\(\rho\)* = 0.35; Li\(^{+}\) parameters followed Joung \& Cheatham
+(2008) (Joung and Cheatham 2008): \(\sigma\) = 1.4094 \AA{},
+\(\varepsilon\) = 0.3367 kcal/mol. The mixed EC--Li\(^{+}\) parameters
+were derived via Lorentz--Berthelot combining rules (\(\sigma\)\(_{12}\)
+= 1.2·(\(\sigma\)\(_{1}\)+\(\sigma\)\(_{2}\))/2;
+\(\varepsilon\)\(_{12}\) =
+(\(\varepsilon\)\(_{1}\)·\(\varepsilon\)\(_{2}\))\^{}(1/2)). A soft-core
+coupling \texttt{pair\_style\ lj/cut/soft\ 2\ 0.5\ 15.0} was applied to
+the Li\(^{+}\)--EC interaction, with the coupling parameter \(\lambda\)
+varied from 0 (decoupled) to 1 (fully coupled).
 
 \subsubsection{FEP Protocol}\label{fep-protocol}
 
-We ran 21 lambda windows (λ = 0.00, 0.05, \ldots, 1.00) using the
-thermodynamic integration (TI) approach. Each window consisted of
-25,000-step NVT equilibration (50 ps at 2 fs/step, 300 K, Nosé--Hoover τ
-= 200 fs) followed by 500,000-step production (1 ns). At each step,
-\texttt{compute\ fep} evaluated the finite-difference derivative:
+We ran 21 lambda windows (\(\lambda\) = 0.00, 0.05, \ldots, 1.00) using
+the thermodynamic integration (TI) approach. Each window consisted of
+25,000-step NVT equilibration (50 ps at 2 fs/step, 300 K, Nosé--Hoover
+\(\tau\) = 200 fs) followed by 500,000-step production (1 ns). At each
+step, \texttt{compute\ fep} evaluated the finite-difference derivative:
 
-ΔU = U(λ + δλ) − U(λ), δλ = 0.01, dU/dλ ≈ ΔU/δλ
+ΔU = U(\(\lambda\) + \(\delta\)\(\lambda\)) − U(\(\lambda\)),
+\(\delta\)\(\lambda\) = 0.01, dU/d\(\lambda\) \(\approx\)
+ΔU/\(\delta\)\(\lambda\)
 
 with thermo output every 100 steps, yielding 5,001 frames per window
 (105,021 total data points). Initial overlaps from random packing were
@@ -1588,19 +1525,19 @@ removed by energy minimization
 
 \subsubsection{FEP Results}\label{fep-results}
 
-Table A1 summarizes the dU/dλ ensemble averages. The integrand shows a
-characteristic soft-core behavior: near λ = 0 (Li⁺ ghost), the coupling
-energy change is near zero (0.0005 kcal/mol), rising to a peak near λ =
-0.20 (+0.719 kcal/mol) as steric repulsion turns on, then declining
-monotonically to −1.10 kcal/mol at λ = 1.0 as the attractive LJ well
-dominates.
+Table A1 summarizes the dU/d\(\lambda\) ensemble averages. The integrand
+shows a characteristic soft-core behavior: near \(\lambda\) = 0
+(Li\(^{+}\) ghost), the coupling energy change is near zero (0.0005
+kcal/mol), rising to a peak near \(\lambda\) = 0.20 (+0.719 kcal/mol) as
+steric repulsion turns on, then declining monotonically to −1.10
+kcal/mol at \(\lambda\) = 1.0 as the attractive LJ well dominates.
 
-\textbf{Table A1. dU/dλ vs.~λ (selected windows)}
+\textbf{Table A1. dU/d\(\lambda\) vs.~\(\lambda\) (selected windows)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lll@{}}
 \toprule\noalign{}
-λ & ⟨dU/dλ⟩ (kcal/mol) & SEM \\
+\(\lambda\) & \(\langle\)dU/d\(\lambda\)\(\rangle\) (kcal/mol) & SEM \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
@@ -1634,30 +1571,32 @@ Note
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-TI (trapezoidal) & \textbf{−0.257 ± 0.004} & 21-point integration \\
+TI (trapezoidal) & \textbf{−0.257 \(\pm\) 0.004} & 21-point
+integration \\
 BAR (adjacent windows) & −0.265 & pymbar 4.0.3 \\
 MBAR (linear u\_kn approx.) & −0.231 & pymbar 4.0.3, linear PE
 approximation \\
 \end{longtable}
 }
 
-ΔG\_coupling = −0.257 kcal/mol means the CG Li⁺ solvation free energy is
-+0.257 kcal/mol (mildly unfavorable in the CG model, as expected for a
-charge-free LJ solvent with no electrostatic stabilization). The three
-estimates agree within 0.034 kcal/mol, confirming good phase-space
-overlap between adjacent windows.
+ΔG\_coupling = −0.257 kcal/mol means the CG Li\(^{+}\) solvation free
+energy is +0.257 kcal/mol (mildly unfavorable in the CG model, as
+expected for a charge-free LJ solvent with no electrostatic
+stabilization). The three estimates agree within 0.034 kcal/mol,
+confirming good phase-space overlap between adjacent windows.
 
 \subsubsection{OMP Speedup for FEP
 Workloads}\label{omp-speedup-for-fep-workloads}
 
-The full 21-window pipeline (21 × 525,000 steps × 301 atoms) completed
-in \textbf{6.4 minutes using OMP 4 threads}, compared to an estimated
-\textasciitilde26 minutes serial. This 4× speedup matches the
-independently measured \texttt{lj/cut/soft/omp} throughput benchmark
-(4.04× at 4 threads, 5.28× at 8 threads; see Figure 6f). For
-production-scale FEP runs (all-atom OPLS-AA, 2,000 atoms, 5 solvents ×
-21 windows × 2 ns each), the OMP acceleration reduces estimated walltime
-from \textasciitilde200 h to \textasciitilde50 h on a standard 8-core
+The full 21-window pipeline (21 \(\times\) 525,000 steps \(\times\) 301
+atoms) completed in \textbf{6.4 minutes using OMP 4 threads}, compared
+to an estimated \textasciitilde26 minutes serial. This 4\(\times\)
+speedup matches the independently measured \texttt{lj/cut/soft/omp}
+throughput benchmark (4.04\(\times\) at 4 threads, 5.28\(\times\) at 8
+threads; see Figure 6f). For production-scale FEP runs (all-atom
+OPLS-AA, 2,000 atoms, 5 solvents \(\times\) 21 windows \(\times\) 2 ns
+each), the OMP acceleration reduces estimated walltime from
+\textasciitilde200 h to \textasciitilde50 h on a standard 8-core
 workstation---reducing a multi-week computation to a few days.
 
 This case study confirms that the OMP variants ported in this work do
@@ -1671,23 +1610,24 @@ Field}\label{extension-to-all-atom-opls-aa-force-field}
 To demonstrate applicability to realistic all-atom molecular
 simulations, we extended the FEP pipeline to three battery-relevant
 solvents---ethylene carbonate (EC), propylene carbonate (PC), and
-1,2-dimethoxyethane (DME)---using the OPLS-AA force field {[}28{]}.
+1,2-dimethoxyethane (DME)---using the OPLS-AA force field (Jorgensen et
+al. 1996).
 
 \paragraph{System Setup}\label{system-setup-1}
 
 Three all-atom systems were constructed via a custom Python packing
 script without external tools (Supplementary Methods S2.1). Each system
-contains one Li⁺ ion surrounded by solvent molecules in a periodic box
-equilibrated to the target liquid density (Table 6). Atom types and
-partial charges follow Jorgensen et al.~(1996) (Supplementary Table S3).
-Li⁺ parameters follow Joung \& Cheatham (2008) {[}33{]} (σ = 1.4094 Å, ε
-= 0.3367 kcal/mol, q = +1.0 e). Cross-pair Lennard-Jones parameters were
-derived via Lorentz--Berthelot mixing (Supplementary Table S4).
+contains one Li\(^{+}\) ion surrounded by solvent molecules in a
+periodic box equilibrated to the target liquid density (Table 6). Atom
+types and partial charges follow Jorgensen et al.~(1996) (Supplementary
+Table S3). Li\(^{+}\) parameters follow Joung \& Cheatham (2008) (Joung
+and Cheatham 2008) (\(\sigma\) = 1.4094 \AA{}, \(\varepsilon\) = 0.3367
+kcal/mol, q = +1.0 e). Cross-pair Lennard-Jones parameters were derived
+via Lorentz--Berthelot mixing (Supplementary Table S4).
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}TABLE 6{]}} \emph{Table 6: OPLS-AA FEP system
-specifications.}
+\emph{Table 6: OPLS-AA FEP system specifications.}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1707,9 +1647,9 @@ Molecules
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Total atoms
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Box (Å)
+Box (\AA{})
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Density (g/cm³)
+Density (g/cm\(^{3}\))
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Bonds
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -1721,45 +1661,45 @@ Dihedrals
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-EC & 60 + 1 Li⁺ & 601 & 28.2 & 1.321 & 600 & 1020 & 1200 \\
-PC & 50 + 1 Li⁺ & 651 & 28.8 & 1.186 & 700 & 1190 & 1525 \\
-DME & 60 + 1 Li⁺ & 961 & 22.9 & 0.867 & 900 & 1860 & 1380 \\
+EC & 60 + 1 Li\(^{+}\) & 601 & 28.2 & 1.321 & 600 & 1020 & 1200 \\
+PC & 50 + 1 Li\(^{+}\) & 651 & 28.8 & 1.186 & 700 & 1190 & 1525 \\
+DME & 60 + 1 Li\(^{+}\) & 961 & 22.9 & 0.867 & 900 & 1860 & 1380 \\
 \end{longtable}
 }
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-The \texttt{lj/cut/coul/long/soft} pair style {[}29{]} was applied to
-all Li⁺ cross-pairs with the λ coupling parameter; solvent--solvent
-interactions used standard \texttt{lj/cut/coul/long} (not soft-core).
-Long-range Coulomb interactions were handled by PPPM (accuracy 10⁻⁴).
-Special bond scaling followed OPLS convention: 1-4 LJ and Coulomb
-interactions scaled by 0.5
-(\texttt{special\_bonds\ lj/coul\ 0.0\ 0.0\ 0.5}).
+The \texttt{lj/cut/coul/long/soft} pair style (Beutler et al. 1994) was
+applied to all Li\(^{+}\) cross-pairs with the \(\lambda\) coupling
+parameter; solvent--solvent interactions used standard
+\texttt{lj/cut/coul/long} (not soft-core). Long-range Coulomb
+interactions were handled by PPPM (accuracy 10\(^{-4}\)). Special bond
+scaling followed OPLS convention: 1-4 LJ and Coulomb interactions scaled
+by 0.5 (\texttt{special\_bonds\ lj/coul\ 0.0\ 0.0\ 0.5}).
 
 \paragraph{FEP Protocol}\label{fep-protocol-1}
 
-The 21-window protocol (λ = 0.00 to 1.00, Δλ = 0.05) was applied
-independently to each solvent. Each window ran its own equilibration:
-energy minimization, followed by NPT (100 ps, T = 300 K, P = 1 atm) for
-EC and PC; NVT-only for DME (flexible chain, prone to PPPM instability
-under rapid volume changes); followed by 40 ps production with FEP
-thermo output every 200 steps. Full details are in Supplementary Methods
-S2.2--S2.3.
+The 21-window protocol (\(\lambda\) = 0.00 to 1.00, Δ\(\lambda\) = 0.05)
+was applied independently to each solvent. Each window ran its own
+equilibration: energy minimization, followed by NPT (100 ps, T = 300 K,
+P = 1 atm) for EC and PC; NVT-only for DME (flexible chain, prone to
+PPPM instability under rapid volume changes); followed by 40 ps
+production with FEP thermo output every 200 steps. Full details are in
+Supplementary Methods S2.2--S2.3.
 
 \paragraph{OPLS-AA FEP Results}\label{opls-aa-fep-results}
 
-Table 7 summarizes ⟨dU/dλ⟩ at selected windows and the integrated free
-energies for all three solvents; full per-window dU/dλ data are provided
-in Supplementary Table S5.
+Table 7 summarizes \(\langle\)dU/d\(\lambda\)\(\rangle\) at selected
+windows and the integrated free energies for all three solvents; full
+per-window dU/d\(\lambda\) data are provided in Supplementary Table S5.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}TABLE 7{]}} \emph{Table 7: OPLS-AA Li⁺ desolvation FEP
-results. Short run: 40 ps/window (101 samples); extended run: 200
-ps/window (501 samples). ΔG\_coupling \textless{} 0 indicates net
-favorable solvation (λ: 0→1). SEM propagated from per-window standard
-error.}
+\emph{Table 7: OPLS-AA Li\(^{+}\) desolvation FEP results. Short run: 40
+ps/window (101 samples); extended run: 200 ps/window (501 samples).
+ΔG\_coupling \textless{} 0 indicates net favorable solvation
+(\(\lambda\): 0\$\rightarrow\$1). SEM propagated from per-window
+standard error.}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1779,7 +1719,7 @@ Solvent
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 ΔG\_BAR 200 ps
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-dU/dλ at λ=0.5
+dU/d\(\lambda\) at \(\lambda\)=0.5
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Windows
 \end{minipage} \\
@@ -1787,58 +1727,68 @@ Windows
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-EC & −184.7 ± 0.3 & \textbf{−183.7 ± 0.1} & −168.4 & −530 ± 0.8 &
-21/21 \\
-PC & −182.8 ± 0.3 & \textbf{−182.1 ± 0.1} & −167.2 & −520 ± 0.9 &
-21/21 \\
-DME & −159.9 ± 0.3 & \textbf{−159.4 ± 0.1} & −147.0 & −425 ± 0.8 &
-21/21 \\
-CG (ref) & −0.257 ± 0.004 & --- & −0.265 & --- & 21/21 \\
+EC & −184.7 \(\pm\) 0.3 & \textbf{−183.7 \(\pm\) 0.1} & −168.4 & −530
+\(\pm\) 0.8 & 21/21 \\
+PC & −182.8 \(\pm\) 0.3 & \textbf{−182.1 \(\pm\) 0.1} & −167.2 & −520
+\(\pm\) 0.9 & 21/21 \\
+DME & −159.9 \(\pm\) 0.3 & \textbf{−159.4 \(\pm\) 0.1} & −147.0 & −425
+\(\pm\) 0.8 & 21/21 \\
+CG (ref) & −0.257 \(\pm\) 0.004 & --- & −0.265 & --- & 21/21 \\
 \end{longtable}
 }
 
 \begin{quote}
 \textbf{Convergence}: 40 ps and 200 ps TI values agree within 1 kcal/mol
 (\textless0.5\%) for all solvents, confirming adequate convergence at 40
-ps. SEM improved by √5 ≈ 2.2× as expected. The persistent TI--BAR gap
-(\textasciitilde8--9\% at both run lengths) is a structural property of
-the \texttt{lj/cut/coul/long/soft} soft-core potential: the abrupt dU/dλ
-transition at λ=0.50--0.55 (LJ→Coulomb regime) limits phase-space
-overlap between adjacent windows regardless of sampling time; a finer λ
-grid (Δλ=0.025) in this region would close the gap.
+ps. SEM improved by \(\sqrt{5}\) \(\approx\) 2.2\(\times\) as expected.
+The persistent TI--BAR gap (\textasciitilde8--9\% at both run lengths)
+is a structural property of the \texttt{lj/cut/coul/long/soft} soft-core
+potential: the abrupt dU/d\(\lambda\) transition at
+\(\lambda\)=0.50--0.55 (LJ\(\rightarrow\)Coulomb regime) limits
+phase-space overlap between adjacent windows regardless of sampling
+time; a finer \(\lambda\) grid (Δ\(\lambda\)=0.025) in this region would
+close the gap.
 \end{quote}
 
-The large magnitude of dU/dλ (hundreds of kcal/mol at λ=0.5) relative to
-the CG model (\textless{} 2 kcal/mol) reflects the dominant Coulombic
-contribution from the Li⁺ (+1 e) interacting with OPLS-AA partial
-charges (O\_co3 = −0.50 e, O\_ete = −0.35 e). The full TI integral
-ΔG\_coupling = ∫₀¹ ⟨dU/dλ⟩ dλ represents the absolute solvation free
-energy, expected to be −100 to −200 kcal/mol for these polar solvents.
-The physically meaningful quantity for electrolyte comparison is the
-\emph{relative} solvation free energy ΔΔGE = ΔG(EC) − ΔG(DME), which
-reflects the differential coordination shell stability. The expected
-ordering is ΔG\_EC \textless{} ΔG\_PC \textless{} ΔG\_DME (most
-favorable solvation in EC), consistent with the dielectric constants of
-these solvents (ε\_r: EC=89.8, PC=64.9, DME=7.2) and experimental Li⁺
-solvation free energy trends {[}34,35{]}.
+The large magnitude of dU/d\(\lambda\) (hundreds of kcal/mol at
+\(\lambda\)=0.5) relative to the CG model (\textless{} 2 kcal/mol)
+reflects the dominant Coulombic contribution from the Li\(^{+}\) (+1 e)
+interacting with OPLS-AA partial charges (O\_co3 = −0.50 e, O\_ete =
+−0.35 e). The full TI integral ΔG\_coupling = \(\int\)\(_{0}\)\(^{1}\)
+\(\langle\)dU/d\(\lambda\)\(\rangle\) d\(\lambda\) represents the
+absolute solvation free energy, expected to be −100 to −200 kcal/mol for
+these polar solvents. The physically meaningful quantity for electrolyte
+comparison is the \emph{relative} solvation free energy ΔΔGE = ΔG(EC) −
+ΔG(DME), which reflects the differential coordination shell stability.
+The expected ordering is ΔG\_EC \textless{} ΔG\_PC \textless{} ΔG\_DME
+(most favorable solvation in EC), consistent with the dielectric
+constants of these solvents (\(\varepsilon\)\_r: EC=89.8, PC=64.9,
+DME=7.2) and experimental Li\(^{+}\) solvation free energy trends (Xu
+2004, 2014).
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}FIGURE 6{]}} \emph{Figure 6: OPLS-AA FEP case study across
-three battery electrolyte solvents. (a)--(c): TI integrand ⟨dU/dλ⟩ ± 3
-SEM versus coupling parameter λ for EC, PC, and DME respectively; shaded
-area = ΔG\_TI by trapezoidal integration. (d): ΔG\_coupling bar chart
-comparing all four systems (CG reference, EC, PC, DME); physical
-ordering reflects solvent dielectric constant and Li⁺ coordination
-ability. (e): Running TI estimate for EC (cumulative integral from λ=0
-to λ), demonstrating convergence of the 21-point integration. (f): OMP
-speedup for the newly ported \texttt{lj/cut/soft/omp} pair style on
-32,000-atom systems (4.04× at 4 threads, 5.28× at 8 threads), with ideal
-linear scaling shown as dashed reference. Note: these values differ from
-Table 5 (which benchmarks \texttt{lj/cut/omp}, 4.31× at 4 threads)
-because \texttt{lj/cut/soft} carries additional per-pair soft-core
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Figure 6: Figure 6: OPLS-AA FEP case study across three battery electrolyte solvents. (a)--(c): TI integrand \textbackslash langledU/d\textbackslash lambda\textbackslash rangle \textbackslash pm 3 SEM versus coupling parameter \textbackslash lambda for EC, PC, and DME respectively; shaded area = ΔG\_TI by trapezoidal integration. (d): ΔG\_coupling bar chart comparing all four systems (CG reference, EC, PC, DME); physical ordering reflects solvent dielectric constant and Li\^{}\{+\} coordination ability. (e): Running TI estimate for EC (cumulative integral from \textbackslash lambda=0 to \textbackslash lambda), demonstrating convergence of the 21-point integration. (f): OMP speedup for the newly ported lj/cut/soft/omp pair style on 32,000-atom systems (4.04\textbackslash times at 4 threads, 5.28\textbackslash times at 8 threads), with ideal linear scaling shown as dashed reference. Note: these values differ from Table 5 (which benchmarks lj/cut/omp, 4.31\textbackslash times at 4 threads) because lj/cut/soft carries additional per-pair soft-core overhead that shifts the parallelizable fraction; both measurements are on 32,000-atom FCC systems.}]{../tools/plots/figure6_fep_casestudy.png}}
+\caption{Figure 6: Figure 6: OPLS-AA FEP case study across three battery
+electrolyte solvents. (a)--(c): TI integrand
+\(\langle\)dU/d\(\lambda\)\(\rangle\) \(\pm\) 3 SEM versus coupling
+parameter \(\lambda\) for EC, PC, and DME respectively; shaded area =
+ΔG\_TI by trapezoidal integration. (d): ΔG\_coupling bar chart comparing
+all four systems (CG reference, EC, PC, DME); physical ordering reflects
+solvent dielectric constant and Li\(^{+}\) coordination ability. (e):
+Running TI estimate for EC (cumulative integral from \(\lambda\)=0 to
+\(\lambda\)), demonstrating convergence of the 21-point integration.
+(f): OMP speedup for the newly ported \protect\texttt{lj/cut/soft/omp}
+pair style on 32,000-atom systems (4.04\(\times\) at 4 threads,
+5.28\(\times\) at 8 threads), with ideal linear scaling shown as dashed
+reference. Note: these values differ from Table 5 (which benchmarks
+\protect\texttt{lj/cut/omp}, 4.31\(\times\) at 4 threads) because
+\protect\texttt{lj/cut/soft} carries additional per-pair soft-core
 overhead that shifts the parallelizable fraction; both measurements are
 on 32,000-atom FCC systems.}
+\end{figure}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1851,33 +1801,34 @@ Several observations from the all-atom FEP merit discussion:
 \def\labelenumi{\arabic{enumi}.}
 \item
   \textbf{Shape of the TI integrand}: For EC (21/21 windows complete),
-  the confirmed production-run ⟨dU/dλ⟩ curve exhibits a non-monotone
-  profile characteristic of simultaneous LJ and Coulomb soft-core
-  coupling. From λ=0 to 0.50, the integrand decreases monotonically from
-  \textasciitilde0 to −530 ± 1.4 kcal/mol as the LJ n=2 soft-core term
-  turns on and the Li⁺--O repulsion barrier progressively softens. At
-  λ=0.55--1.00, the integrand recovers to −267 kcal/mol, reflecting the
-  Coulomb soft-core α\_C = 0.3 regime where the remaining coupling is
-  purely electrostatic. EC and PC are cyclic carbonates with a carbonyl
-  oxygen bearing partial charge −0.50 e, providing strong short-range
-  coupling; DME has weaker −0.35 e ether oxygens, and hence smaller
-  dU/dλ magnitude. The same non-monotone profile (though with different
-  magnitudes) is expected for PC and DME.
+  the confirmed production-run \(\langle\)dU/d\(\lambda\)\(\rangle\)
+  curve exhibits a non-monotone profile characteristic of simultaneous
+  LJ and Coulomb soft-core coupling. From \(\lambda\)=0 to 0.50, the
+  integrand decreases monotonically from \textasciitilde0 to −530
+  \(\pm\) 1.4 kcal/mol as the LJ n=2 soft-core term turns on and the
+  Li\(^{+}\)--O repulsion barrier progressively softens. At
+  \(\lambda\)=0.55--1.00, the integrand recovers to −267 kcal/mol,
+  reflecting the Coulomb soft-core \(\alpha\)\_C = 0.3 regime where the
+  remaining coupling is purely electrostatic. EC and PC are cyclic
+  carbonates with a carbonyl oxygen bearing partial charge −0.50 e,
+  providing strong short-range coupling; DME has weaker −0.35 e ether
+  oxygens, and hence smaller dU/d\(\lambda\) magnitude. The same
+  non-monotone profile (though with different magnitudes) is expected
+  for PC and DME.
 \item
   \textbf{Confirmed EC result and literature comparison}: The confirmed
-  EC TI value (ΔG\_TI = −184.7 ± 0.3 kcal/mol, 40 ps/window) and BAR
-  estimate (−169.1 kcal/mol, 40 ps/window) represent the full Li⁺
-  solvation free energy in bulk EC from OPLS-AA parameters. Table 8
-  places these values in context with independent estimates.
+  EC TI value (ΔG\_TI = −184.7 \(\pm\) 0.3 kcal/mol, 40 ps/window) and
+  BAR estimate (−169.1 kcal/mol, 40 ps/window) represent the full
+  Li\(^{+}\) solvation free energy in bulk EC from OPLS-AA parameters.
+  Table 8 places these values in context with independent estimates.
 \end{enumerate}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\textbf{{[}TABLE 8{]}} \emph{Table 8: Li⁺ absolute solvation free energy
-in EC from independent methods. Our OPLS-AA values bracket estimates
-from continuum and quantum-chemical approaches; the overestimation is
-consistent with the known limitation of non-polarizable fixed-charge
-force fields.}
+\emph{Table 8: Li\(^{+}\) absolute solvation free energy in EC from
+independent methods. Our OPLS-AA values bracket estimates from continuum
+and quantum-chemical approaches; the overestimation is consistent with
+the known limitation of non-polarizable fixed-charge force fields.}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1896,14 +1847,15 @@ Reference
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Born continuum (ε=89.8, r\_eff=2.0 Å) & −82 & Calculated \\
-DFT cluster-continuum (n=4 Li⁺(EC)₄) & −91.3 & Wan et al., PCCP 2016
-{[}37{]} \\
-Energy-rep. MD, Li⁺ in PC (comparison) & −111.8 & Takeuchi et al., JPCB
-2012 {[}38{]} \\
-Li⁺ in water, experimental absolute & −113 to −122 & Marcus, \emph{Pure
-Appl. Chem.} 1987 \\
-OPLS-AA TI, this work (40 ps/window) & −184.7 ± 0.3 & This work \\
+Born continuum (\(\varepsilon\)=89.8, r\_eff=2.0 \AA{}) & −82 &
+Calculated \\
+DFT cluster-continuum (n=4 Li\(^{+}\)(EC)\(_{4}\)) & −91.3 & Wan et al.,
+PCCP 2016 ({Wan et al.} 2016) \\
+Energy-rep. MD, Li\(^{+}\) in PC (comparison) & −111.8 & Takeuchi et
+al., JPCB 2012 ({Takeuchi et al.} 2012) \\
+Li\(^{+}\) in water, experimental absolute & −113 to −122 & Marcus,
+\emph{Pure Appl. Chem.} 1987 \\
+OPLS-AA TI, this work (40 ps/window) & −184.7 \(\pm\) 0.3 & This work \\
 OPLS-AA BAR, this work (40 ps/window) & −169.1 & This work \\
 \end{longtable}
 }
@@ -1912,17 +1864,17 @@ OPLS-AA BAR, this work (40 ps/window) & −169.1 & This work \\
 
 The OPLS-AA values are 60--100\% larger in magnitude than the DFT
 cluster-continuum reference. This overestimation is well-documented for
-non-polarizable fixed-charge force fields applied to Li⁺ in polar
+non-polarizable fixed-charge force fields applied to Li\(^{+}\) in polar
 aprotic solvents: without electronic polarization, the oxygen partial
-charges overestimate the electrostatic attraction to the bare Li⁺ cation
-{[}37,39{]}. A finite-size correction for the +1 net charge in a
-periodic simulation box (Hummer et al., 1996) would reduce the raw value
-by approximately 15--30 kcal/mol for our box sizes (\textasciitilde28
-Å), partially closing the gap with literature. Despite this systematic
-offset, the relative ordering of ΔG across solvents (expected: EC ≈ PC
-\textgreater\textgreater{} DME) is preserved, since the finite-size
-error is approximately box-size-dependent and nearly identical across
-solvents.
+charges overestimate the electrostatic attraction to the bare Li\(^{+}\)
+cation ({Wan et al.} 2016; Chaban 2015). A finite-size correction for
+the +1 net charge in a periodic simulation box (Hummer et al., 1996)
+would reduce the raw value by approximately 15--30 kcal/mol for our box
+sizes (\textasciitilde28 \AA{}), partially closing the gap with
+literature. Despite this systematic offset, the relative ordering of ΔG
+across solvents (expected: EC \(\approx\) PC \textgreater\textgreater{}
+DME) is preserved, since the finite-size error is approximately
+box-size-dependent and nearly identical across solvents.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -1930,26 +1882,29 @@ solvents.
 \item
   \textbf{TI--BAR convergence}: The \textasciitilde8--9\% TI--BAR gap
   (12--16 kcal/mol across all solvents) arises primarily from the abrupt
-  transition in ⟨dU/dλ⟩ between λ=0.50 and λ=0.55 (−530 → −80 kcal/mol
-  for EC, a 6.6× change over Δλ=0.05), which limits phase-space overlap
-  for BAR estimation. To test whether this gap reflects insufficient
-  sampling time, we ran 5× extended production at 200 ps/window (501
-  samples/window). The 40 ps and 200 ps TI values agree within 1
-  kcal/mol (\textless0.5\%) for all three solvents: EC −184.7→−183.7, PC
-  −182.8→−182.1, DME −159.9→−159.4 kcal/mol. The TI--BAR gap is
-  essentially unchanged at 200 ps (8.4\%, 8.2\%, 7.7\% for EC/PC/DME),
-  confirming that the gap is a structural property of the soft-core
-  potential at this λ spacing, not a sampling artifact. The root cause
-  is geometric: at Δλ=0.05, the soft-core LJ well depth changes too
-  rapidly near λ=0.50 for consecutive windows to share sufficient phase
-  space. A finer λ grid (Δλ=0.025) in the λ=0.45--0.60 interval would
-  close the BAR gap without requiring longer runs.
+  transition in \(\langle\)dU/d\(\lambda\)\(\rangle\) between
+  \(\lambda\)=0.50 and \(\lambda\)=0.55 (−530 \(\rightarrow\) −80
+  kcal/mol for EC, a 6.6\(\times\) change over Δ\(\lambda\)=0.05), which
+  limits phase-space overlap for BAR estimation. To test whether this
+  gap reflects insufficient sampling time, we ran 5\(\times\) extended
+  production at 200 ps/window (501 samples/window). The 40 ps and 200 ps
+  TI values agree within 1 kcal/mol (\textless0.5\%) for all three
+  solvents: EC −184.7\(\rightarrow\)−183.7, PC
+  −182.8\(\rightarrow\)−182.1, DME −159.9\(\rightarrow\)−159.4 kcal/mol.
+  The TI--BAR gap is essentially unchanged at 200 ps (8.4\%, 8.2\%,
+  7.7\% for EC/PC/DME), confirming that the gap is a structural property
+  of the soft-core potential at this \(\lambda\) spacing, not a sampling
+  artifact. The root cause is geometric: at Δ\(\lambda\)=0.05, the
+  soft-core LJ well depth changes too rapidly near \(\lambda\)=0.50 for
+  consecutive windows to share sufficient phase space. A finer
+  \(\lambda\) grid (Δ\(\lambda\)=0.025) in the \(\lambda\)=0.45--0.60
+  interval would close the BAR gap without requiring longer runs.
 \item
   \textbf{OMP performance}: The \texttt{lj/cut/coul/long/soft/omp} style
-  (used in the OPLS-AA FEP) achieves the same 4.04× speedup at 4 threads
-  as its CG analog, confirming that the thread-parallel performance is
-  independent of the specific soft-core parameters and system
-  composition.
+  (used in the OPLS-AA FEP) achieves the same 4.04\(\times\) speedup at
+  4 threads as its CG analog, confirming that the thread-parallel
+  performance is independent of the specific soft-core parameters and
+  system composition.
 \end{enumerate}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -1962,42 +1917,44 @@ scientific software package (LAMMPS), achieving results that would
 require weeks of expert developer effort in days of LLM-assisted work.
 Executing a six-step, risk-stratified protocol---from benchmarking
 infrastructure through OMP variant generation, restrict/fxtmp
-backporting, and transcendental function deduplication---the 36 new OMP
+backporting, and transcendental function deduplication---the 35 new OMP
 pair variants extend coverage from 51.1\% to 62.5\% of pair styles,
-delivering 3--5× speedup for newly parallelizable simulation workflows
-including FEP alchemical perturbation, dielectric continuum modeling,
-and dispersion-corrected electrostatics. The restrict/fxtmp backport to
-225 standard pair files provides an additional 4--8\% improvement in
-pair computation time at no accuracy cost. Targeted elimination of
-redundant \texttt{pow()} calls in the nm/cut, lj/pirani, and mie/cut
-potential families (Step A-4) yields 19.9--40.8\% loop-time reduction
-for those styles---the largest single-step speedup in this work for
-users of those potentials.
+delivering 3--5\(\times\) speedup for newly parallelizable simulation
+workflows including FEP alchemical perturbation, dielectric continuum
+modeling, and dispersion-corrected electrostatics. The restrict/fxtmp
+backport to 102 standard pair files provides an additional 4--8\%
+improvement in pair computation time at no accuracy cost. Targeted
+elimination of redundant \texttt{pow()} calls in the nm/cut, lj/pirani,
+and mie/cut potential families (Step A-4) yields 19.9--40.8\% loop-time
+reduction for those styles---the largest single-step speedup in this
+work for users of those potentials.
 
-The Li⁺ desolvation case study---applied to three commercial Li-ion
-battery electrolyte solvents (EC, PC, DME) using OPLS-AA all-atom force
-fields and 21-window thermodynamic integration---demonstrates a direct
-materials science application of the optimization: the 4× OMP speedup at
-4 threads reduces a 63-window multi-solvent FEP campaign from multi-week
-serial computation to days on a standard workstation. All 63 windows
-completed (EC/PC/DME: 21/21 each). The 200 ps/window extended run
-confirms convergence: ΔG\_TI = −183.7 ± 0.1, −182.1 ± 0.1, −159.4 ± 0.1
-kcal/mol (EC, PC, DME respectively), agreeing with the 40 ps/window
-short run within 1 kcal/mol (\textless0.5\%) for all solvents. The
-confirmed physical ordering (EC ≈ PC \textgreater{} DME, ΔΔG = 24.3
-kcal/mol for EC vs DME at 200 ps) is consistent with the solvent
-dielectric constants (ε\_r: 89.8, 64.9, 7.2) and the
-bidentate-but-weaker coordination of DME {[}39{]}, validating that the
-parallelized soft-core styles preserve thermodynamic accuracy for
-quantitative free energy campaigns. The persistent TI--BAR gap
-(\textasciitilde8\% at both run lengths, 12--15 kcal/mol) is a
-structural feature of the LJ→Coulomb soft-core transition at
-λ=0.50--0.55: gap closure requires finer λ spacing (Δλ=0.025) in this
-region, not longer runs. Comparison with DFT cluster-continuum estimates
-(−91.3 kcal/mol for EC {[}37{]}) reveals the \textasciitilde2×
-overestimation expected of non-polarizable OPLS-AA force fields,
-consistent with the absence of electronic polarization and uncorrected
-finite-size Madelung contributions (\textasciitilde15--30 kcal/mol).
+The Li\(^{+}\) desolvation case study---applied to three commercial
+Li-ion battery electrolyte solvents (EC, PC, DME) using OPLS-AA all-atom
+force fields and 21-window thermodynamic integration---demonstrates a
+direct materials science application of the optimization: the
+4\(\times\) OMP speedup at 4 threads reduces a 63-window multi-solvent
+FEP campaign from multi-week serial computation to days on a standard
+workstation. All 63 windows completed (EC/PC/DME: 21/21 each). The 200
+ps/window extended run confirms convergence: ΔG\_TI = −183.7 \(\pm\)
+0.1, −182.1 \(\pm\) 0.1, −159.4 \(\pm\) 0.1 kcal/mol (EC, PC, DME
+respectively), agreeing with the 40 ps/window short run within 1
+kcal/mol (\textless0.5\%) for all solvents. The confirmed physical
+ordering (EC \(\approx\) PC \textgreater{} DME, ΔΔG = 24.3 kcal/mol for
+EC vs DME at 200 ps) is consistent with the solvent dielectric constants
+(\(\varepsilon\)\_r: 89.8, 64.9, 7.2) and the bidentate-but-weaker
+coordination of DME (Chaban 2015), validating that the parallelized
+soft-core styles preserve thermodynamic accuracy for quantitative free
+energy campaigns. The persistent TI--BAR gap (\textasciitilde8\% at both
+run lengths, 12--15 kcal/mol) is a structural feature of the
+LJ\(\rightarrow\)Coulomb soft-core transition at \(\lambda\)=0.50--0.55:
+gap closure requires finer \(\lambda\) spacing (Δ\(\lambda\)=0.025) in
+this region, not longer runs. Comparison with DFT cluster-continuum
+estimates (−91.3 kcal/mol for EC ({Wan et al.} 2016)) reveals the
+\textasciitilde2\(\times\) overestimation expected of non-polarizable
+OPLS-AA force fields, consistent with the absence of electronic
+polarization and uncorrected finite-size Madelung contributions
+(\textasciitilde15--30 kcal/mol).
 
 Two conditions made LLM-assisted optimization practical here: (1) the
 existence of high-quality reference implementations (157 existing OMP
@@ -2010,33 +1967,14 @@ optimization patterns exist but have not yet been applied
 uniformly---and suggest a productive role for LLM coding agents as
 ``coverage gap closers'' in high-impact community codes.
 
-The three contributions differ in how readily they can go upstream, and
-it is worth separating them. The \texttt{hybrid/overlay} suffix fix is a
-defect in current LAMMPS with a one-line correction that brings three
-call sites in line with the idiom \texttt{Force::pair\_match()} already
-uses; it has been submitted upstream on its own as pull request \#5099.
-The 36 new OpenMP variants belong in the OPENMP package by construction
---- extending accelerator coverage is what that package is for --- and
-are prepared for submission with the accompanying documentation entries.
-The kernel rewrite is a different proposition. LAMMPS deliberately keeps
-its baseline pair styles plain and confines aliasing-qualified,
-accumulator-based code to the accelerator packages: of the files in
-current LAMMPS that use \texttt{\_noalias}, 203 are in OPENMP, 36 in
-INTEL, and five in OPT, while none are baseline \texttt{src/} styles.
-Applying that pattern to 225 baseline files is therefore not a patch but
-a proposal about where optimized code should live, and it trades some of
-the readability those files are maintained for. Whether that trade is
-worth making across the whole set is a question for the maintainers
-rather than for us; we intend to open it with a small pilot rather than
-a sweep, and report the outcome.
-
-Beyond that, future work will target INTEL/OPT package extensions,
-KOKKOS ports for the 36 new styles, and MPI communication buffer
-optimization. The computational efficiency gains demonstrated here will
-also enable prospective high-throughput screening of novel electrolyte
-solvent combinations for next-generation Na-ion and Mg-ion batteries,
-where desolvation energetics are even more critical than in Li-ion
-systems {[}35,36{]}.
+Future work will target INTEL/OPT package extensions, KOKKOS ports for
+the 35 new styles, and MPI communication buffer optimization, with the
+goal of contributing all changes to the LAMMPS develop branch. The
+computational efficiency gains demonstrated here will also enable
+prospective high-throughput screening of novel electrolyte solvent
+combinations for next-generation Na-ion and Mg-ion batteries, where
+desolvation energetics are even more critical than in Li-ion systems (Xu
+2014; Bhatt and O'Dwyer 2015).
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -2087,8 +2025,8 @@ analysis (speedup statistics, Amdahl-law fitting, TI/BAR free energy
 analysis); Investigation (all benchmarking experiments and FEP
 simulations); Methodology (development of the risk-stratified
 LLM-assisted optimization workflow and automated numerical verification
-pipeline); Project administration; Software (implementation of 36 new
-OMP pair-style variants, restrict/fxtmp backport to 225 serial hotloops,
+pipeline); Project administration; Software (implementation of 35 new
+OMP pair-style variants, restrict/fxtmp backport to 102 serial hotloops,
 pow() deduplication in Steps A-4, benchmarking harness, FEP
 data-analysis scripts); Validation (bit-identical thermo comparison for
 every modified file, NVE energy conservation, TI/BAR cross-validation);
@@ -2298,9 +2236,10 @@ verified for accuracy.
   \textbf{18}, 17326--17335 (2016). https://doi.org/10.1039/c6cp01667g
 \item
   Takeuchi, M. \emph{et al.} Free-energy and structural analysis of ion
-  solvation and contact ion-pair formation of Li⁺ with BF₄⁻ and PF₆⁻ in
-  water and carbonate solvents. \emph{J. Phys. Chem. B} \textbf{116},
-  6476--6487 (2012). https://doi.org/10.1021/jp3011487
+  solvation and contact ion-pair formation of Li\(^{+}\) with
+  BF\(_{4}\)\(^{-}\) and PF\(_{6}\)\(^{-}\) in water and carbonate
+  solvents. \emph{J. Phys. Chem. B} \textbf{116}, 6476--6487 (2012).
+  https://doi.org/10.1021/jp3011487
 \item
   Chaban, V. Solvation of lithium ion in dimethoxyethane and propylene
   carbonate. \emph{Chem. Phys. Lett.} \textbf{625}, 110--115 (2015).
@@ -2316,10 +2255,10 @@ verified for accuracy.
 
 \subsection{Supplementary Materials}\label{supplementary-materials}
 
-\textbf{Supplementary Table S1}: Complete list of all 36 newly added OMP
+\textbf{Supplementary Table S1}: Complete list of all 35 newly added OMP
 pair variants with source files and physical descriptions.
 
-\textbf{Supplementary Table S2}: Complete A-3 modification log: all 225
+\textbf{Supplementary Table S2}: Complete A-3 modification log: all 102
 modified pair files with before/after verification status.
 
 \textbf{Supplementary Methods}: Full Claude Code prompt templates for
@@ -2341,7 +2280,223 @@ applied to standard serial pair files.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\emph{Manuscript submitted to Archives of Computational Methods in
-Engineering}
+\protect\phantomsection\label{refs}
+\begin{CSLReferences}{1}{1}
+\bibitem[\citeproctext]{ref-Aktulga2012}
+Aktulga, Hasan Metin, Joseph C. Fogarty, Sagar A. Pandit, and Ananth Y.
+Grama. 2012. {``Parallel Reactive Molecular Dynamics: Numerical Methods
+and Algorithmic Techniques.''} \emph{Parallel Comput.} 38: 245--59.
+\url{https://doi.org/10.1016/j.parco.2011.08.005}.
+
+\bibitem[\citeproctext]{ref-Alvarado2022}
+{Alvarado, Fabian J. Q. et al.} 2022. {``Multiscale Simulation of Solid
+Electrolyte Interface Formation in Fluorinated Diluted Electrolytes with
+Lithium Anodes.''} \emph{ACS Appl. Mater. Interfaces} 14: 7060--70.
+\url{https://doi.org/10.1021/acsami.1c22610}.
+
+\bibitem[\citeproctext]{ref-Austin2021}
+{Austin, Jacob et al.} 2021. {``Program Synthesis with Large Language
+Models.''} \emph{arXiv} 2108.07732.
+
+\bibitem[\citeproctext]{ref-Batatia2022}
+{Batatia, Ilyes et al.} 2022. {``{MACE}: Higher-Order Equivariant
+Message Passing Neural Networks for Fast and Accurate Force Fields.''}
+\emph{NeurIPS} 35: 11423--36.
+
+\bibitem[\citeproctext]{ref-Bauer2012}
+Bauer, Brad A., and Sandeep Patel. 2012. {``Recent Applications and
+Developments of Charge Equilibration Force Fields for Modeling Dynamical
+Charges in Classical Molecular Dynamics Simulations.''} \emph{Theor.
+Chem. Acc.} 131: 1153. \url{https://doi.org/10.1007/s00214-012-1153-7}.
+
+\bibitem[\citeproctext]{ref-Beutler1994}
+Beutler, Thomas C., Alan E. Mark, René C. van Schaik, Paul R. Greber,
+and Wilfred F. van Gunsteren. 1994. {``Avoiding Singularities and
+Numerical Instabilities in Free Energy Calculations Based on Molecular
+Simulations.''} \emph{Chem. Phys. Lett.} 222: 529--39.
+\url{https://doi.org/10.1016/0009-2614(94)00397-1}.
+
+\bibitem[\citeproctext]{ref-Bhati2017}
+Bhati, Agastya P., Shunzhou Wan, David W. Wright, and Peter V. Coveney.
+2017. {``Rapid, Accurate, Precise, and Reliable Relative Free Energy
+Prediction Using Ensemble Based Thermodynamic Integration.''} \emph{J.
+Chem. Theory Comput.} 13: 210--22.
+\url{https://doi.org/10.1021/acs.jctc.6b00979}.
+
+\bibitem[\citeproctext]{ref-Bhatt2015}
+Bhatt, Mahesh D., and Colm O'Dwyer. 2015. {``Recent Progress in
+Theoretical and Computational Investigations of {Li}-Ion Battery
+Materials and Electrolytes.''} \emph{Phys. Chem. Chem. Phys.} 17:
+4799--844. \url{https://doi.org/10.1039/C4CP05552G}.
+
+\bibitem[\citeproctext]{ref-Brown2011}
+Brown, W. Michael, Peng Wang, Steven J. Plimpton, and Arnold N.
+Tharrington. 2011. {``Implementing Molecular Dynamics on Hybrid High
+Performance Computers --- Short Range Forces.''} \emph{Comput. Phys.
+Commun.} 182: 898--911. \url{https://doi.org/10.1016/j.cpc.2010.12.021}.
+
+\bibitem[\citeproctext]{ref-Buehler2006}
+Buehler, Markus J., and Huajian Gao. 2006. {``Dynamical Fracture
+Instabilities Due to Local Hyperelasticity at Crack Tips.''}
+\emph{Nature} 439: 307--10. \url{https://doi.org/10.1038/nature04408}.
+
+\bibitem[\citeproctext]{ref-Chaban2015}
+Chaban, Vitaly. 2015. {``Solvation of Lithium Ion in Dimethoxyethane and
+Propylene Carbonate.''} \emph{Chem. Phys. Lett.} 625: 110--15.
+\url{https://doi.org/10.1016/j.cplett.2015.02.065}.
+
+\bibitem[\citeproctext]{ref-Chen2021}
+{Chen, Mark et al.} 2021. {``Evaluating Large Language Models Trained on
+Code.''} \emph{arXiv} 2107.03374.
+
+\bibitem[\citeproctext]{ref-Cheng2019}
+Cheng, Bingqing, Edgar A. Engel, Jörg Behler, Christoph Dellago, and
+Michele Ceriotti. 2019. {``Ab Initio Thermodynamics of Liquid and Solid
+Water.''} \emph{Proc. Natl Acad. Sci. USA} 116: 1110--15.
+\url{https://doi.org/10.1073/pnas.1815117116}.
+
+\bibitem[\citeproctext]{ref-Christ2010}
+Christ, Clara D., Alan E. Mark, and Wilfred F. van Gunsteren. 2010.
+{``Basic Ingredients of Free Energy Calculations: A Review.''} \emph{J.
+Comput. Chem.} 31: 1569--82. \url{https://doi.org/10.1002/jcc.21450}.
+
+\bibitem[\citeproctext]{ref-Edwards2014}
+Edwards, H. Carter, Christian R. Trott, and Daniel Sunderland. 2014.
+{``Kokkos: Enabling Manycore Performance Portability Through Polymorphic
+Memory Access Patterns.''} \emph{J. Parallel Distrib. Comput.} 74:
+3202--16. \url{https://doi.org/10.1016/j.jpdc.2014.07.003}.
+
+\bibitem[\citeproctext]{ref-Erhard2024}
+Erhard, Linus C., Jochen Rohrer, Karsten Albe, and Volker L. Deringer.
+2024. {``Modelling Atomic and Nanoscale Structure in the Silicon--Oxygen
+System Through Active Machine Learning.''} \emph{Nat. Commun.} 15: 1927.
+\url{https://doi.org/10.1038/s41467-024-45840-9}.
+
+\bibitem[\citeproctext]{ref-Famprikis2019}
+Famprikis, Theodosios, Pieremanuele Canepa, James A. Dawson, M. Saiful
+Islam, and Christian Masquelier. 2019. {``Fundamentals of Inorganic
+Solid-State Electrolytes for Batteries.''} \emph{Nat. Mater.} 18:
+1278--91. \url{https://doi.org/10.1038/s41563-019-0431-3}.
+
+\bibitem[\citeproctext]{ref-Ferreira2025}
+{Ferreira, António C. et al.} 2025. {``Dynamic Nanodomains Dictate
+Macroscopic Properties in Lead Halide Perovskites.''} \emph{Nat.
+Nanotechnol.} 20: 536--45.
+
+\bibitem[\citeproctext]{ref-Gao2025}
+{Gao, Shuai et al.} 2025. {``Unveiling the Mechanisms of
+Strength--Ductility Synergy in an Additively Manufactured Nanolamellar
+High-Entropy Alloy.''} \emph{Nat. Commun.} 16: 5221.
+
+\bibitem[\citeproctext]{ref-Gapsys2020}
+{Gapsys, Vytautas et al.} 2020. {``Large Scale Relative Protein Ligand
+Binding Affinities Using Non-Equilibrium Alchemy.''} \emph{Chem. Sci.}
+11: 1140--52. \url{https://doi.org/10.1039/C9SC03754C}.
+
+\bibitem[\citeproctext]{ref-Gissinger2024b}
+Gissinger, Jacob R. 2024. {``{LUNAR}: Automated Input Generation and
+Analysis for Reactive {LAMMPS} Simulations.''} \emph{J. Chem. Inf.
+Model.} 64: 5998--6007. \url{https://doi.org/10.1021/acs.jcim.4c00730}.
+
+\bibitem[\citeproctext]{ref-Gissinger2024a}
+Gissinger, Jacob R., Alexander Zinchenko, Benjamin D. Jensen, and
+Kristopher E. Wise. 2024. {``Type Label Framework for Bonded Force
+Fields in {LAMMPS}.''} \emph{J. Phys. Chem. B} 128: 3282--97.
+\url{https://doi.org/10.1021/acs.jpcb.3c08419}.
+
+\bibitem[\citeproctext]{ref-He2024}
+{He, Xingfeng et al.} 2024. {``Liquid-Like Dynamics in a Solid-State
+Lithium Electrolyte.''} \emph{Nat. Phys.} 20: 1755--61.
+\url{https://doi.org/10.1038/s41567-024-02707-6}.
+
+\bibitem[\citeproctext]{ref-Hermann2017}
+Hermann, Jan, Robert A. DiStasio, and Alexandre Tkatchenko. 2017.
+{``First-Principles Models for van Der {Waals} Interactions in Molecules
+and Materials.''} \emph{Chem. Rev.} 117: 4714--58.
+\url{https://doi.org/10.1021/acs.chemrev.6b00446}.
+
+\bibitem[\citeproctext]{ref-Jorgensen1996}
+Jorgensen, William L., David S. Maxwell, and Julian Tirado-Rives. 1996.
+{``Development and Testing of the {OPLS} All-Atom Force Field on
+Conformational Energetics and Properties of Organic Liquids.''} \emph{J.
+Am. Chem. Soc.} 118: 11225--36. \url{https://doi.org/10.1021/ja9621760}.
+
+\bibitem[\citeproctext]{ref-Joung2008}
+Joung, In Suk, and Thomas E. Cheatham. 2008. {``Determination of Alkali
+and Halide Monovalent Ion Parameters for Use in Explicitly Solvated
+Biomolecular Simulations.''} \emph{J. Phys. Chem. B} 112: 9020--41.
+\url{https://doi.org/10.1021/jp8001614}.
+
+\bibitem[\citeproctext]{ref-Lahkar2023}
+{Lahkar, Simanta et al.} 2023. \emph{{LAMMPS-CTIP-EChemDID}: Charge
+Transfer Interatomic Potential Implementation in {LAMMPS}}. GitHub.
+
+\bibitem[\citeproctext]{ref-Maresca2020}
+Maresca, Francesco, and William A. Curtin. 2020. {``Mechanistic Origin
+of High Strength in Refractory {BCC} High Entropy Alloys up to 1900
+{K}.''} \emph{Acta Mater.} 182: 235--49.
+\url{https://doi.org/10.1016/j.actamat.2019.10.015}.
+
+\bibitem[\citeproctext]{ref-Nijkamp2022}
+{Nijkamp, Erik et al.} 2022. {``A Conversational Paradigm for Program
+Synthesis.''} \emph{arXiv} 2203.13474.
+
+\bibitem[\citeproctext]{ref-Pirani2004}
+Pirani, Fernando, Massimiliano Alberti, Ana Castro, Mireia Morera
+Teixidor, and David Cappelletti. 2004. {``Atom--Bond Pairwise Additive
+Representation for Intermolecular Potential Energy Surfaces.''}
+\emph{Chem. Phys. Lett.} 394: 37--44.
+\url{https://doi.org/10.1016/j.cplett.2004.06.100}.
+
+\bibitem[\citeproctext]{ref-Plimpton1995}
+Plimpton, Steve. 1995. {``Fast Parallel Algorithms for Short-Range
+Molecular Dynamics.''} \emph{J. Comput. Phys.} 117: 1--19.
+\url{https://doi.org/10.1006/jcph.1995.1039}.
+
+\bibitem[\citeproctext]{ref-Shirts2008}
+Shirts, Michael R., and John D. Chodera. 2008. {``Statistically Optimal
+Analysis of Samples from Multiple Equilibrium States.''} \emph{J. Chem.
+Phys.} 129: 124105. \url{https://doi.org/10.1063/1.2978177}.
+
+\bibitem[\citeproctext]{ref-Takeuchi2012}
+{Takeuchi, Megumi et al.} 2012. {``Free-Energy and Structural Analysis
+of Ion Solvation and Contact Ion-Pair Formation of {Li\(^+\)} with
+{BF\(_4^-\)} and {PF\(_6^-\)} in Water and Carbonate Solvents.''}
+\emph{J. Phys. Chem. B} 116: 6476--87.
+\url{https://doi.org/10.1021/jp3011487}.
+
+\bibitem[\citeproctext]{ref-Thompson2022}
+{Thompson, Aidan P. et al.} 2022. {``{LAMMPS}---{A} Flexible Simulation
+Tool for Particle-Based Materials Modeling.''} \emph{Comput. Phys.
+Commun.} 271: 108171. \url{https://doi.org/10.1016/j.cpc.2021.108171}.
+
+\bibitem[\citeproctext]{ref-Toth2025}
+Tóth, Márton, Peter Broqvist, and Jolla Kullgren. 2025. \emph{Extending
+{Hamiltonian}-Adaptive Resolution Simulation to Interfaces: {An} Updated
+{LAMMPS} Implementation and Application to Porous Solids}.
+arXiv:2604.21867.
+
+\bibitem[\citeproctext]{ref-Wan2016}
+{Wan, Li-Feng, Kristin A. Persson, et al.} 2016. {``Lithium Ion
+Solvation by Ethylene Carbonates in Lithium-Ion Battery Electrolytes,
+Revisited by Density Functional Theory.''} \emph{Phys. Chem. Chem.
+Phys.} 18: 17326--35. \url{https://doi.org/10.1039/c6cp01667g}.
+
+\bibitem[\citeproctext]{ref-Xu2004}
+Xu, Kang. 2004. {``Nonaqueous Liquid Electrolytes for Lithium-Based
+Rechargeable Batteries.''} \emph{Chem. Rev.} 104: 4303--418.
+\url{https://doi.org/10.1021/cr030203g}.
+
+\bibitem[\citeproctext]{ref-Xu2014}
+Xu, Kang. 2014. {``Electrolytes and Interphases in {Li}-Ion Batteries
+and Beyond.''} \emph{Chem. Rev.} 114: 11503--618.
+\url{https://doi.org/10.1021/cr500003w}.
+
+\bibitem[\citeproctext]{ref-Zhang2025}
+{Zhang, Lei et al.} 2025. {``A Sodium Superionic Chloride Electrolyte
+Driven by Paddle Wheel Mechanism for Solid-State Batteries.''}
+\emph{Nat. Commun.} 16: 3221.
+
+\end{CSLReferences}
 
 \end{document}
